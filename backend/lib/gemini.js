@@ -80,11 +80,21 @@ export async function analyzeFoodImageWithGemini(
   mimeType = 'image/jpeg',
   modelOverride = null
 ) {
-  const model = modelOverride || process.env.DEFAULT_GEMINI_MODEL || 'gemini-2.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+  // Clean apiKey of accidental surrounding quotes or invisible whitespace
+  const cleanKey = (apiKey || '')
+    .trim()
+    .replace(/^["'`]+|["'`]+$/g, '')
+    .replace(/[\u200B-\u200D\uFEFF\u00A0\s]/g, '');
+
+  const defaultModel = process.env.DEFAULT_GEMINI_MODEL || 'gemini-2.5-flash';
+  const modelsToTry = modelOverride
+    ? [modelOverride]
+    : [defaultModel, 'gemini-2.0-flash', 'gemini-1.5-flash'].filter(
+        (v, i, a) => a.indexOf(v) === i
+      );
 
   // Strip data: prefix if accidentally passed
-  const cleanBase64 = imageBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
+  const cleanBase64 = imageBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').trim();
 
   const payload = {
     contents: [
@@ -112,25 +122,41 @@ export async function analyzeFoodImageWithGemini(
   };
 
   let response;
-  try {
-    response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey
-      },
-      body: JSON.stringify(payload)
-    });
-  } catch {
-    const error = new Error('Failed to communicate with Google Gemini API.');
-    error.code = 'GEMINI_UNAVAILABLE';
-    error.status = 503;
-    throw error;
+
+  for (let i = 0; i < modelsToTry.length; i++) {
+    const currentModel = modelsToTry[i];
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(currentModel)}:generateContent`;
+
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': cleanKey
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch {
+      const error = new Error('Failed to communicate with Google Gemini API.');
+      error.code = 'GEMINI_UNAVAILABLE';
+      error.status = 503;
+      throw error;
+    }
+
+    // If 404 (model not found), attempt fallback model
+    if (response.status === 404 && i < modelsToTry.length - 1) {
+      console.warn(
+        `Model ${currentModel} returned 404, attempting fallback to ${modelsToTry[i + 1]}`
+      );
+      continue;
+    }
+
+    break;
   }
 
   // Handle HTTP error responses
-  if (!response.ok) {
-    const status = response.status;
+  if (!response || !response.ok) {
+    const status = response?.status || 500;
     let errData = {};
     try {
       errData = await response.json();

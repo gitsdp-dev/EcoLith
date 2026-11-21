@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { encryptApiKey, decryptApiKey, hashApiKey } from '../lib/crypto.js';
+import { cleanApiKey } from '../routes/keys.js';
 import { redactObject } from '../middleware/redact.js';
 import { normalizeToKg, calculateDashboardMetrics } from '../../js/dashboard.js';
 import { FOURTEEN_DAYS_MS, isSessionExpired } from '../../js/auth.js';
@@ -271,7 +272,11 @@ test('AUTH: Inactive user kept logged in for 14 days and automatically expired t
       last_sign_in_at: thirteenDaysAgoIso
     }
   };
-  assert.equal(isSessionExpired(validSession), false, 'User inactive for 13 days must remain logged in');
+  assert.equal(
+    isSessionExpired(validSession),
+    false,
+    'User inactive for 13 days must remain logged in'
+  );
 
   // Case 2: Inactive user at 15 days (> 14 days) -> Automatically expired
   const fifteenDaysAgoIso = new Date(now - 15 * 24 * 60 * 60 * 1000).toISOString();
@@ -281,7 +286,11 @@ test('AUTH: Inactive user kept logged in for 14 days and automatically expired t
       last_sign_in_at: fifteenDaysAgoIso
     }
   };
-  assert.equal(isSessionExpired(expiredSession), true, 'User inactive for > 14 days must be automatically expired');
+  assert.equal(
+    isSessionExpired(expiredSession),
+    true,
+    'User inactive for > 14 days must be automatically expired'
+  );
 
   // Case 3: Fresh login -> Valid
   const freshSession = {
@@ -351,7 +360,11 @@ test('CONCURRENCY: Authentication system withstands 10 concurrent logins per sec
   // All 10 logins must pass through cleanly within under 1 second without throwing errors or dropping
   assert.ok(durationMs < 1000, `10 concurrent logins completed in ${durationMs}ms`);
   for (const res of results) {
-    assert.equal(res.nextCalled, true, 'Each of the 10 logins in 1 second must be allowed by burst limiter');
+    assert.equal(
+      res.nextCalled,
+      true,
+      'Each of the 10 logins in 1 second must be allowed by burst limiter'
+    );
     assert.equal(res.statusCode, 200);
   }
 });
@@ -364,8 +377,39 @@ test('SECURITY: Admins never receive user API keys (plaintext or ciphertext)', a
   assert.ok(adminRouter, 'Admin router must be defined');
 
   // Verify that neither the database helper nor the admin user routes return key fields
-  const adminFileContent = fs.readFileSync(path.join(ROOT_DIR, 'backend', 'routes', 'admin.js'), 'utf-8');
-  assert.ok(!adminFileContent.includes('ciphertext'), 'Admin routes must NEVER select or return ciphertext');
-  assert.ok(!adminFileContent.includes('auth_tag'), 'Admin routes must NEVER select or return auth_tag');
-  assert.ok(!adminFileContent.includes('decryptApiKey'), 'Admin router must NEVER decrypt user API keys');
+  const adminFileContent = fs.readFileSync(
+    path.join(ROOT_DIR, 'backend', 'routes', 'admin.js'),
+    'utf-8'
+  );
+  assert.ok(
+    !adminFileContent.includes('ciphertext'),
+    'Admin routes must NEVER select or return ciphertext'
+  );
+  assert.ok(
+    !adminFileContent.includes('auth_tag'),
+    'Admin routes must NEVER select or return auth_tag'
+  );
+  assert.ok(
+    !adminFileContent.includes('decryptApiKey'),
+    'Admin router must NEVER decrypt user API keys'
+  );
+});
+
+// Test 11: BYOK Resilience - Key Sanitization and AQ./AIza Format Acceptance
+test('BYOK: Key sanitization cleanly processes quoted, prefixed, and modern AQ./AIza keys', () => {
+  // Test A: Quoted legacy key
+  const quotedKey = '"AIzaSyC1234567890abcdefghijklmnopqrst"';
+  assert.equal(cleanApiKey(quotedKey), 'AIzaSyC1234567890abcdefghijklmnopqrst');
+
+  // Test B: Single quoted with env prefix
+  const envPrefixed = "GEMINI_API_KEY='AIzaSyC1234567890abcdefghijklmnopqrst'";
+  assert.equal(cleanApiKey(envPrefixed), 'AIzaSyC1234567890abcdefghijklmnopqrst');
+
+  // Test C: Modern Google AI Studio Auth Key (AQ. format)
+  const aqKey = '  AQ.AbC123_xYz-9876543210abcdefghijklmnop  ';
+  assert.equal(cleanApiKey(aqKey), 'AQ.AbC123_xYz-9876543210abcdefghijklmnop');
+
+  // Test D: Key with trailing whitespace, zero-width spaces, or carriage returns
+  const messyKey = 'key: "AQ.MessyKeyWithSpaces\r\n\u200B" ';
+  assert.equal(cleanApiKey(messyKey), 'AQ.MessyKeyWithSpaces');
 });

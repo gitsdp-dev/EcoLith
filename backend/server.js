@@ -1,3 +1,4 @@
+import path from 'node:path';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -10,6 +11,7 @@ import { analyzeRouter } from './routes/analyze.js';
 import { adminRouter } from './routes/admin.js';
 
 dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), 'backend', '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,11 +54,17 @@ app.use(redactMiddleware);
 
 // Process-level crash prevention guards for high concurrency
 process.on('unhandledRejection', (reason) => {
-  console.error('[CONCURRENCY GUARD] Unhandled Rejection intercepted:', redactObject({ reason: String(reason) }));
+  console.error(
+    '[CONCURRENCY GUARD] Unhandled Rejection intercepted:',
+    redactObject({ reason: String(reason) })
+  );
 });
 
 process.on('uncaughtException', (err) => {
-  console.error('[CONCURRENCY GUARD] Uncaught Exception intercepted:', redactObject({ error: err.message }));
+  console.error(
+    '[CONCURRENCY GUARD] Uncaught Exception intercepted:',
+    redactObject({ error: err.message })
+  );
 });
 
 // Health check endpoint

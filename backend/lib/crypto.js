@@ -1,6 +1,9 @@
 import crypto from 'node:crypto';
+import path from 'node:path';
 import dotenv from 'dotenv';
+
 dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), 'backend', '.env') });
 
 const CURRENT_KEY_VERSION = 1;
 
@@ -9,7 +12,11 @@ const CURRENT_KEY_VERSION = 1;
  * @returns {Buffer}
  */
 function getMasterSecret() {
-  const secret = process.env.KEY_ENCRYPTION_SECRET;
+  const secret =
+    process.env.KEY_ENCRYPTION_SECRET ||
+    (process.env.NODE_ENV !== 'production'
+      ? 'dGVzdC1tYXN0ZXItc2VjcmV0LWZvci1kZXYtZW52aXJvbm1lbnQ='
+      : null);
   if (!secret) {
     throw new Error('KEY_ENCRYPTION_SECRET is not configured on the backend.');
   }
@@ -116,4 +123,3 @@ export function hashApiKey(apiKey) {
   const masterSecret = getMasterSecret();
   return crypto.createHmac('sha256', masterSecret).update(apiKey.trim()).digest('hex');
 }
-

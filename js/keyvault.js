@@ -166,21 +166,42 @@ function renderState(forcedMode = null) {
 }
 
 /**
+ * Sanitizes and cleans user API key input
+ */
+function sanitizeKey(input) {
+  if (!input || typeof input !== 'string') return '';
+  let key = input.trim();
+  // Strip enclosing quotes: "...", '...', `...`
+  key = key.replace(/^["'`]+|["'`]+$/g, '').trim();
+  // Strip common env prefixes
+  key = key
+    .replace(/^(?:GEMINI_API_KEY|GOOGLE_API_KEY|GOOGLE_GENAI_API_KEY|API_KEY|key)\s*[:=]\s*/i, '')
+    .trim();
+  // Strip enclosing quotes again
+  key = key.replace(/^["'`]+|["'`]+$/g, '').trim();
+  // Remove zero-width spaces, byte order marks, non-breaking spaces, and any other internal whitespace
+  key = key.replace(/[\u200B-\u200D\uFEFF\u00A0\s]/g, '').trim();
+  return key;
+}
+
+/**
  * Submit / Replace API Key
  */
 async function submitKey(e) {
   e.preventDefault();
   hideAlert();
 
-  let rawKey = keyInput.value.trim();
+  let rawKey = sanitizeKey(keyInput.value);
   if (!rawKey) {
     showAlert('Please paste your Google Gemini API key.');
     return;
   }
 
-  // Soft hint check
-  if (!rawKey.startsWith('AIza') && rawKey.length < 25) {
-    showAlert('Warning: Gemini API keys usually start with "AIza". Please verify your key.');
+  // Soft hint check: both AIza and AQ. are valid Gemini key formats
+  if (!rawKey.startsWith('AIza') && !rawKey.startsWith('AQ.') && rawKey.length < 25) {
+    showAlert(
+      'Warning: Gemini API keys usually start with "AIza" or "AQ.". Please verify your key.'
+    );
   }
 
   btnSubmitKey.disabled = true;
@@ -251,6 +272,11 @@ async function testKey() {
 
     if (data.status === 'valid') {
       showAlert('Key test succeeded! Your Gemini key is working properly.', 'success');
+    } else if (data.status === 'rate_limited') {
+      showAlert(
+        'Key is authentic and valid, but currently rate-limited or quota exceeded on Google AI Studio.',
+        'warning'
+      );
     } else {
       showAlert(`Key validation failed: ${data.error || 'Google rejected the key.'}`, 'error');
     }
