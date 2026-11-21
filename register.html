@@ -74,16 +74,6 @@
             </svg>
             Sign up with Google
           </button>
-
-          <button type="button" id="btnAzureSignUp" class="btn btn-oauth btn-block">
-            <svg class="oauth-icon" viewBox="0 0 23 23">
-              <path fill="#f35325" d="M1 1h10v10H1z" />
-              <path fill="#81bc06" d="M12 1h10v10H12z" />
-              <path fill="#05a6f0" d="M1 12h10v10H1z" />
-              <path fill="#ffba08" d="M12 12h10v10H12z" />
-            </svg>
-            Sign up with Microsoft
-          </button>
         </div>
 
         <div class="auth-divider">
@@ -172,7 +162,6 @@
       const btnRegSubmit = document.getElementById('btnRegSubmit');
       const regSpinner = document.getElementById('regSpinner');
       const btnGoogleSignUp = document.getElementById('btnGoogleSignUp');
-      const btnAzureSignUp = document.getElementById('btnAzureSignUp');
 
       function showAlert(element, message, type = 'error') {
         element.textContent = message;
@@ -188,7 +177,7 @@
       // Check if user is already logged in
       const existingSession = await getSession();
       if (existingSession) {
-        window.location.href = '/dashboard.html';
+        window.location.replace('dashboard.html');
       }
 
       // Google Sign-Up
@@ -198,16 +187,6 @@
           await signInWithOAuth('google');
         } catch (err) {
           showAlert(authAlert, err.message || 'Failed to initiate Google sign in.');
-        }
-      });
-
-      // Azure/Microsoft Sign-Up
-      btnAzureSignUp.addEventListener('click', async () => {
-        try {
-          hideAlert(authAlert);
-          await signInWithOAuth('azure');
-        } catch (err) {
-          showAlert(authAlert, err.message || 'Failed to initiate Microsoft sign in.');
         }
       });
 
@@ -243,7 +222,7 @@
           const data = await signUp(email, password, name);
           if (data.session) {
             // Direct login (email confirmation disabled in Supabase dev settings)
-            window.location.href = '/dashboard.html';
+            window.location.replace('dashboard.html');
           } else {
             showAlert(
               authAlert,

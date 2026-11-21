@@ -9,6 +9,23 @@
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/admin.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script type="module">
+      import { requireAuth, getUserProfile } from './js/auth.js';
+      try {
+        const session = await requireAuth();
+        const profile = await getUserProfile(session.user.id);
+        if (profile?.role !== 'admin') {
+          window.location.replace('dashboard.html');
+        } else {
+          document.documentElement.classList.add('auth-verified');
+        }
+      } catch {}
+    </script>
+    <style>
+      html:not(.auth-verified) body {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
     <!-- App Header -->

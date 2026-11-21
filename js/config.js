@@ -11,5 +11,6 @@ export const CONFIG = {
     (typeof window !== 'undefined' && window.ECOLITH_SUPABASE_ANON_KEY) ||
     'sb_publishable_hu0glsh8zIMQhfsXjidbgQ_PXY6xh3G',
   API_BASE_URL:
-    (typeof window !== 'undefined' && window.ECOLITH_API_BASE_URL) || 'http://localhost:3000'
+    (typeof window !== 'undefined' && window.ECOLITH_API_BASE_URL) ||
+    (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? '' : 'http://localhost:3000')
 };

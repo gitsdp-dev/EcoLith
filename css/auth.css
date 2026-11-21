@@ -1,6 +1,7 @@
 /**
- * EcoLith Authentication Page Styles
+ * EcoLith Authentication Page Styles — Brutalism Redesign
  * Mobile-first login, register, OAuth, and password reset.
+ * 3px solid black borders, 6px hard drop-shadows, zero radius, Acid Lime highlights (#CCFF00).
  */
 
 .auth-wrapper {
@@ -13,12 +14,11 @@
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  border: 3px solid var(--color-border);
+  box-shadow: 6px 6px 0px var(--color-border);
   padding: var(--spacing-6);
-  box-shadow: var(--shadow-md);
 }
 
 @media (min-width: 640px) {
@@ -33,21 +33,31 @@
 }
 
 .auth-brand-icon {
-  width: 44px;
-  height: 44px;
-  color: var(--color-primary);
-  margin-bottom: var(--spacing-2);
+  width: 48px;
+  height: 48px;
+  padding: 6px;
+  background-color: var(--color-primary);
+  color: #000000;
+  border: 2px solid var(--color-border);
+  box-shadow: 3px 3px 0px var(--color-border);
+  margin-inline: auto;
+  margin-bottom: var(--spacing-3);
 }
 
 .auth-title {
   font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
   color: var(--color-text-main);
   margin-bottom: var(--spacing-1);
 }
 
 .auth-subtitle {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--color-text-muted);
 }
 
@@ -61,17 +71,20 @@
 
 .btn-oauth {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
+  box-shadow: 3px 3px 0px var(--color-border);
   color: var(--color-text-main);
-  font-weight: var(--font-weight-medium);
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
+  font-weight: 800;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .btn-oauth:hover {
   background-color: var(--color-bg);
-  border-color: var(--color-border-hover);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px var(--color-border);
 }
 
 .oauth-icon {
@@ -84,17 +97,18 @@
   align-items: center;
   text-align: center;
   margin-block: var(--spacing-5);
-  color: var(--color-text-muted);
+  color: var(--color-text-main);
   font-size: var(--font-size-xs);
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 .auth-divider::before,
 .auth-divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .auth-divider span {
@@ -105,18 +119,23 @@
 .auth-footer {
   margin-top: var(--spacing-6);
   text-align: center;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
   color: var(--color-text-muted);
 }
 
 .auth-link {
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
-  text-decoration: none;
+  color: var(--color-text-main);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .auth-link:hover {
-  text-decoration: underline;
+  color: var(--color-primary-text);
+  background-color: var(--color-primary);
 }
 
 .auth-action-row {
@@ -124,26 +143,37 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-4);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
 }
 
 /* Alert inside Card */
 .auth-alert {
   padding: var(--spacing-3) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  border: 2px solid var(--color-border);
+  box-shadow: 2px 2px 0px var(--color-border);
   margin-bottom: var(--spacing-4);
   display: none;
 }
 
 .auth-alert-error {
-  background-color: var(--color-danger-surface);
-  color: var(--color-danger);
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  background-color: var(--color-danger);
+  color: #ffffff;
 }
 
 .auth-alert-success {
-  background-color: var(--color-success-surface);
-  color: var(--color-success);
-  border: 1px solid rgba(22, 163, 74, 0.2);
+  background-color: var(--color-primary);
+  color: #000000;
+}
+
+/* Mobile & Thin Phone Auth Optimizations (Galaxy S21 Ultra, 360px - 384px) */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: var(--spacing-5) var(--spacing-4);
+  }
+  .auth-title {
+    font-size: 1.5rem;
+  }
 }

@@ -1,18 +1,18 @@
 /**
- * EcoLith History Styles
+ * EcoLith History Styles — Brutalism Redesign
  * Mobile-first responsive layout for searching, filtering, and managing food waste records.
+ * 2px solid black borders, hard drop-shadows, zero radius, high-voltage Lime accents.
  */
 
 .history-toolbar {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  border: 2px solid var(--color-border);
+  box-shadow: 4px 4px 0px var(--color-border);
   padding: var(--spacing-4) var(--spacing-5);
   margin-bottom: var(--spacing-6);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
-  box-shadow: var(--shadow-sm);
 }
 
 @media (min-width: 768px) {
@@ -38,7 +38,7 @@
   left: var(--spacing-3);
   top: 50%;
   transform: translateY(-50%);
-  color: var(--color-text-muted);
+  color: var(--color-text-main);
   pointer-events: none;
 }
 
@@ -50,11 +50,20 @@
 
 .filter-select {
   padding: var(--spacing-2) var(--spacing-3);
-  font-size: var(--font-size-sm);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 2px solid var(--color-border);
+  box-shadow: 2px 2px 0px var(--color-border);
   background-color: var(--color-surface);
   color: var(--color-text-main);
+}
+
+.filter-select:focus {
+  outline: none;
+  box-shadow: 3px 3px 0px var(--color-border);
 }
 
 .records-list {
@@ -66,18 +75,18 @@
 
 .record-card {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  border: 2px solid var(--color-border);
+  box-shadow: 4px 4px 0px var(--color-border);
   padding: var(--spacing-5);
-  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
-  transition: border-color var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .record-card:hover {
-  border-color: var(--color-border-hover);
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px var(--color-border);
 }
 
 .record-header {
@@ -95,7 +104,9 @@
 
 .record-food-name {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
   color: var(--color-text-main);
   display: flex;
   align-items: center;
@@ -108,22 +119,24 @@
   gap: var(--spacing-2);
   flex-wrap: wrap;
   font-size: var(--font-size-xs);
+  font-weight: 600;
   color: var(--color-text-muted);
 }
 
 .record-qty-badge {
-  background: var(--color-primary-surface);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
+  background: var(--color-primary) !important;
+  color: #000000 !important;
+  border: 1.5px solid var(--color-border);
+  font-family: var(--font-family-mono);
+  font-weight: 800;
   font-size: var(--font-size-sm);
   padding: var(--spacing-1) var(--spacing-3);
-  border-radius: var(--radius-full);
 }
 
 .recovery-section {
   background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-border);
+  box-shadow: 2px 2px 0px var(--color-border);
   padding: var(--spacing-3) var(--spacing-4);
   display: flex;
   flex-direction: column;
@@ -135,7 +148,10 @@
   align-items: center;
   justify-content: space-between;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-main);
 }
 
 .record-actions {
@@ -144,28 +160,33 @@
   justify-content: flex-end;
   gap: var(--spacing-2);
   margin-top: var(--spacing-2);
-  border-top: 1px solid var(--color-border);
+  border-top: 2px solid var(--color-border);
   padding-top: var(--spacing-3);
 }
 
+/* Status Badges with Brutalist Borders */
 .status-badge-suggested {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--color-surface) !important;
+  color: var(--color-text-main) !important;
+  border: 1.5px solid var(--color-border);
 }
 
 .status-badge-planned {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--color-warning) !important;
+  color: #000000 !important;
+  border: 1.5px solid var(--color-border);
 }
 
 .status-badge-completed {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-primary) !important;
+  color: #000000 !important;
+  border: 1.5px solid var(--color-border);
 }
 
 .status-badge-dismissed {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-danger) !important;
+  color: #ffffff !important;
+  border: 1.5px solid var(--color-border);
 }
 
 /* Pagination */
@@ -175,6 +196,27 @@
   justify-content: space-between;
   margin-top: var(--spacing-6);
   margin-bottom: var(--spacing-10);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-main);
+}
+
+/* Mobile & Thin Phone History Optimizations (Galaxy S21 Ultra, 360px - 384px) */
+@media (max-width: 480px) {
+  .history-toolbar {
+    padding: var(--spacing-3);
+    gap: var(--spacing-3);
+  }
+  .filters-row {
+    flex-direction: column;
+    width: 100%;
+  }
+  .filter-select {
+    width: 100%;
+  }
+  .record-card {
+    padding: var(--spacing-4);
+  }
 }

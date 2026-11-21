@@ -7,7 +7,17 @@
     <meta name="description" content="Manage your EcoLith profile and account settings." />
     <link rel="stylesheet" href="css/global.css" />
     <link rel="stylesheet" href="css/components.css" />
+    <script type="module">
+      import { requireAuth } from './js/auth.js';
+      try {
+        await requireAuth();
+        document.documentElement.classList.add('auth-verified');
+      } catch {}
+    </script>
     <style>
+      html:not(.auth-verified) body {
+        display: none !important;
+      }
       .profile-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -22,15 +32,17 @@
       .profile-card-user {
         text-align: center;
         padding: var(--spacing-6);
+        border: 2px solid var(--color-border);
+        box-shadow: 4px 4px 0px var(--color-border);
       }
       .avatar-wrapper {
         width: 88px;
         height: 88px;
-        border-radius: var(--radius-full);
         margin-inline: auto;
         margin-bottom: var(--spacing-4);
-        background-color: var(--color-primary-surface);
-        border: 2px solid var(--color-primary);
+        background-color: var(--color-primary);
+        border: 2px solid var(--color-border);
+        box-shadow: 3px 3px 0px var(--color-border);
         overflow: hidden;
         display: flex;
         align-items: center;
@@ -43,21 +55,25 @@
       }
       .avatar-placeholder {
         font-size: var(--font-size-2xl);
-        font-weight: var(--font-weight-bold);
-        color: var(--color-primary);
+        font-weight: 800;
+        color: #000000;
       }
       .profile-name {
         font-size: var(--font-size-xl);
+        font-weight: 800;
+        text-transform: uppercase;
         margin-bottom: var(--spacing-1);
       }
       .profile-email {
         color: var(--color-text-muted);
-        font-size: var(--font-size-sm);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
         margin-bottom: var(--spacing-3);
       }
       .keyvault-banner-card {
-        border: 1px dashed var(--color-primary);
-        background-color: var(--color-primary-surface);
+        border: 2px solid var(--color-border);
+        background-color: var(--color-surface);
+        box-shadow: 4px 4px 0px var(--color-border);
       }
     </style>
   </head>

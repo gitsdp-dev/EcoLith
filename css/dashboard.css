@@ -1,6 +1,7 @@
 /**
- * EcoLith Dashboard Styles
+ * EcoLith Dashboard Styles — Brutalism Redesign
  * Mobile-first responsive layout for circular resource metrics & charts.
+ * 2px solid black borders, hard drop-shadows, zero radius, Acid Lime highlights.
  */
 
 .dashboard-grid {
@@ -24,15 +25,20 @@
 
 .stat-card {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  border: 2px solid var(--color-border);
+  box-shadow: 4px 4px 0px var(--color-border);
   padding: var(--spacing-5);
-  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
   overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.stat-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px var(--color-border);
 }
 
 .stat-card::before {
@@ -41,12 +47,13 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 6px;
   background: var(--color-primary);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .stat-card.accent-secondary::before {
-  background: var(--color-secondary);
+  background: #000000;
 }
 
 .stat-card.accent-warning::before {
@@ -54,39 +61,51 @@
 }
 
 .stat-card.accent-success::before {
-  background: var(--color-success);
+  background: var(--color-primary);
 }
 
 .stat-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: var(--spacing-2);
   margin-bottom: var(--spacing-2);
 }
 
 .stat-label {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+  color: var(--color-text-main);
 }
 
 .stat-icon {
   font-size: 1.25rem;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .stat-value {
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
+  font-weight: 800;
   color: var(--color-text-main);
   line-height: var(--line-height-tight);
 }
 
 .stat-subtext {
   font-size: var(--font-size-xs);
+  font-weight: 600;
   color: var(--color-text-muted);
   margin-top: var(--spacing-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* Charts Section */
@@ -105,10 +124,9 @@
 
 .chart-card {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  border: 2px solid var(--color-border);
+  box-shadow: 4px 4px 0px var(--color-border);
   padding: var(--spacing-5);
-  box-shadow: var(--shadow-sm);
 }
 
 .chart-header {
@@ -116,25 +134,29 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-2);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .chart-title {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--color-text-main);
 }
 
 .chart-container {
   position: relative;
   width: 100%;
-  min-height: 250px;
+  min-height: 260px;
 }
 
 /* Impact Section */
 .impact-banner {
-  background: linear-gradient(135deg, rgba(5, 150, 105, 0.08) 0%, rgba(13, 148, 136, 0.04) 100%);
-  border: 1px solid rgba(5, 150, 105, 0.3);
-  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  box-shadow: 4px 4px 0px var(--color-border);
   padding: var(--spacing-6);
   margin-bottom: var(--spacing-8);
 }
@@ -161,22 +183,25 @@
 }
 
 .impact-item {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  box-shadow: 3px 3px 0px var(--color-border);
   padding: var(--spacing-4);
   text-align: center;
 }
 
 .impact-number {
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  font-weight: 800;
+  color: var(--color-text-main);
 }
 
 .impact-title {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--color-text-muted);
   margin-top: var(--spacing-1);
 }
@@ -184,8 +209,7 @@
 /* Assumptions Accordion */
 .assumptions-box {
   background: var(--color-bg);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-md);
+  border: 2px dashed var(--color-border);
   padding: var(--spacing-3) var(--spacing-4);
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
@@ -194,7 +218,9 @@
 
 .assumptions-summary {
   cursor: pointer;
-  font-weight: var(--font-weight-semibold);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--color-text-main);
   display: flex;
   align-items: center;
@@ -217,24 +243,30 @@
 
 .suggestion-card {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-border);
+  box-shadow: 3px 3px 0px var(--color-border);
   padding: var(--spacing-4);
   display: flex;
   gap: var(--spacing-3);
   align-items: flex-start;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.suggestion-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px var(--color-border);
 }
 
 .suggestion-icon {
-  font-size: 1.5rem;
-  background: var(--color-primary-surface);
-  color: var(--color-primary);
-  width: 40px;
-  height: 40px;
+  font-size: 1.25rem;
+  background: var(--color-primary);
+  color: #000000;
+  border: 2px solid var(--color-border);
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
   flex-shrink: 0;
 }
 
@@ -243,7 +275,32 @@
   text-align: center;
   padding: var(--spacing-12) var(--spacing-6);
   background: var(--color-surface);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-xl);
+  border: 2px dashed var(--color-border);
+  box-shadow: 4px 4px 0px var(--color-border);
   margin-bottom: var(--spacing-8);
+}
+
+/* Mobile & Thin Phone Dashboard Optimizations (Galaxy S21 Ultra, 360px - 384px) */
+@media (max-width: 480px) {
+  .stat-card {
+    padding: var(--spacing-4);
+  }
+  .stat-value {
+    font-size: 1.65rem;
+  }
+  .chart-card {
+    padding: var(--spacing-4);
+  }
+  .chart-container {
+    min-height: 220px;
+  }
+  .impact-banner {
+    padding: var(--spacing-4);
+  }
+  .impact-number {
+    font-size: 1.5rem;
+  }
+  .suggestion-card {
+    padding: var(--spacing-3);
+  }
 }

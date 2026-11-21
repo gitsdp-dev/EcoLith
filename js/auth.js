@@ -83,7 +83,7 @@ export async function enforce14DaySession(session) {
       await supabase.auth.signOut();
     } catch {}
     if (typeof window !== 'undefined') {
-      window.location.href = '/login.html?reason=session_expired';
+      window.location.replace('login.html?reason=session_expired');
     }
     return false;
   }
@@ -168,10 +168,10 @@ export async function signInWithPassword(email, password, maxRetries = 1) {
 }
 
 /**
- * Sign in via OAuth provider (Google or Azure/Microsoft).
- * @param {'google' | 'azure'} provider
+ * Sign in via OAuth provider (Google).
+ * @param {'google'} provider
  */
-export async function signInWithOAuth(provider) {
+export async function signInWithOAuth(provider = 'google') {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
@@ -190,7 +190,7 @@ export async function signOut() {
   clearSessionTracking();
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
-  window.location.href = '/login.html';
+  window.location.replace('login.html');
 }
 
 /**
@@ -245,8 +245,12 @@ export async function getSession() {
 export async function requireAuth() {
   const session = await getSession();
   if (!session) {
-    const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
-    window.location.href = `/login.html?returnTo=${returnUrl}`;
+    if (typeof window !== 'undefined') {
+      const currentFile = window.location.pathname.split('/').pop() || 'dashboard.html';
+      const search = window.location.search || '';
+      const returnTo = encodeURIComponent(currentFile + search);
+      window.location.replace(`login.html?returnTo=${returnTo}`);
+    }
     throw new Error('Unauthenticated');
   }
   return session;

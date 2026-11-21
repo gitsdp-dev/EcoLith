@@ -14,42 +14,79 @@
     <style>
       .hero-section {
         text-align: center;
-        padding-block: var(--spacing-10) var(--spacing-8);
+        padding-block: var(--spacing-8) var(--spacing-6);
       }
       .hero-badge {
         display: inline-flex;
-        margin-bottom: var(--spacing-4);
+        margin-bottom: var(--spacing-3);
       }
       .hero-title {
-        font-size: 2.25rem;
+        font-family: var(--font-family-heading);
+        font-size: clamp(1.85rem, 6.5vw, 2.5rem);
         font-weight: 800;
-        letter-spacing: -0.025em;
+        text-transform: uppercase;
+        letter-spacing: -0.03em;
+        line-height: 1.08;
         margin-bottom: var(--spacing-4);
         color: var(--color-text-main);
+        word-break: break-word;
       }
       .hero-tagline {
-        font-size: var(--font-size-lg);
+        font-size: var(--font-size-sm);
+        font-weight: 500;
         color: var(--color-text-muted);
-        max-width: 640px;
+        max-width: 680px;
         margin-inline: auto;
         margin-bottom: var(--spacing-6);
       }
+      @media (min-width: 640px) {
+        .hero-tagline {
+          font-size: var(--font-size-base);
+          margin-bottom: var(--spacing-8);
+        }
+      }
       .hero-actions {
         display: flex;
-        gap: var(--spacing-4);
+        gap: var(--spacing-3);
         justify-content: center;
-        flex-wrap: wrap;
-        margin-bottom: var(--spacing-10);
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: var(--spacing-6);
+      }
+      .hero-actions .btn {
+        width: 100%;
+      }
+      @media (min-width: 480px) {
+        .hero-actions {
+          flex-direction: row;
+          width: auto;
+          gap: var(--spacing-4);
+          margin-bottom: var(--spacing-8);
+        }
+        .hero-actions .btn {
+          width: auto;
+        }
+      }
+      .hero-promo-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-4);
+        margin-bottom: var(--spacing-8);
+      }
+      @media (min-width: 640px) {
+        .hero-promo-grid {
+          grid-template-columns: 1fr 1fr;
+        }
       }
       .features-grid {
         display: grid;
         grid-template-columns: 1fr;
         gap: var(--spacing-6);
-        margin-top: var(--spacing-8);
+        margin-top: var(--spacing-6);
       }
       @media (min-width: 768px) {
         .hero-title {
-          font-size: 3.25rem;
+          font-size: 3.75rem;
         }
         .features-grid {
           grid-template-columns: repeat(3, 1fr);
@@ -57,13 +94,21 @@
       }
       .feature-card {
         text-align: left;
+        border: 2px solid var(--color-border);
+        box-shadow: 4px 4px 0px var(--color-border);
+        transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      }
+      .feature-card:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0px var(--color-border);
       }
       .feature-icon-wrapper {
         width: 48px;
         height: 48px;
-        border-radius: var(--radius-lg);
-        background-color: var(--color-primary-surface);
-        color: var(--color-primary);
+        background-color: var(--color-primary);
+        color: #000000;
+        border: 2px solid var(--color-border);
+        box-shadow: 3px 3px 0px var(--color-border);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -72,16 +117,23 @@
       .feature-icon {
         width: 24px;
         height: 24px;
+        stroke-width: 2.2;
       }
       .disclaimer-banner {
-        background-color: var(--color-bg);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-4);
+        background-color: var(--color-warning) !important;
+        color: #000000 !important;
+        border: 2px solid var(--color-border);
+        box-shadow: 4px 4px 0px var(--color-border);
+        padding: var(--spacing-4) var(--spacing-5);
         font-size: var(--font-size-xs);
-        color: var(--color-text-muted);
+        font-weight: 700;
         text-align: center;
-        margin-top: var(--spacing-12);
+        margin-top: var(--spacing-10);
+      }
+      .disclaimer-banner strong,
+      .disclaimer-banner p,
+      .disclaimer-banner span {
+        color: #000000 !important;
       }
     </style>
   </head>
@@ -134,6 +186,28 @@
           <div class="hero-actions">
             <a href="register.html" class="btn btn-primary btn-lg">Create Free Account</a>
             <a href="login.html" class="btn btn-secondary btn-lg">Sign In to Dashboard</a>
+          </div>
+
+          <!-- Brutalist Promo Highlights (Matches Reference Style) -->
+          <div class="hero-promo-grid">
+            <div class="promo-card promo-card-lime">
+              <div>
+                <span class="badge badge-dark" style="margin-bottom: var(--spacing-2);">EFFICIENCY</span>
+                <h3 style="font-size: var(--font-size-xl); margin-top: 4px;">CIRCULAR DIVERSION<br/>UP TO 85% RECOVERY</h3>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-top: var(--spacing-3);">
+                <a href="login.html?returnTo=recovery.html" id="recoveryPromoBtn" class="btn btn-square btn-square-dark" aria-label="Explore recovery">↗</a>
+              </div>
+            </div>
+            <div class="promo-card promo-card-white">
+              <div>
+                <span class="badge badge-primary" style="margin-bottom: var(--spacing-2);">PRIVACY</span>
+                <h3 style="font-size: var(--font-size-xl); margin-top: 4px;">BYOK INTELLIGENCE<br/>NO KEY STORAGE</h3>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-top: var(--spacing-3);">
+                <a href="login.html?returnTo=keyvault.html" id="byokPromoBtn" class="btn btn-square btn-square-dark" aria-label="Explore Key Vault">↗</a>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -227,15 +301,31 @@
     <script type="module">
       import { supabase } from './js/supabase.js';
 
-      // If already logged in, update header CTA to point directly to dashboard
+      // Check user session
       const {
         data: { session }
       } = await supabase.auth.getSession();
+
+      // If logged in, point promo cards directly to destination; otherwise keep safely directed to login
+      const byokPromoBtn = document.getElementById('byokPromoBtn');
+      const recoveryPromoBtn = document.getElementById('recoveryPromoBtn');
+      if (session) {
+        if (byokPromoBtn) byokPromoBtn.href = 'keyvault.html';
+        if (recoveryPromoBtn) recoveryPromoBtn.href = 'recovery.html';
+        
+        const heroSecondary = document.querySelector('.hero-actions .btn-secondary');
+        if (heroSecondary) {
+          heroSecondary.href = 'dashboard.html';
+          heroSecondary.textContent = 'Go to Dashboard';
+        }
+      }
+
+      // If already logged in, update header CTA to point directly to dashboard
       if (session) {
         const container = document.getElementById('headerAuthActions');
         if (container) {
           container.innerHTML = `
-          <a href="dashboard.html" class="btn btn-primary btn-sm">Go to Dashboard</a>
+          <a href="dashboard.html" class="btn btn-primary btn-sm">Dashboard</a>
         `;
         }
       }

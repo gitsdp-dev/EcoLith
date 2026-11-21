@@ -216,12 +216,15 @@ export function renderCharts(scans = [], metrics) {
           {
             label: 'Waste Recorded (kg)',
             data: dataPoints.length > 0 ? dataPoints : [0],
-            borderColor: '#059669',
-            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+            borderColor: '#000000',
+            borderWidth: 3,
+            backgroundColor: 'rgba(204, 255, 0, 0.45)',
             fill: true,
-            tension: 0.3,
-            pointBackgroundColor: '#059669',
-            pointRadius: 4
+            tension: 0, // Sharp brutalist line
+            pointBackgroundColor: '#ccff00',
+            pointBorderColor: '#000000',
+            pointBorderWidth: 2,
+            pointRadius: 6
           }
         ]
       },
@@ -238,12 +241,12 @@ export function renderCharts(scans = [], metrics) {
         },
         scales: {
           x: {
-            ticks: { color: textColor },
+            ticks: { color: textColor, font: { weight: 'bold', family: 'Space Grotesk' } },
             grid: { color: gridColor }
           },
           y: {
             beginAtZero: true,
-            ticks: { color: textColor },
+            ticks: { color: textColor, font: { weight: 'bold', family: 'Space Grotesk' } },
             grid: { color: gridColor }
           }
         }
@@ -279,9 +282,9 @@ export function renderCharts(scans = [], metrics) {
         datasets: [
           {
             data: hasData ? catData : [1],
-            backgroundColor: hasData ? ['#10b981', '#3b82f6', '#f59e0b', '#6b7280'] : ['#e2e8f0'],
+            backgroundColor: hasData ? ['#ccff00', '#000000', '#ffe500', '#f4f4f0'] : ['#e0e0dc'],
             borderWidth: 2,
-            borderColor: isDark ? '#1e293b' : '#ffffff'
+            borderColor: '#000000'
           }
         ]
       },
@@ -291,7 +294,7 @@ export function renderCharts(scans = [], metrics) {
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { color: textColor, boxWidth: 12 }
+            labels: { color: textColor, boxWidth: 12, font: { weight: 'bold', family: 'Space Grotesk' } }
           }
         },
         cutout: '65%'
@@ -318,8 +321,10 @@ export function renderCharts(scans = [], metrics) {
           {
             label: 'Actions Count',
             data: hasMethodData ? mData : [0],
-            backgroundColor: '#0d9488',
-            borderRadius: 4
+            backgroundColor: '#ccff00',
+            borderColor: '#000000',
+            borderWidth: 2,
+            borderRadius: 0 // Sharp brutalist rectangle bars
           }
         ]
       },

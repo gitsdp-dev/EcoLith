@@ -71,16 +71,6 @@
             </svg>
             Continue with Google
           </button>
-
-          <button type="button" id="btnAzureSignIn" class="btn btn-oauth btn-block">
-            <svg class="oauth-icon" viewBox="0 0 23 23">
-              <path fill="#f35325" d="M1 1h10v10H1z" />
-              <path fill="#81bc06" d="M12 1h10v10H12z" />
-              <path fill="#05a6f0" d="M1 12h10v10H1z" />
-              <path fill="#ffba08" d="M12 12h10v10H12z" />
-            </svg>
-            Continue with Microsoft
-          </button>
         </div>
 
         <div class="auth-divider">
@@ -236,7 +226,6 @@
       const btnLoginSubmit = document.getElementById('btnLoginSubmit');
       const loginSpinner = document.getElementById('loginSpinner');
       const btnGoogleSignIn = document.getElementById('btnGoogleSignIn');
-      const btnAzureSignIn = document.getElementById('btnAzureSignIn');
 
       // Forgot password modal elements
       const btnForgotPwd = document.getElementById('btnForgotPwd');
@@ -265,7 +254,8 @@
       }
 
       const urlParams = new URLSearchParams(window.location.search);
-      const returnTo = urlParams.get('returnTo') || '/dashboard.html';
+      const rawReturnTo = urlParams.get('returnTo') || 'dashboard.html';
+      const returnTo = rawReturnTo.replace(/^\//, '');
 
       // Check if logged out due to 14-day inactivity
       if (urlParams.get('reason') === 'session_expired') {
@@ -280,7 +270,7 @@
       const existingSession = await getSession();
 
       if (existingSession && !window.location.hash.includes('type=recovery')) {
-        window.location.href = returnTo;
+        window.location.replace(returnTo);
       }
 
       // Check for recovery flow in URL
@@ -298,16 +288,6 @@
           await signInWithOAuth('google');
         } catch (err) {
           showAlert(authAlert, err.message || 'Failed to initiate Google sign in.');
-        }
-      });
-
-      // Azure/Microsoft Sign-In
-      btnAzureSignIn.addEventListener('click', async () => {
-        try {
-          hideAlert(authAlert);
-          await signInWithOAuth('azure');
-        } catch (err) {
-          showAlert(authAlert, err.message || 'Failed to initiate Microsoft sign in.');
         }
       });
 
@@ -341,7 +321,7 @@
                 const keyStatus = await statusRes.json();
                 if (!keyStatus.hasKey) {
                   // Direct first-time user to software initialization UI
-                  window.location.href = '/keyvault.html?init=true';
+                  window.location.replace('keyvault.html?init=true');
                   return;
                 }
               }
@@ -350,7 +330,7 @@
             }
           }
 
-          window.location.href = returnTo;
+          window.location.replace(returnTo);
         } catch (err) {
           showAlert(authAlert, err.message || 'Invalid email or password.');
         } finally {

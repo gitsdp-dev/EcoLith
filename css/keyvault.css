@@ -1,6 +1,7 @@
 /**
- * EcoLith Key Vault Styles
- * Dedicated styling for BYOK key management with hardened security UX.
+ * EcoLith Key Vault Styles — Brutalism Redesign
+ * Dedicated styling for BYOK key management with hardened brutalist security UX.
+ * 2px solid black borders, hard drop-shadows, Acid Lime highlights (#CCFF00).
  */
 
 .vault-container {
@@ -15,10 +16,15 @@
 }
 
 .vault-shield-icon {
-  width: 48px;
-  height: 48px;
-  color: var(--color-primary);
-  margin-bottom: var(--spacing-2);
+  width: 52px;
+  height: 52px;
+  background-color: var(--color-primary) !important;
+  color: #000000 !important;
+  border: 2px solid var(--color-border);
+  box-shadow: 3px 3px 0px var(--color-border);
+  padding: 6px;
+  margin-inline: auto;
+  margin-bottom: var(--spacing-3);
 }
 
 .key-input-wrapper {
@@ -39,18 +45,20 @@
   right: var(--spacing-2);
   top: 50%;
   transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-main);
   cursor: pointer;
-  padding: var(--spacing-2);
+  padding: var(--spacing-1);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 32px;
+  height: 32px;
 }
 
 .btn-toggle-mask:hover {
-  color: var(--color-text-main);
+  background-color: var(--color-bg);
 }
 
 /* Step-by-step Guide */
@@ -67,26 +75,29 @@
   gap: var(--spacing-3);
   margin-bottom: var(--spacing-4);
   font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
 }
 
 .step-number {
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-full);
-  background-color: var(--color-primary-surface);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-bold);
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid var(--color-border);
+  background-color: var(--color-primary) !important;
+  color: #000000 !important;
+  font-weight: 800;
   font-size: var(--font-size-xs);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 2px 2px 0px var(--color-border);
 }
 
 .step-link {
-  color: var(--color-primary);
-  font-weight: var(--font-weight-medium);
+  color: var(--color-text-main);
+  font-weight: 700;
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* Active Key Card */
@@ -95,8 +106,8 @@
   align-items: center;
   justify-content: space-between;
   background-color: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-border);
+  box-shadow: 3px 3px 0px var(--color-border);
   padding: var(--spacing-4) var(--spacing-5);
   margin-bottom: var(--spacing-5);
 }
@@ -104,15 +115,15 @@
 .key-masked-text {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.1em;
+  font-weight: 800;
+  letter-spacing: 0.12em;
 }
 
 /* Informational "What we store" Panel */
 .what-we-store-panel {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-border);
+  box-shadow: 4px 4px 0px var(--color-border);
   padding: var(--spacing-5);
   margin-top: var(--spacing-6);
 }
@@ -135,13 +146,30 @@
   align-items: flex-start;
   gap: var(--spacing-2);
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--color-text-main);
+  font-weight: 500;
 }
 
 .store-point svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
-  color: var(--color-primary);
-  margin-top: 2px;
+  color: #000000;
+  margin-top: 1px;
+}
+
+/* Mobile & Thin Phone Key Vault Optimizations (Galaxy S21 Ultra, 360px - 384px) */
+@media (max-width: 480px) {
+  .active-key-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+  }
+  .active-key-display .btn {
+    width: 100%;
+  }
+  .what-we-store-panel {
+    padding: var(--spacing-4);
+  }
 }

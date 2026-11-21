@@ -1,15 +1,16 @@
 /**
- * EcoLith Admin Panel Styles
+ * EcoLith Admin Panel Styles — Brutalism Redesign
  * Desktop-first with responsive mobile styling for administrative operations.
+ * 2px solid black borders, hard drop-shadows, zero radius, Acid Lime accents (#CCFF00).
  */
 
 .admin-header-badge {
-  background: #fef3c7;
-  color: #92400e;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  background: var(--color-warning);
+  color: #000000;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   padding: 2px 8px;
-  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border);
   font-size: var(--font-size-xs);
   text-transform: uppercase;
   margin-left: var(--spacing-2);
@@ -18,30 +19,38 @@
 .admin-tabs {
   display: flex;
   gap: var(--spacing-2);
-  border-bottom: 1px solid var(--color-border);
   margin-bottom: var(--spacing-6);
   overflow-x: auto;
+  padding-bottom: var(--spacing-2);
 }
 
 .admin-tab {
-  padding: var(--spacing-3) var(--spacing-5);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-main);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  box-shadow: 2px 2px 0px var(--color-border);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
   transition: all var(--transition-fast);
   white-space: nowrap;
 }
 
 .admin-tab:hover {
-  color: var(--color-text-main);
+  background-color: var(--color-bg);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px var(--color-border);
 }
 
 .admin-tab.active {
+  background-color: #000000;
   color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
+  border-color: var(--color-border);
+  box-shadow: 3px 3px 0px var(--color-primary);
 }
 
 .admin-kpi-grid {
@@ -65,10 +74,9 @@
 
 .admin-table-container {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  border: 2px solid var(--color-border);
+  box-shadow: 4px 4px 0px var(--color-border);
   overflow-x: auto;
-  box-shadow: var(--shadow-sm);
   margin-bottom: var(--spacing-6);
 }
 
@@ -80,52 +88,66 @@
 }
 
 .admin-table th {
-  background: var(--color-bg);
+  background: #000000;
+  color: #ffffff;
   padding: var(--spacing-3) var(--spacing-4);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-muted);
-  border-bottom: 1px solid var(--color-border);
+  font-weight: 800;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid var(--color-border);
+  border-right: 1px solid #333333;
   white-space: nowrap;
+}
+
+.admin-table th:last-child {
+  border-right: none;
 }
 
 .admin-table td {
   padding: var(--spacing-3) var(--spacing-4);
   border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid #e0e0dc;
   color: var(--color-text-main);
   vertical-align: middle;
 }
 
-.admin-table tr:last-child td {
-  border-bottom: none;
+.admin-table td:last-child {
+  border-right: none;
 }
 
 .admin-table tr:hover td {
-  background-color: rgba(5, 150, 105, 0.02);
+  background-color: rgba(204, 255, 0, 0.1);
 }
 
 .badge-status-active {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-primary) !important;
+  color: #000000 !important;
+  border: 1.5px solid var(--color-border);
 }
 
 .badge-status-suspended {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-danger) !important;
+  color: #ffffff !important;
+  border: 1.5px solid var(--color-border);
 }
 
 .badge-key-valid {
-  background: #ecfdf5;
-  color: #059669;
+  background: var(--color-primary) !important;
+  color: #000000 !important;
+  border: 1.5px solid var(--color-border);
 }
 
 .badge-key-none {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--color-surface) !important;
+  color: var(--color-text-main) !important;
+  border: 1.5px solid var(--color-border);
 }
 
 .badge-key-invalid {
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--color-danger) !important;
+  color: #ffffff !important;
+  border: 1.5px solid var(--color-border);
 }
 
 .log-metadata-code {
@@ -133,8 +155,8 @@
   font-size: var(--font-size-xs);
   background: var(--color-bg);
   padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
   max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
