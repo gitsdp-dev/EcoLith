@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — EcoLith</title>
+  <meta name="description" content="EcoLith food waste and circular resource recovery dashboard.">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--color-primary-surface) 0%, var(--color-surface) 100%);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-6);
+      margin-bottom: var(--spacing-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+    }
+    @media (min-width: 640px) {
+      .welcome-banner {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-4);
+      margin-bottom: var(--spacing-8);
+    }
+    @media (min-width: 640px) {
+      .action-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (min-width: 1024px) {
+      .action-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    .action-card {
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .action-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .key-alert-card {
+      background-color: var(--color-warning-surface);
+      border: 1px solid rgba(234, 179, 8, 0.4);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-4) var(--spacing-5);
+      margin-bottom: var(--spacing-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-4);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="app-container header-container">
+      <a href="dashboard.html" class="brand-link">
+        <svg class="brand-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v8"></path>
+          <path d="m4.93 10.93 1.41 1.41"></path>
+          <path d="M2 18h2"></path>
+          <path d="M20 18h2"></path>
+          <path d="m19.07 10.93-1.41 1.41"></path>
+          <path d="M22 22H2"></path>
+          <path d="m8 6 4-4 4 4"></path>
+          <path d="M16 18a4 4 0 0 0-8 0"></path>
+        </svg>
+        <span>EcoLith</span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Main Navigation">
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        <a href="scanner.html" class="nav-link">Scanner</a>
+        <a href="recovery.html" class="nav-link">Recovery</a>
+        <a href="history.html" class="nav-link">History</a>
+        <a href="keyvault.html" class="nav-link">Key Vault</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="profile.html" class="nav-link" aria-label="Profile">Profile</a>
+        <button type="button" id="btnSignOutTop" class="btn btn-outline btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="app-container">
+      <!-- Welcome Header -->
+      <section class="welcome-banner">
+        <div>
+          <span class="badge badge-primary" style="margin-bottom: var(--spacing-2);">EcoLith Workspace</span>
+          <h1 id="welcomeGreeting">Welcome back</h1>
+          <p class="text-muted" style="margin-top: var(--spacing-1);">
+            Convert food residue into circular recovery opportunities.
+          </p>
+        </div>
+        <a href="scanner.html" class="btn btn-primary btn-lg">
+          <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          New Waste Scan
+        </a>
+      </section>
+
+      <!-- Key Vault Setup Reminder (Visible if no key detected) -->
+      <div id="keyNotice" class="key-alert-card" style="display: none;">
+        <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+          <span style="font-size: 1.5rem;">🔑</span>
+          <div>
+            <strong style="font-size: var(--font-size-sm); color: var(--color-text-main);">Gemini API Key Required</strong>
+            <p class="text-xs text-muted" style="margin: 0;">
+              EcoLith is BYOK. Add your Google Gemini key in the Key Vault to unlock AI waste scanning.
+            </p>
+          </div>
+        </div>
+        <a href="keyvault.html" class="btn btn-primary btn-sm">Configure Key</a>
+      </div>
+
+      <!-- Action Cards -->
+      <h2 style="font-size: var(--font-size-lg); margin-bottom: var(--spacing-4);">Quick Navigation</h2>
+      <div class="action-grid">
+        <a href="scanner.html" class="card action-card">
+          <div class="card-body">
+            <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-1); color: var(--color-primary);">
+              📷 Waste Scanner
+            </h3>
+            <p class="text-sm text-muted">
+              Capture or upload food scrap photos for AI classification and recovery suggestions.
+            </p>
+          </div>
+        </a>
+
+        <a href="keyvault.html" class="card action-card">
+          <div class="card-body">
+            <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-1); color: var(--color-primary);">
+              🔒 Key Vault (BYOK)
+            </h3>
+            <p class="text-sm text-muted">
+              Manage your personal Gemini API key with AES-256-GCM encryption at rest.
+            </p>
+          </div>
+        </a>
+
+        <a href="recovery.html" class="card action-card">
+          <div class="card-body">
+            <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-1); color: var(--color-primary);">
+              ♻️ Circular Recovery
+            </h3>
+            <p class="text-sm text-muted">
+              Explore sustainable diversion pathways: composting, biogas, pectin recovery, and reuse.
+            </p>
+          </div>
+        </a>
+
+        <a href="history.html" class="card action-card">
+          <div class="card-body">
+            <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-1); color: var(--color-primary);">
+              📊 Scan History
+            </h3>
+            <p class="text-sm text-muted">
+              Browse previous food waste records, measurements, and tracked outcomes.
+            </p>
+          </div>
+        </a>
+
+        <a href="profile.html" class="card action-card">
+          <div class="card-body">
+            <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-1); color: var(--color-primary);">
+              👤 Profile & Security
+            </h3>
+            <p class="text-sm text-muted">
+              Update your display name, manage authentication, or change passwords.
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <a href="dashboard.html" class="mobile-nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+        <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+        <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+        <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="scanner.html" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </svg>
+      <span>Scan</span>
+    </a>
+    <a href="recovery.html" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+      </svg>
+      <span>Recovery</span>
+    </a>
+    <a href="keyvault.html" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="7.5" cy="15.5" r="5.5"></circle>
+        <path d="m21 2-9.6 9.6"></path>
+        <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+      </svg>
+      <span>Vault</span>
+    </a>
+    <a href="profile.html" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="5"></circle>
+        <path d="M20 21a8 8 0 1 0-16 0"></path>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <script type="module">
+    import { requireAuth, getUserProfile, signOut } from './js/auth.js';
+    import { CONFIG } from './js/config.js';
+
+    const session = await requireAuth();
+    const profile = await getUserProfile(session.user.id);
+
+    const greeting = document.getElementById('welcomeGreeting');
+    if (greeting) {
+      const name = profile?.display_name || session.user.email.split('@')[0];
+      greeting.textContent = `Welcome back, ${name}`;
+    }
+
+    const btnSignOutTop = document.getElementById('btnSignOutTop');
+    if (btnSignOutTop) {
+      btnSignOutTop.addEventListener('click', () => signOut());
+    }
+
+    // Check Key status via backend API
+    try {
+      const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys/status`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      if (res.ok) {
+        const keyData = await res.json();
+        if (!keyData.hasKey || keyData.status === 'invalid') {
+          const keyNotice = document.getElementById('keyNotice');
+          if (keyNotice) keyNotice.style.display = 'flex';
+        }
+      } else if (res.status === 404 || res.status === 401 || res.status === 409) {
+        const keyNotice = document.getElementById('keyNotice');
+        if (keyNotice) keyNotice.style.display = 'flex';
+      }
+    } catch {
+      // Backend may not be running yet in Phase 1; gracefully show reminder
+      const keyNotice = document.getElementById('keyNotice');
+      if (keyNotice) keyNotice.style.display = 'flex';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Key Vault (BYOK) — EcoLith</title>
+  <meta name="description" content="Securely configure your Google Gemini API key for EcoLith AI food waste scanning.">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/keyvault.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="app-container header-container">
+      <a href="dashboard.html" class="brand-link">
+        <svg class="brand-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v8"></path>
+          <path d="m4.93 10.93 1.41 1.41"></path>
+          <path d="M2 18h2"></path>
+          <path d="M20 18h2"></path>
+          <path d="m19.07 10.93-1.41 1.41"></path>
+          <path d="M22 22H2"></path>
+          <path d="m8 6 4-4 4 4"></path>
+          <path d="M16 18a4 4 0 0 0-8 0"></path>
+        </svg>
+        <span>EcoLith</span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Main Navigation">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="scanner.html" class="nav-link">Scanner</a>
+        <a href="recovery.html" class="nav-link">Recovery</a>
+        <a href="history.html" class="nav-link">History</a>
+        <a href="keyvault.html" class="nav-link active">Key Vault</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="profile.html" class="nav-link" aria-label="Profile">Profile</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Key Vault Content -->
+  <main class="main-content">
+    <div class="app-container vault-container">
+      <div class="vault-header">
+        <svg class="vault-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <h1>Secure Key Vault</h1>
+        <p class="text-muted text-sm">
+          EcoLith operates on a strict <strong>Bring Your Own Key (BYOK)</strong> model. Your Gemini key is encrypted at rest (AES-256-GCM) and never shared.
+        </p>
+      </div>
+
+      <!-- Alert Box -->
+      <div id="vaultAlert" class="auth-alert" role="alert" aria-live="polite"></div>
+
+      <!-- STATE 1: ACTIVE KEY DISPLAY -->
+      <div id="stateActive" class="card" style="display: none;">
+        <div class="card-header">
+          <h3>Registered Gemini API Key</h3>
+          <span id="keyStatusBadge" class="badge badge-success">Valid</span>
+        </div>
+        <div class="card-body">
+          <div class="active-key-display">
+            <div>
+              <p class="text-xs text-muted" style="margin-bottom: var(--spacing-1);">Stored API Key</p>
+              <span id="maskedKeyDisplay" class="key-masked-text">•••• •••• •••• ....</span>
+            </div>
+            <button type="button" id="btnTestKey" class="btn btn-secondary btn-sm">
+              <span>Test Key</span>
+            </button>
+          </div>
+          <p id="keyValidatedAt" class="text-xs text-muted" style="margin-bottom: var(--spacing-4);"></p>
+
+          <div style="display: flex; gap: var(--spacing-3); flex-wrap: wrap;">
+            <button type="button" id="btnShowReplace" class="btn btn-outline btn-sm">
+              Replace Key
+            </button>
+            <button type="button" id="btnShowDelete" class="btn btn-danger btn-sm">
+              Delete Key
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATE 2 & 3: EMPTY / ADD OR REPLACE KEY FORM -->
+      <div id="stateEmpty" class="card">
+        <div class="card-header">
+          <h3>Connect Your Google Gemini Key</h3>
+        </div>
+        <div class="card-body">
+          <!-- 3-step guide -->
+          <ol class="steps-list">
+            <li class="step-item">
+              <span class="step-number">1</span>
+              <div>
+                Open <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="step-link">Google AI Studio</a> in a new tab.
+              </div>
+            </li>
+            <li class="step-item">
+              <span class="step-number">2</span>
+              <div>
+                Click <strong>"Create API key"</strong> and copy your key string.
+              </div>
+            </li>
+            <li class="step-item">
+              <span class="step-number">3</span>
+              <div>
+                Paste it below. We will immediately test, encrypt, and store it in your personal vault.
+              </div>
+            </li>
+          </ol>
+
+          <!-- Input Form -->
+          <form id="addKeyForm" novalidate>
+            <div class="form-group">
+              <label for="keyInput" class="form-label">Google Gemini API Key</label>
+              <div class="key-input-wrapper">
+                <input
+                  type="password"
+                  id="keyInput"
+                  name="keyInput"
+                  class="form-input key-input"
+                  required
+                  autocomplete="off"
+                  spellcheck="false"
+                  autocapitalize="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  placeholder="AIzaSy..."
+                >
+                <button type="button" id="btnToggleMask" class="btn-toggle-mask" aria-label="Toggle Key Visibility">
+                  <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <span class="form-help">Keys are write-only. They are encrypted immediately and never shown back.</span>
+            </div>
+
+            <div style="display: flex; gap: var(--spacing-3); align-items: center; margin-top: var(--spacing-5);">
+              <button type="submit" id="btnSubmitKey" class="btn btn-primary">
+                <span>Verify & Save in Vault</span>
+                <span class="spinner sr-only" id="keySubmitSpinner" aria-hidden="true"></span>
+              </button>
+              <button type="button" id="btnCancelReplace" class="btn btn-outline" style="display: none;">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- State Replacing Placeholder -->
+      <div id="stateReplacing" style="display: none;"></div>
+
+      <!-- "What We Store" Privacy Assurance Panel -->
+      <aside class="what-we-store-panel">
+        <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-2);">
+          🛡️ Privacy & Security Commitments
+        </h3>
+        <p class="text-xs text-muted">
+          We designed EcoLith with defense-in-depth to keep your credentials strictly confidential.
+        </p>
+
+        <div class="what-we-store-grid">
+          <div class="store-point">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <div>
+              <strong>Encrypted at rest:</strong> AES-256-GCM encryption with a random IV and authenticated user-binding.
+            </div>
+          </div>
+          <div class="store-point">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+            <div>
+              <strong>Admins cannot view:</strong> Even system administrators cannot see or decrypt your API key.
+            </div>
+          </div>
+          <div class="store-point">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path></svg>
+            <div>
+              <strong>Deletable anytime:</strong> Deleting your key permanently erases all ciphertext from the database.
+            </div>
+          </div>
+          <div class="store-point">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+            <div>
+              <strong>Direct usage:</strong> Requests to Google run directly under your account limits and terms.
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Delete Key Confirmation Modal -->
+  <div id="deleteModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+      <div class="modal-header">
+        <h2 id="deleteModalTitle" style="font-size: var(--font-size-lg); color: var(--color-danger);">
+          Delete API Key?
+        </h2>
+      </div>
+      <div class="modal-body">
+        <p class="text-sm text-muted">
+          Are you sure you want to permanently delete your stored Gemini API key?
+        </p>
+        <p class="text-sm text-muted" style="margin-top: var(--spacing-2);">
+          <strong>Note:</strong> AI waste scanning will be locked until you add a new key.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnCancelDelete" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="btnConfirmDelete" class="btn btn-danger">
+          <span>Delete Permanently</span>
+          <span class="spinner sr-only" id="deleteSpinner" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <a href="dashboard.html" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+        <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+        <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+        <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="scanner.html" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </svg>
+      <span>Scan</span>
+    </a>
+    <a href="recovery.html" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+      </svg>
+      <span>Recovery</span>
+    </a>
+    <a href="keyvault.html" class="mobile-nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="7.5" cy="15.5" r="5.5"></circle>
+        <path d="m21 2-9.6 9.6"></path>
+        <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+      </svg>
+      <span>Vault</span>
+    </a>
+    <a href="profile.html" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="5"></circle>
+        <path d="M20 21a8 8 0 1 0-16 0"></path>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <script type="module" src="js/keyvault.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "ecolith",
+  "version": "1.0.0",
+  "description": "EcoLith — Turning Waste Into Opportunity",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --check ."
+  },
+  "devDependencies": {
+    "eslint": "^9.21.0",
+    "prettier": "^3.5.2"
+  }
+}

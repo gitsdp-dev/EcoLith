@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scan History — EcoLith</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-container header-container">
+      <a href="dashboard.html" class="brand-link">
+        <svg class="brand-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v8"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m8 6 4-4 4 4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>
+        <span>EcoLith</span>
+      </a>
+      <nav class="desktop-nav">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="scanner.html" class="nav-link">Scanner</a>
+        <a href="recovery.html" class="nav-link">Recovery</a>
+        <a href="history.html" class="nav-link active">History</a>
+        <a href="keyvault.html" class="nav-link">Key Vault</a>
+      </nav>
+      <div class="header-actions">
+        <a href="profile.html" class="nav-link">Profile</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="app-container">
+      <div class="card" style="max-width: 600px; margin: var(--spacing-8) auto; text-align: center; padding: var(--spacing-8);">
+        <div style="font-size: 2.5rem; margin-bottom: var(--spacing-3);">📊</div>
+        <h2>Scan History</h2>
+        <p class="text-sm text-muted" style="margin-block: var(--spacing-3);">
+          The historical scans and analytics timeline module will be active in Phase 4.
+        </p>
+        <a href="dashboard.html" class="btn btn-primary">Return to Dashboard</a>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-bottom-nav">
+    <a href="dashboard.html" class="mobile-nav-item">Home</a>
+    <a href="scanner.html" class="mobile-nav-item">Scan</a>
+    <a href="recovery.html" class="mobile-nav-item">Recovery</a>
+    <a href="history.html" class="mobile-nav-item active">History</a>
+    <a href="profile.html" class="mobile-nav-item">Profile</a>
+  </nav>
+
+  <script type="module">
+    import { requireAuth } from './js/auth.js';
+    await requireAuth();
+  </script>
+</body>
+</html>

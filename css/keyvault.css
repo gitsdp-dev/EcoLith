@@ -1,0 +1,147 @@
+/**
+ * EcoLith Key Vault Styles
+ * Dedicated styling for BYOK key management with hardened security UX.
+ */
+
+.vault-container {
+  max-width: 680px;
+  margin-inline: auto;
+  padding-block: var(--spacing-4) var(--spacing-8);
+}
+
+.vault-header {
+  margin-bottom: var(--spacing-6);
+  text-align: center;
+}
+
+.vault-shield-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.key-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.key-input {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  padding-right: 48px;
+  letter-spacing: 0.05em;
+}
+
+.btn-toggle-mask {
+  position: absolute;
+  right: var(--spacing-2);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--spacing-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-toggle-mask:hover {
+  color: var(--color-text-main);
+}
+
+/* Step-by-step Guide */
+.steps-list {
+  list-style: none;
+  counter-reset: vault-step;
+  margin-bottom: var(--spacing-6);
+}
+
+.step-item {
+  counter-increment: vault-step;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-sm);
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-surface);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-link {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+}
+
+/* Active Key Card */
+.active-key-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4) var(--spacing-5);
+  margin-bottom: var(--spacing-5);
+}
+
+.key-masked-text {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.1em;
+}
+
+/* Informational "What we store" Panel */
+.what-we-store-panel {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-5);
+  margin-top: var(--spacing-6);
+}
+
+.what-we-store-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-4);
+}
+
+@media (min-width: 640px) {
+  .what-we-store-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.store-point {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.store-point svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--color-primary);
+  margin-top: 2px;
+}

@@ -1,0 +1,306 @@
+import { requireAuth } from './auth.js';
+import { CONFIG } from './config.js';
+
+let currentSession = null;
+let currentKeyStatus = null;
+let autoMaskTimeout = null;
+let inactivityTimer = null;
+
+// UI Containers & Elements
+const vaultAlert = document.getElementById('vaultAlert');
+const stateEmpty = document.getElementById('stateEmpty');
+const stateActive = document.getElementById('stateActive');
+const stateReplacing = document.getElementById('stateReplacing');
+
+// Active State Elements
+const maskedKeyDisplay = document.getElementById('maskedKeyDisplay');
+const keyStatusBadge = document.getElementById('keyStatusBadge');
+const keyValidatedAt = document.getElementById('keyValidatedAt');
+const btnTestKey = document.getElementById('btnTestKey');
+const btnShowReplace = document.getElementById('btnShowReplace');
+const btnShowDelete = document.getElementById('btnShowDelete');
+
+// Add/Replace Form Elements
+const keyInput = document.getElementById('keyInput');
+const btnToggleMask = document.getElementById('btnToggleMask');
+const btnSubmitKey = document.getElementById('btnSubmitKey');
+const keySubmitSpinner = document.getElementById('keySubmitSpinner');
+const btnCancelReplace = document.getElementById('btnCancelReplace');
+
+// Delete Modal Elements
+const deleteModal = document.getElementById('deleteModal');
+const btnCancelDelete = document.getElementById('btnCancelDelete');
+const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+const deleteSpinner = document.getElementById('deleteSpinner');
+
+function showAlert(message, type = 'error') {
+  vaultAlert.textContent = message;
+  vaultAlert.className = `auth-alert auth-alert-${type}`;
+  vaultAlert.style.display = 'block';
+}
+
+function hideAlert() {
+  vaultAlert.textContent = '';
+  vaultAlert.style.display = 'none';
+}
+
+/**
+ * Hardened Inactivity & Background Clearing
+ * Wipes sensitive key input if tab is hidden or user is inactive for 2 minutes.
+ */
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(() => {
+    wipeKeyInput();
+  }, 2 * 60 * 1000); // 2 minutes
+}
+
+function wipeKeyInput() {
+  if (keyInput) {
+    keyInput.value = '';
+    keyInput.type = 'password';
+  }
+  clearTimeout(autoMaskTimeout);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) wipeKeyInput();
+});
+
+window.addEventListener('pagehide', wipeKeyInput);
+['mousemove', 'keydown', 'touchstart'].forEach(evt => {
+  window.addEventListener(evt, resetInactivityTimer, { passive: true });
+});
+
+/**
+ * Show/Hide password toggle with 10-second auto re-mask
+ */
+btnToggleMask.addEventListener('click', () => {
+  if (keyInput.type === 'password') {
+    keyInput.type = 'text';
+    btnToggleMask.setAttribute('aria-label', 'Mask API Key');
+    clearTimeout(autoMaskTimeout);
+    autoMaskTimeout = setTimeout(() => {
+      keyInput.type = 'password';
+      btnToggleMask.setAttribute('aria-label', 'Show API Key');
+    }, 10000);
+  } else {
+    keyInput.type = 'password';
+    btnToggleMask.setAttribute('aria-label', 'Show API Key');
+    clearTimeout(autoMaskTimeout);
+  }
+});
+
+/**
+ * Fetch Key Status from Backend API
+ */
+async function fetchKeyStatus() {
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys/status`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${currentSession.access_token}`
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to check key status (${res.status})`);
+    }
+
+    currentKeyStatus = await res.json();
+    renderState();
+  } catch (err) {
+    showAlert(err.message || 'Unable to connect to key vault service.');
+  }
+}
+
+/**
+ * Render appropriate UI state
+ */
+function renderState(forcedMode = null) {
+  hideAlert();
+  wipeKeyInput();
+
+  if (forcedMode === 'replacing') {
+    stateEmpty.style.display = 'none';
+    stateActive.style.display = 'none';
+    stateReplacing.style.display = 'block';
+    btnCancelReplace.style.display = 'inline-flex';
+    return;
+  }
+
+  btnCancelReplace.style.display = 'none';
+
+  if (!currentKeyStatus || !currentKeyStatus.hasKey) {
+    stateEmpty.style.display = 'block';
+    stateActive.style.display = 'none';
+    stateReplacing.style.display = 'none';
+  } else {
+    stateEmpty.style.display = 'none';
+    stateActive.style.display = 'block';
+    stateReplacing.style.display = 'none';
+
+    maskedKeyDisplay.textContent = `•••• •••• •••• ${currentKeyStatus.last4}`;
+
+    if (currentKeyStatus.status === 'valid') {
+      keyStatusBadge.textContent = 'Active & Valid';
+      keyStatusBadge.className = 'badge badge-success';
+    } else if (currentKeyStatus.status === 'rate_limited') {
+      keyStatusBadge.textContent = 'Rate Limited / Quota';
+      keyStatusBadge.className = 'badge badge-warning';
+    } else {
+      keyStatusBadge.textContent = 'Invalid / Expired';
+      keyStatusBadge.className = 'badge badge-danger';
+    }
+
+    if (currentKeyStatus.validatedAt) {
+      const dt = new Date(currentKeyStatus.validatedAt).toLocaleString();
+      keyValidatedAt.textContent = `Last verified: ${dt}`;
+    } else {
+      keyValidatedAt.textContent = '';
+    }
+  }
+}
+
+/**
+ * Submit / Replace API Key
+ */
+async function submitKey(e) {
+  e.preventDefault();
+  hideAlert();
+
+  let rawKey = keyInput.value.trim();
+  if (!rawKey) {
+    showAlert('Please paste your Google Gemini API key.');
+    return;
+  }
+
+  // Soft hint check
+  if (!rawKey.startsWith('AIza') && rawKey.length < 25) {
+    showAlert('Warning: Gemini API keys usually start with "AIza". Please verify your key.');
+  }
+
+  btnSubmitKey.disabled = true;
+  keySubmitSpinner.classList.remove('sr-only');
+
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentSession.access_token}`
+      },
+      body: JSON.stringify({ apiKey: rawKey })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || 'Key validation failed.');
+    }
+
+    currentKeyStatus = data;
+    renderState();
+    showAlert('Gemini API key successfully verified and securely stored in vault.', 'success');
+  } catch (err) {
+    showAlert(err.message || 'Failed to submit key.');
+  } finally {
+    // Critical Security Rule: Instantly discard key from memory & DOM
+    rawKey = '';
+    wipeKeyInput();
+    btnSubmitKey.disabled = false;
+    keySubmitSpinner.classList.add('sr-only');
+  }
+}
+
+/**
+ * Re-test Active Key
+ */
+async function testKey() {
+  hideAlert();
+  btnTestKey.disabled = true;
+
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys/revalidate`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${currentSession.access_token}`
+      }
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Validation request failed.');
+
+    currentKeyStatus.status = data.status;
+    currentKeyStatus.validatedAt = data.validatedAt;
+    renderState();
+
+    if (data.status === 'valid') {
+      showAlert('Key test succeeded! Your Gemini key is working properly.', 'success');
+    } else {
+      showAlert(`Key validation failed: ${data.error || 'Google rejected the key.'}`, 'error');
+    }
+  } catch (err) {
+    showAlert(err.message || 'Failed to retest key.');
+  } finally {
+    btnTestKey.disabled = false;
+  }
+}
+
+/**
+ * Delete Key Flow
+ */
+function openDeleteModal() {
+  deleteModal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+  deleteModal.style.display = 'none';
+}
+
+async function confirmDeleteKey() {
+  btnConfirmDelete.disabled = true;
+  deleteSpinner.classList.remove('sr-only');
+
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${currentSession.access_token}`
+      }
+    });
+
+    if (!res.ok) throw new Error('Failed to delete key.');
+
+    currentKeyStatus = { hasKey: false, last4: null, status: null, validatedAt: null };
+    closeDeleteModal();
+    renderState();
+    showAlert('Your key has been deleted from the vault. AI scanning is now locked until a new key is added.', 'info');
+  } catch (err) {
+    showAlert(err.message || 'Failed to remove key.');
+  } finally {
+    btnConfirmDelete.disabled = false;
+    deleteSpinner.classList.add('sr-only');
+  }
+}
+
+// Event Listeners
+document.getElementById('addKeyForm').addEventListener('submit', submitKey);
+btnTestKey.addEventListener('click', testKey);
+btnShowReplace.addEventListener('click', () => renderState('replacing'));
+btnCancelReplace.addEventListener('click', () => renderState());
+btnShowDelete.addEventListener('click', openDeleteModal);
+btnCancelDelete.addEventListener('click', closeDeleteModal);
+btnConfirmDelete.addEventListener('click', confirmDeleteKey);
+
+// Initialization
+async function init() {
+  try {
+    currentSession = await requireAuth();
+    resetInactivityTimer();
+    await fetchKeyStatus();
+  } catch (err) {
+    console.error('Key vault authentication required:', err);
+  }
+}
+
+init();
