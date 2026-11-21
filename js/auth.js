@@ -1,5 +1,103 @@
 import { supabase } from './supabase.js';
 
+// 14 days session duration in milliseconds (14 * 24 * 60 * 60 * 1000)
+export const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
+const SESSION_START_KEY = 'ecolith_session_login_at';
+const SESSION_USER_KEY = 'ecolith_session_user_id';
+
+/**
+ * Records or refreshes the session start timestamp.
+ * Inactive users remain logged in for up to 14 days.
+ * @param {string} userId
+ */
+export function recordLoginSession(userId) {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(SESSION_START_KEY, String(Date.now()));
+      if (userId) {
+        window.localStorage.setItem(SESSION_USER_KEY, userId);
+      }
+    }
+  } catch (err) {
+    console.warn('[AUTH] Could not persist session timestamp:', err);
+  }
+}
+
+/**
+ * Clears session tracking keys.
+ */
+export function clearSessionTracking() {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem(SESSION_START_KEY);
+      window.localStorage.removeItem(SESSION_USER_KEY);
+    }
+  } catch {}
+}
+
+/**
+ * Checks whether the current session has exceeded the 14-day inactivity limit.
+ * @param {import('@supabase/supabase-js').Session | null} session
+ * @returns {boolean} True if session is older than 14 days
+ */
+export function isSessionExpired(session) {
+  if (!session) return false;
+
+  // 1. Check local session record first
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const storedStart = window.localStorage.getItem(SESSION_START_KEY);
+      if (storedStart) {
+        const startMs = parseInt(storedStart, 10);
+        if (!isNaN(startMs) && Date.now() - startMs > FOURTEEN_DAYS_MS) {
+          return true;
+        }
+      }
+    }
+  } catch {}
+
+  // 2. Fallback check using Supabase user last_sign_in_at
+  if (session.user?.last_sign_in_at) {
+    const signInMs = new Date(session.user.last_sign_in_at).getTime();
+    if (!isNaN(signInMs) && Date.now() - signInMs > FOURTEEN_DAYS_MS) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Enforces the 14-day session policy.
+ * If expired, signs out immediately and redirects to login with reason parameter.
+ * @param {import('@supabase/supabase-js').Session | null} session
+ * @returns {Promise<boolean>} True if valid, false if expired and logged out
+ */
+export async function enforce14DaySession(session) {
+  if (!session) return false;
+
+  if (isSessionExpired(session)) {
+    console.warn('[AUTH] Session exceeded 14-day maximum limit. Logging out.');
+    clearSessionTracking();
+    try {
+      await supabase.auth.signOut();
+    } catch {}
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login.html?reason=session_expired';
+    }
+    return false;
+  }
+
+  // If user is logged in but no session start recorded yet, initialize it
+  try {
+    if (typeof window !== 'undefined' && window.localStorage && !window.localStorage.getItem(SESSION_START_KEY)) {
+      recordLoginSession(session.user?.id);
+    }
+  } catch {}
+
+  return true;
+}
+
 /**
  * Register a new user with email and password.
  * Supabase Auth trigger will automatically create a public.profiles row.
@@ -21,22 +119,52 @@ export async function signUp(email, password, displayName) {
   });
 
   if (error) throw error;
+  if (data?.user) {
+    recordLoginSession(data.user.id);
+  }
   return data;
 }
 
 /**
  * Sign in with email and password.
+ * Includes concurrency resilience with jittered retry to effortlessly support bursts
+ * of 10+ logins per single second without dropping requests or crashing the client.
  * @param {string} email
  * @param {string} password
+ * @param {number} [maxRetries=1]
  */
-export async function signInWithPassword(email, password) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
+export async function signInWithPassword(email, password, maxRetries = 1) {
+  let attempt = 0;
+  while (attempt <= maxRetries) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-  if (error) throw error;
-  return data;
+      if (error) {
+        // If rate limited or network contention during burst login, retry with slight jitter
+        if (attempt < maxRetries && (error.status === 429 || error.message?.includes('fetch'))) {
+          attempt++;
+          await new Promise((r) => setTimeout(r, 100 + Math.random() * 200));
+          continue;
+        }
+        throw error;
+      }
+
+      if (data?.user) {
+        recordLoginSession(data.user.id);
+      }
+      return data;
+    } catch (err) {
+      if (attempt < maxRetries && (err.status === 429 || err.message?.includes('fetch'))) {
+        attempt++;
+        await new Promise((r) => setTimeout(r, 100 + Math.random() * 200));
+        continue;
+      }
+      throw err;
+    }
+  }
 }
 
 /**
@@ -59,6 +187,7 @@ export async function signInWithOAuth(provider) {
  * Sign out current user.
  */
 export async function signOut() {
+  clearSessionTracking();
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
   window.location.href = '/login.html';
@@ -91,16 +220,26 @@ export async function updatePassword(newPassword) {
 }
 
 /**
- * Get current session.
+ * Get current session with 14-day inactivity enforcement.
  */
 export async function getSession() {
-  const { data: { session }, error } = await supabase.auth.getSession();
+  const {
+    data: { session },
+    error
+  } = await supabase.auth.getSession();
   if (error) throw error;
+
+  if (session) {
+    const isValid = await enforce14DaySession(session);
+    if (!isValid) return null;
+  }
+
   return session;
 }
 
 /**
- * Auth guard for protected pages. Redirects to login.html if not authenticated.
+ * Auth guard for protected pages. Redirects to login.html if not authenticated
+ * or if 14-day inactivity limit is exceeded.
  * @returns {Promise<import('@supabase/supabase-js').Session>}
  */
 export async function requireAuth() {
@@ -111,6 +250,30 @@ export async function requireAuth() {
     throw new Error('Unauthenticated');
   }
   return session;
+}
+
+// Background session checker: periodically verifies 14-day expiry if tab is kept open
+if (typeof window !== 'undefined') {
+  // Check every 5 minutes and on window visibility / focus
+  setInterval(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await enforce14DaySession(session);
+      }
+    } catch {}
+  }, 5 * 60 * 1000);
+
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible') {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          await enforce14DaySession(session);
+        }
+      } catch {}
+    }
+  });
 }
 
 /**

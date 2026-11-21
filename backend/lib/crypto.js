@@ -75,7 +75,13 @@ export function encryptApiKey(apiKey, userId) {
  * @param {number} keyVersion - Version of the key
  * @returns {string} Plaintext API key (decrypted in memory only)
  */
-export function decryptApiKey(ciphertext, ivBase64, authTagBase64, userId, keyVersion = CURRENT_KEY_VERSION) {
+export function decryptApiKey(
+  ciphertext,
+  ivBase64,
+  authTagBase64,
+  userId,
+  _keyVersion = CURRENT_KEY_VERSION
+) {
   const masterSecret = getMasterSecret();
   const iv = Buffer.from(ivBase64, 'base64');
   const authTag = Buffer.from(authTagBase64, 'base64');
@@ -91,3 +97,23 @@ export function decryptApiKey(ciphertext, ivBase64, authTagBase64, userId, keyVe
 
   return decrypted;
 }
+
+/**
+ * Computes a deterministic zero-knowledge cryptographic HMAC-SHA256 hash of an API key
+ * using the server's master secret as key.
+ *
+ * This allows the database to strictly enforce the "One Key, One User" invariant:
+ * - Prevents convergence (no two accounts can register or share the same API key)
+ * - Zero-knowledge: the hash cannot be reversed to plaintext by anyone (including admins)
+ *
+ * @param {string} apiKey - Raw API key
+ * @returns {string} Hex-encoded HMAC-SHA256 fingerprint
+ */
+export function hashApiKey(apiKey) {
+  if (!apiKey || typeof apiKey !== 'string') {
+    throw new Error('Invalid API key input for hashing.');
+  }
+  const masterSecret = getMasterSecret();
+  return crypto.createHmac('sha256', masterSecret).update(apiKey.trim()).digest('hex');
+}
+

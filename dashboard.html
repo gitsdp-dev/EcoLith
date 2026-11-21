@@ -1,280 +1,658 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — EcoLith</title>
-  <meta name="description" content="EcoLith food waste and circular resource recovery dashboard.">
-  <link rel="stylesheet" href="css/global.css">
-  <link rel="stylesheet" href="css/components.css">
-  <style>
-    .welcome-banner {
-      background: linear-gradient(135deg, var(--color-primary-surface) 0%, var(--color-surface) 100%);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-xl);
-      padding: var(--spacing-6);
-      margin-bottom: var(--spacing-6);
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-4);
-    }
-    @media (min-width: 640px) {
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — EcoLith</title>
+    <meta
+      name="description"
+      content="EcoLith food waste intelligence and circular resource recovery dashboard."
+    />
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
       .welcome-banner {
-        flex-direction: row;
+        background: linear-gradient(
+          135deg,
+          var(--color-primary-surface) 0%,
+          var(--color-surface) 100%
+        );
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-6);
+        margin-bottom: var(--spacing-6);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-4);
+      }
+      @media (min-width: 640px) {
+        .welcome-banner {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+      .key-alert-card {
+        background-color: var(--color-warning-surface);
+        border: 1px solid rgba(234, 179, 8, 0.4);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-4) var(--spacing-5);
+        margin-bottom: var(--spacing-6);
+        display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: var(--spacing-4);
       }
-    }
-    .action-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--spacing-4);
-      margin-bottom: var(--spacing-8);
-    }
-    @media (min-width: 640px) {
-      .action-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    @media (min-width: 1024px) {
-      .action-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-    .action-card {
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
-    .action-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-    .key-alert-card {
-      background-color: var(--color-warning-surface);
-      border: 1px solid rgba(234, 179, 8, 0.4);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-4) var(--spacing-5);
-      margin-bottom: var(--spacing-6);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-4);
-    }
-  </style>
-</head>
-<body>
-
-  <!-- App Header -->
-  <header class="app-header">
-    <div class="app-container header-container">
-      <a href="dashboard.html" class="brand-link">
-        <svg class="brand-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2v8"></path>
-          <path d="m4.93 10.93 1.41 1.41"></path>
-          <path d="M2 18h2"></path>
-          <path d="M20 18h2"></path>
-          <path d="m19.07 10.93-1.41 1.41"></path>
-          <path d="M22 22H2"></path>
-          <path d="m8 6 4-4 4 4"></path>
-          <path d="M16 18a4 4 0 0 0-8 0"></path>
-        </svg>
-        <span>EcoLith</span>
-      </a>
-
-      <nav class="desktop-nav" aria-label="Main Navigation">
-        <a href="dashboard.html" class="nav-link active">Dashboard</a>
-        <a href="scanner.html" class="nav-link">Scanner</a>
-        <a href="recovery.html" class="nav-link">Recovery</a>
-        <a href="history.html" class="nav-link">History</a>
-        <a href="keyvault.html" class="nav-link">Key Vault</a>
-      </nav>
-
-      <div class="header-actions">
-        <a href="profile.html" class="nav-link" aria-label="Profile">Profile</a>
-        <button type="button" id="btnSignOutTop" class="btn btn-outline btn-sm">Sign Out</button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <div class="app-container">
-      <!-- Welcome Header -->
-      <section class="welcome-banner">
-        <div>
-          <span class="badge badge-primary" style="margin-bottom: var(--spacing-2);">EcoLith Workspace</span>
-          <h1 id="welcomeGreeting">Welcome back</h1>
-          <p class="text-muted" style="margin-top: var(--spacing-1);">
-            Convert food residue into circular recovery opportunities.
-          </p>
-        </div>
-        <a href="scanner.html" class="btn btn-primary btn-lg">
-          <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-            <circle cx="12" cy="13" r="4"></circle>
+    </style>
+  </head>
+  <body>
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="app-container header-container">
+        <a href="dashboard.html" class="brand-link">
+          <svg
+            class="brand-logo-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 2v8"></path>
+            <path d="m4.93 10.93 1.41 1.41"></path>
+            <path d="M2 18h2"></path>
+            <path d="M20 18h2"></path>
+            <path d="m19.07 10.93-1.41 1.41"></path>
+            <path d="M22 22H2"></path>
+            <path d="m8 6 4-4 4 4"></path>
+            <path d="M16 18a4 4 0 0 0-8 0"></path>
           </svg>
-          New Waste Scan
+          <span>EcoLith</span>
         </a>
-      </section>
 
-      <!-- Key Vault Setup Reminder (Visible if no key detected) -->
-      <div id="keyNotice" class="key-alert-card" style="display: none;">
-        <div style="display: flex; align-items: center; gap: var(--spacing-3);">
-          <span style="font-size: 1.5rem;">🔑</span>
+        <nav class="desktop-nav" aria-label="Main Navigation">
+          <a href="dashboard.html" class="nav-link active">Dashboard</a>
+          <a href="scanner.html" class="nav-link">Scanner</a>
+          <a href="recovery.html" class="nav-link">Recovery</a>
+          <a href="history.html" class="nav-link">History</a>
+          <a href="keyvault.html" class="nav-link">Key Vault</a>
+          <a href="admin.html" id="adminNavLink" class="nav-link" style="display: none">Admin</a>
+        </nav>
+
+        <div class="header-actions">
+          <a href="profile.html" class="nav-link" aria-label="Profile">Profile</a>
+          <button type="button" id="btnSignOutTop" class="btn btn-outline btn-sm">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="app-container">
+        <!-- Welcome Header -->
+        <section class="welcome-banner">
           <div>
-            <strong style="font-size: var(--font-size-sm); color: var(--color-text-main);">Gemini API Key Required</strong>
-            <p class="text-xs text-muted" style="margin: 0;">
-              EcoLith is BYOK. Add your Google Gemini key in the Key Vault to unlock AI waste scanning.
+            <span class="badge badge-primary" style="margin-bottom: var(--spacing-2)"
+              >EcoLith Workspace</span
+            >
+            <h1 id="welcomeGreeting">Welcome back</h1>
+            <p class="text-muted" style="margin-top: var(--spacing-1)">
+              Deterministic food waste analytics and circular resource recovery tracking.
             </p>
+          </div>
+          <div style="display: flex; gap: var(--spacing-3); flex-wrap: wrap">
+            <a href="scanner.html" class="btn btn-primary">
+              <svg
+                style="width: 18px; height: 18px"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                ></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              New Scan
+            </a>
+            <a href="history.html" class="btn btn-outline"> View History </a>
+          </div>
+        </section>
+
+        <!-- Key Vault Setup Reminder (Visible if no key detected) -->
+        <div id="keyNotice" class="key-alert-card" style="display: none">
+          <div style="display: flex; align-items: center; gap: var(--spacing-3)">
+            <span style="font-size: 1.5rem">🔑</span>
+            <div>
+              <strong style="font-size: var(--font-size-sm); color: var(--color-text-main)"
+                >Gemini API Key Required</strong
+              >
+              <p class="text-xs text-muted" style="margin: 0">
+                EcoLith is BYOK. Add your Google Gemini key in the Key Vault to unlock AI waste
+                scanning.
+              </p>
+            </div>
+          </div>
+          <a href="keyvault.html" class="btn btn-primary btn-sm">Configure Key</a>
+        </div>
+
+        <div
+          id="dashboardErrorBanner"
+          class="alert alert-danger"
+          style="display: none; margin-bottom: var(--spacing-6)"
+        ></div>
+
+        <!-- Zero Data State -->
+        <div id="dashboardEmptyState" class="empty-dashboard-card" style="display: none">
+          <div style="font-size: 3rem; margin-bottom: var(--spacing-3)">🌱</div>
+          <h2>No Waste Records Yet</h2>
+          <p
+            class="text-muted"
+            style="max-width: 480px; margin: var(--spacing-2) auto var(--spacing-6)"
+          >
+            Scan your kitchen food scraps, leftovers, or coffee grounds to begin building your
+            deterministic circular recovery records.
+          </p>
+          <a href="scanner.html" class="btn btn-primary btn-lg">Scan Your First Food Scrap</a>
+        </div>
+
+        <!-- Dashboard Metrics Section (Visible when user has scans) -->
+        <div id="dashboardMetricsSection">
+          <!-- KPI Statistics Grid -->
+          <div class="dashboard-grid">
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-label">Total Waste Logged</span>
+                <span class="stat-icon">⚖️</span>
+              </div>
+              <div class="stat-value" id="valTotalWaste">0 kg</div>
+              <div class="stat-subtext">Cumulative recorded mass</div>
+            </div>
+
+            <div class="stat-card accent-secondary">
+              <div class="stat-header">
+                <span class="stat-label">Scans Count</span>
+                <span class="stat-icon">📷</span>
+              </div>
+              <div class="stat-value" id="valTotalScans">0</div>
+              <div class="stat-subtext">Total scan observations</div>
+            </div>
+
+            <div class="stat-card accent-warning">
+              <div class="stat-header">
+                <span class="stat-label">Edible Surplus</span>
+                <span class="stat-icon">🥪</span>
+              </div>
+              <div class="stat-value" id="valEdibleRedirect">0%</div>
+              <div class="stat-subtext">Edible & redistributable portion</div>
+            </div>
+
+            <div class="stat-card accent-success">
+              <div class="stat-header">
+                <span class="stat-label">Recovery Diversion</span>
+                <span class="stat-icon">♻️</span>
+              </div>
+              <div class="stat-value" id="valDiversionRate">0%</div>
+              <div class="stat-subtext">Organic waste diversion rate</div>
+            </div>
+          </div>
+
+          <!-- Environmental Impact Section (With Mandatory Estimated Badge) -->
+          <section class="impact-banner">
+            <div class="impact-header">
+              <h2 style="font-size: var(--font-size-lg); margin: 0; color: var(--color-primary)">
+                🌍 Circular Environmental Impact
+              </h2>
+              <span class="badge badge-warning" style="font-weight: 700; letter-spacing: 0.05em"
+                >ESTIMATED</span
+              >
+            </div>
+            <p class="text-sm text-muted" style="margin-bottom: var(--spacing-4)">
+              Estimated environmental savings achieved by diverting your recorded organic residues
+              from municipal landfills into circular pathways.
+            </p>
+
+            <div class="impact-grid">
+              <div class="impact-item">
+                <div class="impact-number" id="valImpactCo2">0 kg</div>
+                <div class="impact-title">Est. CO₂e Prevented</div>
+              </div>
+              <div class="impact-item">
+                <div class="impact-number" id="valImpactWater">0 L</div>
+                <div class="impact-title">Est. Embedded Water Saved</div>
+              </div>
+              <div class="impact-item">
+                <div class="impact-number" id="valImpactWaste">0 kg</div>
+                <div class="impact-title">Organic Waste Diverted</div>
+              </div>
+            </div>
+
+            <!-- Expandable Assumptions Panel (Mandatory Section 9 Rule 9) -->
+            <details class="assumptions-box">
+              <summary class="assumptions-summary">
+                <span>ℹ️ View Calculation Methodology & Assumptions</span>
+              </summary>
+              <div style="margin-top: var(--spacing-3); line-height: 1.6">
+                <p><strong>Impact Estimation Model Assumptions:</strong></p>
+                <ul style="padding-left: var(--spacing-4); margin: var(--spacing-2) 0">
+                  <li>
+                    <strong>GHG Avoidance:</strong> Calculated using EPA WARM & IPCC organic waste
+                    diversion benchmarks: diverting 1 kg of mixed food residue from landfill
+                    anaerobic methane generation prevents approximately
+                    <strong>1.9 kg CO₂e</strong> emissions.
+                  </li>
+                  <li>
+                    <strong>Water Footprint:</strong> Calculated based on FAO global agricultural
+                    benchmarks: average weighted embedded water intensity across fruit, vegetable,
+                    and bakery supply chains is estimated at approximately
+                    <strong>1,500 Liters per kg</strong>.
+                  </li>
+                  <li>
+                    <strong>Unit Normalization:</strong> Quantities logged as 'piece' assume a
+                    standard ~150g average weight; 'ml' is converted at 1.0 g/ml density.
+                  </li>
+                  <li>
+                    <strong>Transparency Disclaimer:</strong> These figures are deterministic
+                    mathematical projections derived from published environmental conversion factors
+                    and do not represent physical lab-measured metrics.
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </section>
+
+          <!-- Visual Analytics Charts Grid -->
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">📈 Waste Logging Timeline (kg)</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">🥧 Waste Classification</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card" style="margin-bottom: var(--spacing-8)">
+            <div class="chart-header">
+              <h3 class="chart-title">🔄 Circular Recovery Pathways Selected</h3>
+            </div>
+            <div class="chart-container" style="min-height: 200px">
+              <canvas id="recoveryMethodChart"></canvas>
+            </div>
           </div>
         </div>
-        <a href="keyvault.html" class="btn btn-primary btn-sm">Configure Key</a>
+
+        <!-- Personalized Circular Suggestions -->
+        <section style="margin-bottom: var(--spacing-10)">
+          <h2 style="font-size: var(--font-size-lg); margin-bottom: var(--spacing-4)">
+            💡 Personalized Circular Insights
+          </h2>
+          <div id="suggestionsContainer" class="suggestions-list"></div>
+        </section>
       </div>
+    </main>
 
-      <!-- Action Cards -->
-      <h2 style="font-size: var(--font-size-lg); margin-bottom: var(--spacing-4);">Quick Navigation</h2>
-      <div class="action-grid">
-        <a href="scanner.html" class="card action-card">
-          <div class="card-body">
-            <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-1); color: var(--color-primary);">
-              📷 Waste Scanner
-            </h3>
-            <p class="text-sm text-muted">
-              Capture or upload food scrap photos for AI classification and recovery suggestions.
-            </p>
+    <!-- Software Initialization Modal (First-Time API Key Entry) -->
+    <div id="softwareInitModal" class="modal-backdrop" style="display: none">
+      <div
+        class="modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="softwareInitTitle"
+        style="max-width: 520px"
+      >
+        <div
+          class="modal-header"
+          style="background: linear-gradient(135deg, var(--color-primary-surface), var(--color-surface))"
+        >
+          <div style="display: flex; align-items: center; gap: var(--spacing-2)">
+            <span style="font-size: 1.5rem">🔑</span>
+            <div>
+              <h2 id="softwareInitTitle" style="font-size: var(--font-size-base); margin: 0">
+                Initialize EcoLith Software
+              </h2>
+              <span class="text-xs text-muted">First-time setup • Google Gemini BYOK</span>
+            </div>
           </div>
-        </a>
+          <button
+            type="button"
+            id="btnCloseInitModal"
+            class="btn btn-outline btn-sm"
+            aria-label="Close"
+            style="min-height: 32px; padding: 0 var(--spacing-2)"
+          >
+            ✕
+          </button>
+        </div>
 
-        <a href="keyvault.html" class="card action-card">
-          <div class="card-body">
-            <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-1); color: var(--color-primary);">
-              🔒 Key Vault (BYOK)
-            </h3>
-            <p class="text-sm text-muted">
-              Manage your personal Gemini API key with AES-256-GCM encryption at rest.
-            </p>
-          </div>
-        </a>
+        <form id="softwareInitForm" novalidate>
+          <div class="modal-body">
+            <div id="initModalAlert" class="auth-alert" role="alert" style="display: none"></div>
 
-        <a href="recovery.html" class="card action-card">
-          <div class="card-body">
-            <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-1); color: var(--color-primary);">
-              ♻️ Circular Recovery
-            </h3>
-            <p class="text-sm text-muted">
-              Explore sustainable diversion pathways: composting, biogas, pectin recovery, and reuse.
+            <p class="text-sm" style="margin-bottom: var(--spacing-3); color: var(--color-text-main)">
+              Welcome to EcoLith! To initialize the software and activate AI visual food waste scanning, please connect your <strong>Google Gemini API Key</strong>.
             </p>
-          </div>
-        </a>
 
-        <a href="history.html" class="card action-card">
-          <div class="card-body">
-            <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-1); color: var(--color-primary);">
-              📊 Scan History
-            </h3>
-            <p class="text-sm text-muted">
-              Browse previous food waste records, measurements, and tracked outcomes.
-            </p>
-          </div>
-        </a>
+            <div
+              style="
+                background-color: var(--color-bg);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                padding: var(--spacing-3);
+                margin-bottom: var(--spacing-4);
+              "
+            >
+              <div
+                class="text-xs"
+                style="margin-bottom: var(--spacing-2); font-weight: var(--font-weight-medium); color: var(--color-text-main)"
+              >
+                ⚡ Free 30-Second Key Setup:
+              </div>
+              <ol
+                class="text-xs text-muted"
+                style="margin: 0; padding-left: var(--spacing-4); line-height: 1.6"
+              >
+                <li>
+                  Open
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style="color: var(--color-primary); font-weight: 600"
+                    >Google AI Studio</a
+                  >.
+                </li>
+                <li>Click <strong>"Create API key"</strong> and copy your key string.</li>
+                <li>Paste it below to securely initialize your software.</li>
+              </ol>
+            </div>
 
-        <a href="profile.html" class="card action-card">
-          <div class="card-body">
-            <h3 style="font-size: var(--font-size-base); margin-bottom: var(--spacing-1); color: var(--color-primary);">
-              👤 Profile & Security
-            </h3>
-            <p class="text-sm text-muted">
-              Update your display name, manage authentication, or change passwords.
-            </p>
+            <div class="form-group" style="margin-bottom: var(--spacing-3)">
+              <label for="initApiKeyInput" class="form-label" style="font-size: var(--font-size-xs)">
+                Google Gemini API Key
+              </label>
+              <div style="position: relative; display: flex; align-items: center">
+                <input
+                  type="password"
+                  id="initApiKeyInput"
+                  class="form-input"
+                  required
+                  placeholder="AIzaSy..."
+                  autocomplete="off"
+                  spellcheck="false"
+                  style="padding-right: 48px; font-family: monospace; font-size: var(--font-size-sm)"
+                />
+                <button
+                  type="button"
+                  id="btnToggleInitMask"
+                  class="btn btn-outline btn-sm"
+                  style="
+                    position: absolute;
+                    right: 4px;
+                    height: 32px;
+                    min-height: 32px;
+                    padding: 0 8px;
+                    border: none;
+                    background: transparent;
+                  "
+                  aria-label="Toggle Key Visibility"
+                >
+                  👁️
+                </button>
+              </div>
+              <span class="text-xs text-muted" style="margin-top: 4px; display: block">
+                🔒 Stored strictly in Supabase private vault (AES-256-GCM). Inaccessible even to admins.
+              </span>
+            </div>
+
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: var(--spacing-2);
+                background: var(--color-primary-surface);
+                padding: var(--spacing-2) var(--spacing-3);
+                border-radius: var(--radius-sm);
+                font-size: 11px;
+                color: var(--color-text-muted);
+              "
+            >
+              <div>🛡️ <strong>Zero-Knowledge:</strong> Admin cannot see keys</div>
+              <div>⚡ <strong>1 User, 1 Key:</strong> Strictly non-shared</div>
+            </div>
           </div>
-        </a>
+
+          <div
+            class="modal-footer"
+            style="display: flex; justify-content: space-between; align-items: center"
+          >
+            <a href="keyvault.html" class="text-xs" style="color: var(--color-text-muted)">
+              Open Key Vault
+            </a>
+            <div style="display: flex; gap: var(--spacing-2)">
+              <button type="button" id="btnRemindLater" class="btn btn-secondary btn-sm">
+                Skip For Now
+              </button>
+              <button type="submit" id="btnSubmitInitKey" class="btn btn-primary btn-sm">
+                <span id="initBtnText">Test & Initialize Software</span>
+                <span class="spinner sr-only" id="initKeySpinner" aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
-  </main>
 
-  <!-- Mobile Bottom Navigation Bar -->
-  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
-    <a href="dashboard.html" class="mobile-nav-item active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect width="7" height="9" x="3" y="3" rx="1"></rect>
-        <rect width="7" height="5" x="14" y="3" rx="1"></rect>
-        <rect width="7" height="9" x="14" y="12" rx="1"></rect>
-        <rect width="7" height="5" x="3" y="16" rx="1"></rect>
-      </svg>
-      <span>Home</span>
-    </a>
-    <a href="scanner.html" class="mobile-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-        <circle cx="12" cy="13" r="4"></circle>
-      </svg>
-      <span>Scan</span>
-    </a>
-    <a href="recovery.html" class="mobile-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
-      </svg>
-      <span>Recovery</span>
-    </a>
-    <a href="keyvault.html" class="mobile-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="7.5" cy="15.5" r="5.5"></circle>
-        <path d="m21 2-9.6 9.6"></path>
-        <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
-      </svg>
-      <span>Vault</span>
-    </a>
-    <a href="profile.html" class="mobile-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="8" r="5"></circle>
-        <path d="M20 21a8 8 0 1 0-16 0"></path>
-      </svg>
-      <span>Profile</span>
-    </a>
-  </nav>
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+      <a href="dashboard.html" class="mobile-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+          <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+          <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+          <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="scanner.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path
+            d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+          ></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <span>Scan</span>
+      </a>
+      <a href="recovery.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+        </svg>
+        <span>Recovery</span>
+      </a>
+      <a href="history.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <span>History</span>
+      </a>
+      <a href="keyvault.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="7.5" cy="15.5" r="5.5"></circle>
+          <path d="m21 2-9.6 9.6"></path>
+          <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+        </svg>
+        <span>Vault</span>
+      </a>
+      <a href="profile.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="8" r="5"></circle>
+          <path d="M20 21a8 8 0 1 0-16 0"></path>
+        </svg>
+        <span>Profile</span>
+      </a>
+    </nav>
 
-  <script type="module">
-    import { requireAuth, getUserProfile, signOut } from './js/auth.js';
-    import { CONFIG } from './js/config.js';
+    <script type="module">
+      import { requireAuth, getUserProfile, signOut } from './js/auth.js';
+      import { CONFIG } from './js/config.js';
+      import { initDashboard } from './js/dashboard.js';
 
-    const session = await requireAuth();
-    const profile = await getUserProfile(session.user.id);
+      const session = await requireAuth();
+      const profile = await getUserProfile(session.user.id);
 
-    const greeting = document.getElementById('welcomeGreeting');
-    if (greeting) {
-      const name = profile?.display_name || session.user.email.split('@')[0];
-      greeting.textContent = `Welcome back, ${name}`;
-    }
-
-    const btnSignOutTop = document.getElementById('btnSignOutTop');
-    if (btnSignOutTop) {
-      btnSignOutTop.addEventListener('click', () => signOut());
-    }
-
-    // Check Key status via backend API
-    try {
-      const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys/status`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-      if (res.ok) {
-        const keyData = await res.json();
-        if (!keyData.hasKey || keyData.status === 'invalid') {
-          const keyNotice = document.getElementById('keyNotice');
-          if (keyNotice) keyNotice.style.display = 'flex';
-        }
-      } else if (res.status === 404 || res.status === 401 || res.status === 409) {
-        const keyNotice = document.getElementById('keyNotice');
-        if (keyNotice) keyNotice.style.display = 'flex';
+      const greeting = document.getElementById('welcomeGreeting');
+      if (greeting) {
+        const name = profile?.display_name || session.user.email.split('@')[0];
+        greeting.textContent = `Welcome back, ${name}`;
       }
-    } catch {
-      // Backend may not be running yet in Phase 1; gracefully show reminder
-      const keyNotice = document.getElementById('keyNotice');
-      if (keyNotice) keyNotice.style.display = 'flex';
-    }
-  </script>
-</body>
+
+      // If user is admin, show Admin nav link
+      if (profile?.role === 'admin') {
+        const adminLink = document.getElementById('adminNavLink');
+        if (adminLink) adminLink.style.display = 'inline-block';
+      }
+
+      const btnSignOutTop = document.getElementById('btnSignOutTop');
+      if (btnSignOutTop) {
+        btnSignOutTop.addEventListener('click', () => signOut());
+      }
+
+      // Software Initialization Modal Elements
+      const softwareInitModal = document.getElementById('softwareInitModal');
+      const softwareInitForm = document.getElementById('softwareInitForm');
+      const initApiKeyInput = document.getElementById('initApiKeyInput');
+      const btnToggleInitMask = document.getElementById('btnToggleInitMask');
+      const btnCloseInitModal = document.getElementById('btnCloseInitModal');
+      const btnRemindLater = document.getElementById('btnRemindLater');
+      const btnSubmitInitKey = document.getElementById('btnSubmitInitKey');
+      const initBtnText = document.getElementById('initBtnText');
+      const initKeySpinner = document.getElementById('initKeySpinner');
+      const initModalAlert = document.getElementById('initModalAlert');
+
+      function showInitAlert(msg, type = 'error') {
+        initModalAlert.textContent = msg;
+        initModalAlert.className = `auth-alert auth-alert-${type}`;
+        initModalAlert.style.display = 'block';
+      }
+
+      function hideInitAlert() {
+        initModalAlert.textContent = '';
+        initModalAlert.style.display = 'none';
+      }
+
+      const closeInitModal = () => {
+        softwareInitModal.style.display = 'none';
+        initApiKeyInput.value = '';
+        hideInitAlert();
+      };
+
+      if (btnCloseInitModal) btnCloseInitModal.addEventListener('click', closeInitModal);
+      if (btnRemindLater) btnRemindLater.addEventListener('click', closeInitModal);
+
+      if (btnToggleInitMask) {
+        btnToggleInitMask.addEventListener('click', () => {
+          if (initApiKeyInput.type === 'password') {
+            initApiKeyInput.type = 'text';
+            btnToggleInitMask.textContent = '🔒';
+          } else {
+            initApiKeyInput.type = 'password';
+            btnToggleInitMask.textContent = '👁️';
+          }
+        });
+      }
+
+      if (softwareInitForm) {
+        softwareInitForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          hideInitAlert();
+
+          const rawKey = initApiKeyInput.value.trim();
+          if (!rawKey) {
+            showInitAlert('Please enter your Google Gemini API key.');
+            return;
+          }
+
+          btnSubmitInitKey.disabled = true;
+          initBtnText.textContent = 'Verifying with Google...';
+          initKeySpinner.classList.remove('sr-only');
+
+          try {
+            const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.access_token}`
+              },
+              body: JSON.stringify({ apiKey: rawKey })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.message || 'Key validation failed.');
+            }
+
+            showInitAlert('🎉 Software Initialized! EcoLith AI scanning is now fully active.', 'success');
+            const keyNotice = document.getElementById('keyNotice');
+            if (keyNotice) keyNotice.style.display = 'none';
+
+            setTimeout(() => {
+              closeInitModal();
+            }, 1200);
+          } catch (err) {
+            showInitAlert(err.message || 'Failed to initialize software.');
+          } finally {
+            initApiKeyInput.value = '';
+            btnSubmitInitKey.disabled = false;
+            initBtnText.textContent = 'Test & Initialize Software';
+            initKeySpinner.classList.add('sr-only');
+          }
+        });
+      }
+
+      // Check Key status via backend API
+      try {
+        const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys/status`, {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`
+          }
+        });
+        if (res.ok) {
+          const keyData = await res.json();
+          if (!keyData.hasKey || keyData.status === 'invalid') {
+            const keyNotice = document.getElementById('keyNotice');
+            if (keyNotice) keyNotice.style.display = 'flex';
+
+            // Show Software Initialization Modal on first login
+            if (softwareInitModal) {
+              softwareInitModal.style.display = 'flex';
+            }
+          }
+        }
+      } catch {
+        // Backend key status fetch failed or server down
+      }
+
+      // Initialize deterministic metrics and charts
+      await initDashboard(session.user.id);
+    </script>
+  </body>
 </html>

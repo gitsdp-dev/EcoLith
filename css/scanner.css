@@ -1,0 +1,378 @@
+/**
+ * EcoLith Food Waste Scanner Styles
+ * Mobile-first (360px+), accessible, touch-friendly, dark/light compatible.
+ */
+
+.scanner-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* Viewfinder & Camera Frame */
+.scanner-viewport-card {
+  position: relative;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.viewfinder-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.camera-captured-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #0f172a;
+  display: block;
+}
+
+/* Viewfinder Target Overlays */
+.viewfinder-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewfinder-guide-box {
+  width: 75%;
+  height: 75%;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+  position: relative;
+}
+
+.guide-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--color-primary);
+  border-style: solid;
+}
+
+.corner-tl {
+  top: -2px;
+  left: -2px;
+  border-width: 4px 0 0 4px;
+  border-top-left-radius: var(--radius-md);
+}
+.corner-tr {
+  top: -2px;
+  right: -2px;
+  border-width: 4px 4px 0 0;
+  border-top-right-radius: var(--radius-md);
+}
+.corner-bl {
+  bottom: -2px;
+  left: -2px;
+  border-width: 0 0 4px 4px;
+  border-bottom-left-radius: var(--radius-md);
+}
+.corner-br {
+  bottom: -2px;
+  right: -2px;
+  border-width: 0 4px 4px 0;
+  border-bottom-right-radius: var(--radius-md);
+}
+
+/* Standby / Initial State within Viewfinder */
+.viewfinder-standby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-6);
+  color: #ffffff;
+  gap: var(--spacing-3);
+  z-index: 2;
+}
+
+.standby-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+/* Scanner Action Bar */
+.scanner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.scanner-actions .btn {
+  min-height: var(--min-touch-target);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  font-weight: var(--font-weight-semibold);
+}
+
+.btn-capture {
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
+  border-radius: var(--radius-full);
+  padding-inline: var(--spacing-6);
+}
+
+.btn-capture:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* Hidden elements */
+.is-hidden {
+  display: none !important;
+}
+
+/* Analyzing / Spinner Overlay */
+.analyzing-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  gap: var(--spacing-4);
+  padding: var(--spacing-6);
+  text-align: center;
+  z-index: 10;
+}
+
+.scanner-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Confirmation & Edit Card */
+.confirmation-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.confirmation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--spacing-4);
+}
+
+.confidence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-surface);
+  color: var(--color-primary);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.food-safety-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-warning-surface);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-xs);
+  color: #854d0e;
+  line-height: var(--line-height-normal);
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
+}
+
+@media (min-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.correction-indicator {
+  font-size: var(--font-size-xs);
+  color: var(--color-accent);
+  display: none;
+}
+
+.correction-indicator.visible {
+  display: inline-block;
+}
+
+/* Recovery Options Preview List */
+.recovery-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.recovery-preview-card {
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.recovery-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.recovery-method-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.recovery-reason {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-main);
+}
+
+.recovery-requirements {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Reuse Suggestions List */
+.reuse-pills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.reuse-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  background-color: var(--color-secondary-surface);
+  color: var(--color-secondary);
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-md);
+}
+
+/* Success Card */
+.success-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-8);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.success-icon-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--color-success-surface);
+  color: var(--color-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+/* Key Vault Locked Banner */
+.scanner-locked-box {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-8);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  max-width: 580px;
+  margin: var(--spacing-8) auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.locked-icon-large {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.byok-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-surface);
+  color: var(--color-primary);
+}

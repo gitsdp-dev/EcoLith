@@ -1,75 +1,459 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Food Waste Scanner — EcoLith</title>
-  <link rel="stylesheet" href="css/global.css">
-  <link rel="stylesheet" href="css/components.css">
-  <style>
-    .scanner-locked-box {
-      max-width: 540px;
-      margin: var(--spacing-10) auto;
-      text-align: center;
-      padding: var(--spacing-8);
-    }
-  </style>
-</head>
-<body>
-  <header class="app-header">
-    <div class="app-container header-container">
-      <a href="dashboard.html" class="brand-link">
-        <svg class="brand-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2v8"></path>
-          <path d="m4.93 10.93 1.41 1.41"></path>
-          <path d="M2 18h2"></path>
-          <path d="M20 18h2"></path>
-          <path d="m19.07 10.93-1.41 1.41"></path>
-          <path d="M22 22H2"></path>
-          <path d="m8 6 4-4 4 4"></path>
-          <path d="M16 18a4 4 0 0 0-8 0"></path>
-        </svg>
-        <span>EcoLith</span>
-      </a>
-      <nav class="desktop-nav">
-        <a href="dashboard.html" class="nav-link">Dashboard</a>
-        <a href="scanner.html" class="nav-link active">Scanner</a>
-        <a href="recovery.html" class="nav-link">Recovery</a>
-        <a href="history.html" class="nav-link">History</a>
-        <a href="keyvault.html" class="nav-link">Key Vault</a>
-      </nav>
-      <div class="header-actions">
-        <a href="profile.html" class="nav-link">Profile</a>
-      </div>
-    </div>
-  </header>
-
-  <main class="main-content">
-    <div class="app-container">
-      <div class="card scanner-locked-box">
-        <div style="font-size: 3rem; margin-bottom: var(--spacing-3);">🔒</div>
-        <h2>Scanner Locked: Gemini Key Required</h2>
-        <p class="text-sm text-muted" style="margin-block: var(--spacing-3);">
-          EcoLith requires your own Google Gemini API key to perform AI image classification on food waste. Please set up your key in the Key Vault.
-        </p>
-        <a href="keyvault.html" class="btn btn-primary btn-lg" style="margin-top: var(--spacing-2);">
-          Open Key Vault
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Food Waste Scanner — EcoLith</title>
+    <meta
+      name="description"
+      content="Scan and classify food waste to uncover circular resource recovery pathways."
+    />
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/scanner.css" />
+  </head>
+  <body>
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="app-container header-container">
+        <a href="dashboard.html" class="brand-link" aria-label="EcoLith Home">
+          <svg
+            class="brand-logo-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M12 2v8"></path>
+            <path d="m4.93 10.93 1.41 1.41"></path>
+            <path d="M2 18h2"></path>
+            <path d="M20 18h2"></path>
+            <path d="m19.07 10.93-1.41 1.41"></path>
+            <path d="M22 22H2"></path>
+            <path d="m8 6 4-4 4 4"></path>
+            <path d="M16 18a4 4 0 0 0-8 0"></path>
+          </svg>
+          <span>EcoLith</span>
+          <span class="brand-tagline-subtle">— Turning Waste Into Opportunity</span>
         </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="desktop-nav" aria-label="Main Navigation">
+          <a href="dashboard.html" class="nav-link">Dashboard</a>
+          <a href="scanner.html" class="nav-link active" aria-current="page">Scanner</a>
+          <a href="recovery.html" class="nav-link">Recovery</a>
+          <a href="history.html" class="nav-link">History</a>
+          <a href="keyvault.html" class="nav-link">Key Vault</a>
+        </nav>
+
+        <div class="header-actions">
+          <a href="profile.html" class="nav-link">Profile</a>
+        </div>
       </div>
-    </div>
-  </main>
+    </header>
 
-  <nav class="mobile-bottom-nav">
-    <a href="dashboard.html" class="mobile-nav-item">Home</a>
-    <a href="scanner.html" class="mobile-nav-item active">Scan</a>
-    <a href="recovery.html" class="mobile-nav-item">Recovery</a>
-    <a href="keyvault.html" class="mobile-nav-item">Vault</a>
-    <a href="profile.html" class="mobile-nav-item">Profile</a>
-  </nav>
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="app-container">
+        <!-- ===================================================================
+           1. Scanner Locked State (Displayed when no valid Gemini key is registered)
+           =================================================================== -->
+        <section
+          id="scanner-locked-state"
+          class="scanner-locked-box is-hidden"
+          aria-labelledby="locked-heading"
+        >
+          <div class="locked-icon-large" aria-hidden="true">🔒</div>
+          <span class="byok-badge">BYOK • Bring Your Own Key</span>
+          <h2 id="locked-heading" class="text-2xl font-bold">
+            Scanner Locked: Gemini Key Required
+          </h2>
+          <p class="text-sm text-muted">
+            EcoLith ships with <strong>no platform-owned AI key</strong> to protect your privacy and
+            guarantee direct ownership. All food waste scans run on your own Google Gemini API key.
+          </p>
+          <p class="text-xs text-muted" style="margin-top: -8px">
+            Your key is encrypted with AES-256-GCM at rest, never visible to administrators, and
+            decrypted only in memory during analysis.
+          </p>
+          <a
+            href="keyvault.html"
+            class="btn btn-primary btn-lg"
+            style="margin-top: var(--spacing-2)"
+          >
+            Configure Key in Key Vault
+          </a>
+        </section>
 
-  <script type="module">
-    import { requireAuth } from './js/auth.js';
-    await requireAuth();
-  </script>
-</body>
+        <!-- ===================================================================
+           2. Active Camera & Viewfinder Section
+           =================================================================== -->
+        <section
+          id="scanner-active-section"
+          class="scanner-view-container is-hidden"
+          aria-labelledby="scanner-heading"
+        >
+          <div style="text-align: center; margin-bottom: var(--spacing-2)">
+            <h1 id="scanner-heading" class="text-2xl font-bold">Food Waste AI Scanner</h1>
+            <p class="text-sm text-muted">
+              Point your camera at food residues, edible surplus, or trimmings.
+            </p>
+          </div>
+
+          <div class="scanner-viewport-card">
+            <!-- Viewfinder Window -->
+            <div class="viewfinder-wrapper">
+              <!-- Live Video Stream -->
+              <video
+                id="camera-video"
+                class="camera-video is-hidden"
+                autoplay
+                playsinline
+                muted
+              ></video>
+
+              <!-- Captured Image Frozen Frame Preview -->
+              <img
+                id="captured-image-preview"
+                class="camera-captured-image is-hidden"
+                alt="Captured food waste frame"
+              />
+
+              <!-- Standby View when Camera is off -->
+              <div id="viewfinder-standby" class="viewfinder-standby">
+                <div class="standby-icon" aria-hidden="true">📷</div>
+                <h3 class="font-semibold text-lg">Camera Ready</h3>
+                <p class="text-xs text-muted" style="color: #cbd5e1; max-width: 320px">
+                  Camera access is requested only when you tap Start Camera. You can also upload a
+                  photo directly.
+                </p>
+              </div>
+
+              <!-- Viewfinder Target Frame -->
+              <div id="viewfinder-overlay" class="viewfinder-overlay is-hidden">
+                <div class="viewfinder-guide-box">
+                  <span class="guide-corner corner-tl"></span>
+                  <span class="guide-corner corner-tr"></span>
+                  <span class="guide-corner corner-bl"></span>
+                  <span class="guide-corner corner-br"></span>
+                </div>
+              </div>
+
+              <!-- Analyzing Loading State Overlay -->
+              <div id="analyzing-overlay" class="analyzing-overlay is-hidden" aria-live="polite">
+                <div class="scanner-spinner" aria-hidden="true"></div>
+                <h3 class="font-bold text-lg">Analyzing Food Waste...</h3>
+                <p class="text-xs" style="color: #e2e8f0; max-width: 280px">
+                  Detecting food category, organic composition, and circular recovery pathways using
+                  your Gemini key.
+                </p>
+              </div>
+            </div>
+
+            <!-- Controls Bar -->
+            <div class="scanner-actions">
+              <!-- Standby Actions -->
+              <button type="button" id="btn-start-camera" class="btn btn-primary">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                  ></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <span>Start Camera</span>
+              </button>
+
+              <button type="button" id="btn-upload" class="btn btn-outline">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>Upload Photo</span>
+              </button>
+
+              <!-- Active Stream Actions -->
+              <button type="button" id="btn-capture" class="btn btn-capture is-hidden">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span>Capture Photo</span>
+              </button>
+
+              <button type="button" id="btn-cancel-camera" class="btn btn-secondary is-hidden">
+                <span>Cancel</span>
+              </button>
+
+              <!-- Post-Capture Retake -->
+              <button type="button" id="btn-retake" class="btn btn-outline is-hidden">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                <span>Retake Photo</span>
+              </button>
+
+              <!-- Hidden File Input for fallback upload -->
+              <input
+                type="file"
+                id="file-input"
+                accept="image/jpeg,image/png,image/webp"
+                class="is-hidden"
+                aria-label="Upload food image"
+              />
+            </div>
+          </div>
+
+          <div class="text-xs text-muted text-center" style="max-width: 480px; margin: 0 auto">
+            <span
+              >🔒 Privacy Note: Photos are processed in memory and discarded immediately. EcoLith
+              never stores your images on any server without explicit opt-in.</span
+            >
+          </div>
+        </section>
+
+        <!-- ===================================================================
+           3. Confirmation & Correction Screen
+           =================================================================== -->
+        <section
+          id="scanner-confirmation-section"
+          class="confirmation-card is-hidden"
+          aria-labelledby="confirm-heading"
+        >
+          <div class="confirmation-header">
+            <div>
+              <h2 id="confirm-heading" class="text-xl font-bold">
+                Review & Confirm Classification
+              </h2>
+              <p class="text-xs text-muted">
+                Verify the AI-suggested details or adjust them before saving.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="confidence-pill" class="confidence-badge">85% AI Confidence</span>
+              <span id="correction-indicator" class="correction-indicator">✏️ User modified</span>
+            </div>
+          </div>
+
+          <!-- Food Safety Disclaimer (Mandatory per AGENTS.md rule 8) -->
+          <div class="food-safety-banner" role="alert">
+            <span style="font-size: 1.25rem">⚠️</span>
+            <div>
+              <strong>Food Safety Notice:</strong> AI visual analysis is an estimate, not a
+              laboratory test or proof of microbiological safety. Contamination cannot be assessed
+              from photos alone. Never consume food based solely on AI suggestions.
+            </div>
+          </div>
+
+          <div
+            style="display: flex; gap: var(--spacing-4); align-items: flex-start; flex-wrap: wrap"
+          >
+            <img
+              id="scan-thumbnail"
+              src=""
+              alt="Thumbnail of scanned food"
+              style="
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                border-radius: var(--radius-lg);
+                border: 1px solid var(--color-border);
+              "
+            />
+            <div style="flex: 1; min-width: 220px">
+              <p class="text-xs text-muted">Scanned item preview</p>
+              <p class="text-xs text-muted" style="margin-top: var(--spacing-1)">
+                All suggested fields are fully editable. You can adjust the quantity,
+                classification, or recommended pathway below.
+              </p>
+            </div>
+          </div>
+
+          <!-- Error Notice -->
+          <div id="form-error-notice" class="form-error is-hidden" role="alert"></div>
+
+          <!-- Editable Form -->
+          <form id="confirm-scan-form" onsubmit="return false;" class="flex flex-col gap-4">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="edit-food-name" class="form-label">Food / Material Name *</label>
+                <input
+                  type="text"
+                  id="edit-food-name"
+                  class="form-input"
+                  required
+                  placeholder="e.g. Orange peel, Stale bread"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="edit-food-category" class="form-label">Food Category *</label>
+                <input
+                  type="text"
+                  id="edit-food-category"
+                  class="form-input"
+                  required
+                  placeholder="e.g. fruit, bakery, vegetable, dairy"
+                />
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="edit-waste-category" class="form-label"
+                  >Waste Stream Classification *</label
+                >
+                <select id="edit-waste-category" class="form-select">
+                  <option value="edible_reusable">Edible Leftovers / Reusable Trimmings</option>
+                  <option value="surplus_redistributable">Surplus Food (Redistributable)</option>
+                  <option value="unavoidable_organic" selected>Unavoidable Organic Residue</option>
+                  <option value="other_separate">Specialized Stream / Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="edit-quantity" class="form-label">Estimated Quantity *</label>
+                <div style="display: flex; gap: var(--spacing-2)">
+                  <input
+                    type="number"
+                    id="edit-quantity"
+                    class="form-input"
+                    step="any"
+                    min="0.01"
+                    value="1.0"
+                    required
+                    style="flex: 1"
+                  />
+                  <select id="edit-quantity-unit" class="form-select" style="width: 90px">
+                    <option value="kg" selected>kg</option>
+                    <option value="g">g</option>
+                    <option value="piece">piece</option>
+                    <option value="l">l</option>
+                    <option value="ml">ml</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Circular Recovery Pathways Preview -->
+            <div class="form-group" style="margin-top: var(--spacing-2)">
+              <label class="form-label">Identified Circular Recovery Pathways</label>
+              <div id="recovery-preview-list" class="recovery-preview-list">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Culinary / Home Reuse Suggestions -->
+            <div class="form-group">
+              <label class="form-label">Household & Kitchen Reuse Tips</label>
+              <div id="reuse-pills-list" class="reuse-pills-list">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div
+              style="
+                display: flex;
+                gap: var(--spacing-3);
+                flex-wrap: wrap;
+                margin-top: var(--spacing-4);
+              "
+            >
+              <button
+                type="button"
+                id="btn-confirm-scan"
+                class="btn btn-primary btn-lg"
+                style="flex: 1"
+              >
+                Confirm & Save Scan
+              </button>
+              <button type="button" id="btn-discard-scan" class="btn btn-secondary">Discard</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ===================================================================
+           4. Success Screen
+           =================================================================== -->
+        <section
+          id="scanner-success-section"
+          class="success-card is-hidden"
+          aria-labelledby="success-heading"
+        >
+          <div class="success-icon-badge" aria-hidden="true">✓</div>
+          <h2 id="success-heading" class="text-2xl font-bold">Scan Saved Successfully!</h2>
+          <p class="text-sm text-muted" style="max-width: 440px">
+            Recorded <strong id="success-quantity">1 kg</strong> of
+            <strong id="success-food-name">Item</strong> into your circular resource log. Circular
+            recovery pathways have been generated.
+          </p>
+
+          <div
+            style="
+              display: flex;
+              gap: var(--spacing-3);
+              flex-wrap: wrap;
+              justify-content: center;
+              margin-top: var(--spacing-2);
+            "
+          >
+            <a href="recovery.html" class="btn btn-primary"> View in Circular Recovery </a>
+            <button type="button" id="btn-scan-another" class="btn btn-outline">
+              Scan Another Item
+            </button>
+            <a href="dashboard.html" class="btn btn-secondary"> Go to Dashboard </a>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+      <a href="dashboard.html" class="mobile-nav-item">Home</a>
+      <a href="scanner.html" class="mobile-nav-item active" aria-current="page">Scan</a>
+      <a href="recovery.html" class="mobile-nav-item">Recovery</a>
+      <a href="keyvault.html" class="mobile-nav-item">Vault</a>
+      <a href="profile.html" class="mobile-nav-item">Profile</a>
+    </nav>
+
+    <!-- Initialize Auth & Scanner Script -->
+    <script type="module">
+      import { requireAuth } from './js/auth.js';
+      import { initScanner } from './js/scanner.js';
+
+      // Verify session before initializing
+      await requireAuth();
+      await initScanner();
+    </script>
+  </body>
 </html>

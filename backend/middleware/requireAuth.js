@@ -15,13 +15,30 @@ export async function requireAuth(req, res, next) {
     }
 
     const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError
+    } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
       return res.status(401).json({
         error: 'Unauthorized',
         message: 'Session has expired or is invalid.'
       });
+    }
+
+    // 14-Day Inactivity Session Enforcement:
+    // If a user logged in and was inactive for >= 14 days, expire session automatically
+    const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
+    if (user.last_sign_in_at) {
+      const lastLoginMs = new Date(user.last_sign_in_at).getTime();
+      if (!isNaN(lastLoginMs) && Date.now() - lastLoginMs > FOURTEEN_DAYS_MS) {
+        return res.status(401).json({
+          error: 'SessionExpired',
+          code: 'SESSION_EXPIRED',
+          message: 'Your 14-day login session has expired due to inactivity. Please sign in again.'
+        });
+      }
     }
 
     // Verify account status in public.profiles
@@ -54,7 +71,7 @@ export async function requireAuth(req, res, next) {
     };
 
     next();
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       error: 'InternalServerError',
       message: 'Authentication check failed.'

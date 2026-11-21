@@ -6,21 +6,72 @@ import { supabaseAdmin } from './supabaseAdmin.js';
  */
 
 /**
+ * Checks whether an API key hash is already registered to another user (anti-convergence check).
+ * Enforces "One Key, One User".
+ * @param {string} userId
+ * @param {string} keyHash
+ * @returns {Promise<boolean>} True if another user already has this key
+ */
+export async function isKeyClaimedByOther(userId, keyHash) {
+  try {
+    const { data, error } = await supabaseAdmin.rpc('vault_check_key_hash_exists', {
+      p_hash: keyHash,
+      p_user: userId
+    });
+
+    if (error) {
+      // If RPC is not created yet, fallback check via table query
+      const { data: existing } = await supabaseAdmin
+        .from('user_api_keys')
+        .select('user_id')
+        .eq('key_hash', keyHash)
+        .neq('user_id', userId)
+        .limit(1);
+
+      return Boolean(existing && existing.length > 0);
+    }
+
+    return Boolean(data);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Stores or updates an encrypted key in the vault.
  * @param {string} userId
  * @param {{ ciphertext: string, iv: string, authTag: string, keyVersion: number, keyLast4: string }} encrypted
+ * @param {string} [keyHash] - HMAC-SHA256 fingerprint for one-key-one-user uniqueness
  */
-export async function putKey(userId, encrypted) {
-  const { error } = await supabaseAdmin.rpc('vault_put_key', {
+export async function putKey(userId, encrypted, keyHash = null) {
+  const rpcParams = {
     p_user: userId,
     p_ct: encrypted.ciphertext,
     p_iv: encrypted.iv,
     p_tag: encrypted.authTag,
     p_ver: encrypted.keyVersion,
     p_last4: encrypted.keyLast4
-  });
+  };
+
+  if (keyHash) {
+    rpcParams.p_hash = keyHash;
+  }
+
+  const { error } = await supabaseAdmin.rpc('vault_put_key', rpcParams);
 
   if (error) {
+    if (error.message && error.message.includes('KEY_ALREADY_REGISTERED')) {
+      const err = new Error('This API key is already registered to another account.');
+      err.code = 'KeyAlreadyClaimed';
+      throw err;
+    }
+    // Fallback if rpc without p_hash is used in older schema
+    if (error.message && error.message.includes('p_hash')) {
+      delete rpcParams.p_hash;
+      const { error: retryErr } = await supabaseAdmin.rpc('vault_put_key', rpcParams);
+      if (retryErr) throw new Error(`Failed to store key in vault: ${retryErr.message}`);
+      return;
+    }
     throw new Error(`Failed to store key in vault: ${error.message}`);
   }
 }

@@ -70,10 +70,12 @@ function renderProfile() {
   }
 
   badgeRole.textContent = currentProfile.role === 'admin' ? 'Administrator' : 'User';
-  badgeRole.className = currentProfile.role === 'admin' ? 'badge badge-warning' : 'badge badge-primary';
+  badgeRole.className =
+    currentProfile.role === 'admin' ? 'badge badge-warning' : 'badge badge-primary';
 
   badgeStatus.textContent = currentProfile.status === 'suspended' ? 'Suspended' : 'Active';
-  badgeStatus.className = currentProfile.status === 'suspended' ? 'badge badge-danger' : 'badge badge-success';
+  badgeStatus.className =
+    currentProfile.status === 'suspended' ? 'badge badge-danger' : 'badge badge-success';
 
   if (currentProfile.created_at) {
     const joined = new Date(currentProfile.created_at).toLocaleDateString(undefined, {

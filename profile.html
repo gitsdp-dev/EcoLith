@@ -1,254 +1,344 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Profile — EcoLith</title>
-  <meta name="description" content="Manage your EcoLith profile and account settings.">
-  <link rel="stylesheet" href="css/global.css">
-  <link rel="stylesheet" href="css/components.css">
-  <style>
-    .profile-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--spacing-6);
-      margin-top: var(--spacing-4);
-    }
-    @media (min-width: 840px) {
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Profile — EcoLith</title>
+    <meta name="description" content="Manage your EcoLith profile and account settings." />
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <style>
       .profile-grid {
-        grid-template-columns: 320px 1fr;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-6);
+        margin-top: var(--spacing-4);
       }
-    }
-    .profile-card-user {
-      text-align: center;
-      padding: var(--spacing-6);
-    }
-    .avatar-wrapper {
-      width: 88px;
-      height: 88px;
-      border-radius: var(--radius-full);
-      margin-inline: auto;
-      margin-bottom: var(--spacing-4);
-      background-color: var(--color-primary-surface);
-      border: 2px solid var(--color-primary);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .avatar-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .avatar-placeholder {
-      font-size: var(--font-size-2xl);
-      font-weight: var(--font-weight-bold);
-      color: var(--color-primary);
-    }
-    .profile-name {
-      font-size: var(--font-size-xl);
-      margin-bottom: var(--spacing-1);
-    }
-    .profile-email {
-      color: var(--color-text-muted);
-      font-size: var(--font-size-sm);
-      margin-bottom: var(--spacing-3);
-    }
-    .keyvault-banner-card {
-      border: 1px dashed var(--color-primary);
-      background-color: var(--color-primary-surface);
-    }
-  </style>
-</head>
-<body>
-
-  <!-- App Header -->
-  <header class="app-header">
-    <div class="app-container header-container">
-      <a href="dashboard.html" class="brand-link">
-        <svg class="brand-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2v8"></path>
-          <path d="m4.93 10.93 1.41 1.41"></path>
-          <path d="M2 18h2"></path>
-          <path d="M20 18h2"></path>
-          <path d="m19.07 10.93-1.41 1.41"></path>
-          <path d="M22 22H2"></path>
-          <path d="m8 6 4-4 4 4"></path>
-          <path d="M16 18a4 4 0 0 0-8 0"></path>
-        </svg>
-        <span>EcoLith</span>
-      </a>
-
-      <nav class="desktop-nav" aria-label="Main Navigation">
-        <a href="dashboard.html" class="nav-link">Dashboard</a>
-        <a href="scanner.html" class="nav-link">Scanner</a>
-        <a href="recovery.html" class="nav-link">Recovery</a>
-        <a href="history.html" class="nav-link">History</a>
-        <a href="keyvault.html" class="nav-link">Key Vault</a>
-      </nav>
-
-      <div class="header-actions">
-        <a href="profile.html" class="nav-link active" aria-label="Profile">
-          <span>Profile</span>
+      @media (min-width: 840px) {
+        .profile-grid {
+          grid-template-columns: 320px 1fr;
+        }
+      }
+      .profile-card-user {
+        text-align: center;
+        padding: var(--spacing-6);
+      }
+      .avatar-wrapper {
+        width: 88px;
+        height: 88px;
+        border-radius: var(--radius-full);
+        margin-inline: auto;
+        margin-bottom: var(--spacing-4);
+        background-color: var(--color-primary-surface);
+        border: 2px solid var(--color-primary);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .avatar-placeholder {
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-primary);
+      }
+      .profile-name {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-1);
+      }
+      .profile-email {
+        color: var(--color-text-muted);
+        font-size: var(--font-size-sm);
+        margin-bottom: var(--spacing-3);
+      }
+      .keyvault-banner-card {
+        border: 1px dashed var(--color-primary);
+        background-color: var(--color-primary-surface);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="app-container header-container">
+        <a href="dashboard.html" class="brand-link">
+          <svg
+            class="brand-logo-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 2v8"></path>
+            <path d="m4.93 10.93 1.41 1.41"></path>
+            <path d="M2 18h2"></path>
+            <path d="M20 18h2"></path>
+            <path d="m19.07 10.93-1.41 1.41"></path>
+            <path d="M22 22H2"></path>
+            <path d="m8 6 4-4 4 4"></path>
+            <path d="M16 18a4 4 0 0 0-8 0"></path>
+          </svg>
+          <span>EcoLith</span>
         </a>
-        <button type="button" id="btnSignOutTop" class="btn btn-outline btn-sm">Sign Out</button>
+
+        <nav class="desktop-nav" aria-label="Main Navigation">
+          <a href="dashboard.html" class="nav-link">Dashboard</a>
+          <a href="scanner.html" class="nav-link">Scanner</a>
+          <a href="recovery.html" class="nav-link">Recovery</a>
+          <a href="history.html" class="nav-link">History</a>
+          <a href="keyvault.html" class="nav-link">Key Vault</a>
+        </nav>
+
+        <div class="header-actions">
+          <a href="profile.html" class="nav-link active" aria-label="Profile">
+            <span>Profile</span>
+          </a>
+          <button type="button" id="btnSignOutTop" class="btn btn-outline btn-sm">Sign Out</button>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Main Content -->
-  <main class="main-content">
-    <div class="app-container">
-      <div style="margin-bottom: var(--spacing-6);">
-        <h1>Account & Profile</h1>
-        <p class="text-muted">Manage your personal settings, display information, and security.</p>
-      </div>
-
-      <div id="globalAlert" class="auth-alert" role="alert" style="margin-bottom: var(--spacing-6);"></div>
-
-      <div class="profile-grid">
-        <!-- Sidebar Summary -->
-        <div>
-          <div class="card profile-card-user">
-            <div class="avatar-wrapper" id="userAvatarContainer">
-              <span class="avatar-placeholder" id="avatarInitial">U</span>
-            </div>
-            <h2 class="profile-name" id="displayProfileName">Loading...</h2>
-            <p class="profile-email" id="displayProfileEmail">...</p>
-            <div style="display: flex; justify-content: center; gap: var(--spacing-2); margin-bottom: var(--spacing-4);">
-              <span class="badge badge-primary" id="badgeRole">User</span>
-              <span class="badge badge-success" id="badgeStatus">Active</span>
-            </div>
-            <p class="text-xs text-muted" id="displayJoinedDate">Joined: ...</p>
-          </div>
-
-          <!-- Key Vault Promo Card -->
-          <div class="card keyvault-banner-card" style="margin-top: var(--spacing-4); padding: var(--spacing-4);">
-            <h3 style="font-size: var(--font-size-base); color: var(--color-primary); margin-bottom: var(--spacing-2);">
-              🔑 BYOK Key Vault
-            </h3>
-            <p class="text-xs text-muted" style="margin-bottom: var(--spacing-3);">
-              EcoLith requires your own Google Gemini API key to run scans. Manage or replace your encrypted key in the Key Vault.
-            </p>
-            <a href="keyvault.html" class="btn btn-primary btn-block btn-sm">Open Key Vault</a>
-          </div>
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="app-container">
+        <div style="margin-bottom: var(--spacing-6)">
+          <h1>Account & Profile</h1>
+          <p class="text-muted">
+            Manage your personal settings, display information, and security.
+          </p>
         </div>
 
-        <!-- Settings Forms -->
-        <div style="display: flex; flex-direction: column; gap: var(--spacing-6);">
-          <!-- Edit Display Name -->
-          <div class="card">
-            <div class="card-header">
-              <h3>Profile Information</h3>
+        <div
+          id="globalAlert"
+          class="auth-alert"
+          role="alert"
+          style="margin-bottom: var(--spacing-6)"
+        ></div>
+
+        <div class="profile-grid">
+          <!-- Sidebar Summary -->
+          <div>
+            <div class="card profile-card-user">
+              <div class="avatar-wrapper" id="userAvatarContainer">
+                <span class="avatar-placeholder" id="avatarInitial">U</span>
+              </div>
+              <h2 class="profile-name" id="displayProfileName">Loading...</h2>
+              <p class="profile-email" id="displayProfileEmail">...</p>
+              <div
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: var(--spacing-2);
+                  margin-bottom: var(--spacing-4);
+                "
+              >
+                <span class="badge badge-primary" id="badgeRole">User</span>
+                <span class="badge badge-success" id="badgeStatus">Active</span>
+              </div>
+              <p class="text-xs text-muted" id="displayJoinedDate">Joined: ...</p>
             </div>
-            <div class="card-body">
-              <form id="profileForm">
-                <div class="form-group">
-                  <label for="inputEmail" class="form-label">Email Address (Read-only)</label>
-                  <input type="email" id="inputEmail" class="form-input" disabled>
-                  <span class="form-help">Managed by authentication provider.</span>
-                </div>
 
-                <div class="form-group">
-                  <label for="inputDisplayName" class="form-label">Display Name</label>
-                  <input type="text" id="inputDisplayName" class="form-input" required maxlength="100">
-                </div>
-
-                <button type="submit" id="btnSaveProfile" class="btn btn-primary">
-                  <span>Save Changes</span>
-                  <span class="spinner sr-only" id="profileSpinner" aria-hidden="true"></span>
-                </button>
-              </form>
-            </div>
-          </div>
-
-          <!-- Change Password -->
-          <div class="card">
-            <div class="card-header">
-              <h3>Security & Password</h3>
-            </div>
-            <div class="card-body">
-              <form id="passwordForm">
-                <div class="form-group">
-                  <label for="inputNewPassword" class="form-label">New Password</label>
-                  <input type="password" id="inputNewPassword" class="form-input" required minlength="6" autocomplete="new-password">
-                  <span class="form-help">Minimum 6 characters.</span>
-                </div>
-
-                <div class="form-group">
-                  <label for="inputConfirmNewPassword" class="form-label">Confirm New Password</label>
-                  <input type="password" id="inputConfirmNewPassword" class="form-input" required minlength="6" autocomplete="new-password">
-                </div>
-
-                <button type="submit" id="btnSavePassword" class="btn btn-secondary">
-                  <span>Update Password</span>
-                  <span class="spinner sr-only" id="pwdSpinner" aria-hidden="true"></span>
-                </button>
-              </form>
-            </div>
-          </div>
-
-          <!-- Sign Out Action -->
-          <div class="card">
-            <div class="card-header">
-              <h3 style="color: var(--color-danger);">Session & Sign Out</h3>
-            </div>
-            <div class="card-body">
-              <p class="text-sm text-muted" style="margin-bottom: var(--spacing-4);">
-                Signing out will clear your active browser session on this device.
+            <!-- Key Vault Promo Card -->
+            <div
+              class="card keyvault-banner-card"
+              style="margin-top: var(--spacing-4); padding: var(--spacing-4)"
+            >
+              <h3
+                style="
+                  font-size: var(--font-size-base);
+                  color: var(--color-primary);
+                  margin-bottom: var(--spacing-2);
+                "
+              >
+                🔑 BYOK Key Vault
+              </h3>
+              <p class="text-xs text-muted" style="margin-bottom: var(--spacing-3)">
+                EcoLith requires your own Google Gemini API key to run scans. Manage or replace your
+                encrypted key in the Key Vault.
               </p>
-              <button type="button" id="btnSignOutBottom" class="btn btn-danger">
-                Sign Out of EcoLith
-              </button>
+              <a href="keyvault.html" class="btn btn-primary btn-block btn-sm">Open Key Vault</a>
+            </div>
+          </div>
+
+          <!-- Settings Forms -->
+          <div style="display: flex; flex-direction: column; gap: var(--spacing-6)">
+            <!-- Edit Display Name -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Profile Information</h3>
+              </div>
+              <div class="card-body">
+                <form id="profileForm">
+                  <div class="form-group">
+                    <label for="inputEmail" class="form-label">Email Address (Read-only)</label>
+                    <input type="email" id="inputEmail" class="form-input" disabled />
+                    <span class="form-help">Managed by authentication provider.</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="inputDisplayName" class="form-label">Display Name</label>
+                    <input
+                      type="text"
+                      id="inputDisplayName"
+                      class="form-input"
+                      required
+                      maxlength="100"
+                    />
+                  </div>
+
+                  <button type="submit" id="btnSaveProfile" class="btn btn-primary">
+                    <span>Save Changes</span>
+                    <span class="spinner sr-only" id="profileSpinner" aria-hidden="true"></span>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Change Password -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Security & Password</h3>
+              </div>
+              <div class="card-body">
+                <form id="passwordForm">
+                  <div class="form-group">
+                    <label for="inputNewPassword" class="form-label">New Password</label>
+                    <input
+                      type="password"
+                      id="inputNewPassword"
+                      class="form-input"
+                      required
+                      minlength="6"
+                      autocomplete="new-password"
+                    />
+                    <span class="form-help">Minimum 6 characters.</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="inputConfirmNewPassword" class="form-label"
+                      >Confirm New Password</label
+                    >
+                    <input
+                      type="password"
+                      id="inputConfirmNewPassword"
+                      class="form-input"
+                      required
+                      minlength="6"
+                      autocomplete="new-password"
+                    />
+                  </div>
+
+                  <button type="submit" id="btnSavePassword" class="btn btn-secondary">
+                    <span>Update Password</span>
+                    <span class="spinner sr-only" id="pwdSpinner" aria-hidden="true"></span>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Sign Out Action -->
+            <div class="card">
+              <div class="card-header">
+                <h3 style="color: var(--color-danger)">Session & Sign Out</h3>
+              </div>
+              <div class="card-body">
+                <p class="text-sm text-muted" style="margin-bottom: var(--spacing-4)">
+                  Signing out will clear your active browser session on this device.
+                </p>
+                <button type="button" id="btnSignOutBottom" class="btn btn-danger">
+                  Sign Out of EcoLith
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </main>
+    </main>
 
-  <!-- Mobile Bottom Navigation Bar -->
-  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
-    <a href="dashboard.html" class="mobile-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect width="7" height="9" x="3" y="3" rx="1"></rect>
-        <rect width="7" height="5" x="14" y="3" rx="1"></rect>
-        <rect width="7" height="9" x="14" y="12" rx="1"></rect>
-        <rect width="7" height="5" x="3" y="16" rx="1"></rect>
-      </svg>
-      <span>Home</span>
-    </a>
-    <a href="scanner.html" class="mobile-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-        <circle cx="12" cy="13" r="4"></circle>
-      </svg>
-      <span>Scan</span>
-    </a>
-    <a href="recovery.html" class="mobile-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
-      </svg>
-      <span>Recovery</span>
-    </a>
-    <a href="keyvault.html" class="mobile-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="7.5" cy="15.5" r="5.5"></circle>
-        <path d="m21 2-9.6 9.6"></path>
-        <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
-      </svg>
-      <span>Vault</span>
-    </a>
-    <a href="profile.html" class="mobile-nav-item active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="8" r="5"></circle>
-        <path d="M20 21a8 8 0 1 0-16 0"></path>
-      </svg>
-      <span>Profile</span>
-    </a>
-  </nav>
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+      <a href="dashboard.html" class="mobile-nav-item">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+          <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+          <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+          <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="scanner.html" class="mobile-nav-item">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+          ></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <span>Scan</span>
+      </a>
+      <a href="recovery.html" class="mobile-nav-item">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+        </svg>
+        <span>Recovery</span>
+      </a>
+      <a href="keyvault.html" class="mobile-nav-item">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="7.5" cy="15.5" r="5.5"></circle>
+          <path d="m21 2-9.6 9.6"></path>
+          <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+        </svg>
+        <span>Vault</span>
+      </a>
+      <a href="profile.html" class="mobile-nav-item active">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="8" r="5"></circle>
+          <path d="M20 21a8 8 0 1 0-16 0"></path>
+        </svg>
+        <span>Profile</span>
+      </a>
+    </nav>
 
-  <script type="module" src="js/profile.js"></script>
-</body>
+    <script type="module" src="js/profile.js"></script>
+  </body>
 </html>

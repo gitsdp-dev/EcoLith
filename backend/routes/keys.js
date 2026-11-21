@@ -1,13 +1,17 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { encryptApiKey, decryptApiKey } from '../lib/crypto.js';
+import { encryptApiKey, decryptApiKey, hashApiKey } from '../lib/crypto.js';
 import * as vault from '../lib/vault.js';
 import { keyRateLimiter } from '../middleware/rateLimit.js';
 
 export const keysRouter = Router();
 
 const putKeySchema = z.object({
-  apiKey: z.string().trim().min(20, 'API key must be at least 20 characters').max(200, 'API key is too long')
+  apiKey: z
+    .string()
+    .trim()
+    .min(20, 'API key must be at least 20 characters')
+    .max(200, 'API key is too long')
 });
 
 /**
@@ -32,7 +36,7 @@ async function testGeminiKey(apiKey) {
     const errData = await res.json().catch(() => ({}));
     const message = errData.error?.message || `Google returned status ${res.status}`;
     return { valid: false, error: message };
-  } catch (networkErr) {
+  } catch {
     return { valid: false, error: 'Network failure communicating with Google Gemini API.' };
   }
 }
@@ -53,20 +57,32 @@ keysRouter.put('/', keyRateLimiter, async (req, res) => {
 
     const rawKey = parseResult.data.apiKey;
 
+    // Cryptographic anti-convergence check: One Key, One User
+    const keyHash = hashApiKey(rawKey);
+    const isClaimed = await vault.isKeyClaimedByOther(req.user.id, keyHash);
+    if (isClaimed) {
+      return res.status(409).json({
+        error: 'KeyAlreadyClaimed',
+        message:
+          'This Gemini API key is already associated with another EcoLith account. Each user must provide their own unique key (one key, one user).'
+      });
+    }
+
     // Validate key against Google Gemini
     const testResult = await testGeminiKey(rawKey);
     if (!testResult.valid) {
       return res.status(400).json({
         error: 'InvalidApiKey',
-        message: 'Google Gemini rejected this key. Please check your key in Google AI Studio and ensure Generative Language API is enabled.'
+        message:
+          'Google Gemini rejected this key. Please check your key in Google AI Studio and ensure Generative Language API is enabled.'
       });
     }
 
     // Encrypt key with AES-256-GCM bound to caller's UUID
     const encrypted = encryptApiKey(rawKey, req.user.id);
 
-    // Save to private vault via database security definer function
-    await vault.putKey(req.user.id, encrypted);
+    // Save to private vault via database security definer function (with keyHash)
+    await vault.putKey(req.user.id, encrypted, keyHash);
 
     // Return only non-sensitive metadata
     return res.status(200).json({
@@ -76,6 +92,13 @@ keysRouter.put('/', keyRateLimiter, async (req, res) => {
       validatedAt: new Date().toISOString()
     });
   } catch (err) {
+    if (err.code === 'KeyAlreadyClaimed' || (err.message && err.message.includes('KEY_ALREADY_REGISTERED'))) {
+      return res.status(409).json({
+        error: 'KeyAlreadyClaimed',
+        message:
+          'This Gemini API key is already associated with another EcoLith account. Each user must provide their own unique key (one key, one user).'
+      });
+    }
     return res.status(500).json({
       error: 'VaultError',
       message: 'Failed to securely store API key.'
@@ -92,7 +115,7 @@ keysRouter.get('/status', async (req, res) => {
   try {
     const status = await vault.getStatus(req.user.id);
     return res.status(200).json(status);
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       error: 'VaultError',
       message: 'Failed to retrieve key status.'
@@ -146,7 +169,7 @@ keysRouter.post('/revalidate', keyRateLimiter, async (req, res) => {
       validatedAt: new Date().toISOString(),
       error: testResult.valid ? null : testResult.error
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       error: 'VaultError',
       message: 'Failed to revalidate API key.'
@@ -165,7 +188,7 @@ keysRouter.delete('/', async (req, res) => {
       success: true,
       message: 'Your Gemini API key has been permanently deleted from the vault.'
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       error: 'VaultError',
       message: 'Failed to delete key.'

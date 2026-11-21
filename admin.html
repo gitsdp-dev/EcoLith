@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Operations — EcoLith</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="app-container header-container">
+        <a href="dashboard.html" class="brand-link">
+          <svg
+            class="brand-logo-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 2v8"></path>
+            <path d="m4.93 10.93 1.41 1.41"></path>
+            <path d="M2 18h2"></path>
+            <path d="M20 18h2"></path>
+            <path d="m19.07 10.93-1.41 1.41"></path>
+            <path d="M22 22H2"></path>
+            <path d="m8 6 4-4 4 4"></path>
+            <path d="M16 18a4 4 0 0 0-8 0"></path>
+          </svg>
+          <span>EcoLith</span>
+          <span class="admin-header-badge">Admin Panel</span>
+        </a>
+
+        <nav class="desktop-nav" aria-label="Main Navigation">
+          <a href="dashboard.html" class="nav-link">Dashboard</a>
+          <a href="scanner.html" class="nav-link">Scanner</a>
+          <a href="recovery.html" class="nav-link">Recovery</a>
+          <a href="history.html" class="nav-link">History</a>
+          <a href="keyvault.html" class="nav-link">Key Vault</a>
+          <a href="admin.html" class="nav-link active">Admin</a>
+        </nav>
+
+        <div class="header-actions">
+          <a href="profile.html" class="nav-link">Profile</a>
+          <button type="button" id="btnAdminSignOut" class="btn btn-outline btn-sm">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="app-container">
+        <!-- Access Denied Alert (For non-admin callers) -->
+        <div
+          id="adminAccessDenied"
+          class="card"
+          style="
+            display: none;
+            max-width: 500px;
+            margin: var(--spacing-12) auto;
+            text-align: center;
+            padding: var(--spacing-8);
+          "
+        >
+          <div style="font-size: 3rem; margin-bottom: var(--spacing-3)">🚫</div>
+          <h2>Administrator Access Required</h2>
+          <p class="text-sm text-muted" style="margin: var(--spacing-2) 0 var(--spacing-6)">
+            Your account does not possess active administrator privileges. This incident has been
+            logged.
+          </p>
+          <a href="dashboard.html" class="btn btn-primary">Return to Dashboard</a>
+        </div>
+
+        <!-- Admin App Content -->
+        <div id="adminAppContent">
+          <!-- Page Header -->
+          <div style="margin-bottom: var(--spacing-6)">
+            <h1 style="font-size: var(--font-size-2xl); margin: 0">
+              System Administration & Monitoring
+            </h1>
+            <p class="text-sm text-muted" style="margin-top: var(--spacing-1)">
+              Manage user accounts, observe circular waste metrics, and inspect append-only audit
+              records.
+            </p>
+          </div>
+
+          <!-- Navigation Tabs -->
+          <div class="admin-tabs" role="tablist">
+            <button type="button" class="admin-tab active" data-target="secOverview" role="tab">
+              📊 Platform Overview
+            </button>
+            <button type="button" class="admin-tab" data-target="secUsers" role="tab">
+              👥 User Management
+            </button>
+            <button type="button" class="admin-tab" data-target="secAudit" role="tab">
+              📜 Audit Log
+            </button>
+          </div>
+
+          <!-- Section 1: Platform Overview -->
+          <section id="secOverview" class="admin-section" role="tabpanel">
+            <div class="admin-kpi-grid">
+              <div class="card" style="padding: var(--spacing-4)">
+                <div class="text-xs text-muted" style="text-transform: uppercase; font-weight: 600">
+                  Total Users
+                </div>
+                <div
+                  id="kpiTotalUsers"
+                  style="
+                    font-size: var(--font-size-2xl);
+                    font-weight: 700;
+                    color: var(--color-text-main);
+                    margin-top: 4px;
+                  "
+                >
+                  0
+                </div>
+                <div id="kpiActiveUsers" class="text-xs text-muted" style="margin-top: 4px">
+                  0 active
+                </div>
+              </div>
+
+              <div class="card" style="padding: var(--spacing-4)">
+                <div class="text-xs text-muted" style="text-transform: uppercase; font-weight: 600">
+                  Total Scans
+                </div>
+                <div
+                  id="kpiTotalScans"
+                  style="
+                    font-size: var(--font-size-2xl);
+                    font-weight: 700;
+                    color: var(--color-primary);
+                    margin-top: 4px;
+                  "
+                >
+                  0
+                </div>
+                <div id="kpiTotalWaste" class="text-xs text-muted" style="margin-top: 4px">
+                  0 kg recorded
+                </div>
+              </div>
+
+              <div class="card" style="padding: var(--spacing-4)">
+                <div class="text-xs text-muted" style="text-transform: uppercase; font-weight: 600">
+                  BYOK Adoption
+                </div>
+                <div
+                  id="kpiByokAdoption"
+                  style="
+                    font-size: var(--font-size-2xl);
+                    font-weight: 700;
+                    color: var(--color-secondary);
+                    margin-top: 4px;
+                  "
+                >
+                  0%
+                </div>
+                <div class="text-xs text-muted" style="margin-top: 4px">
+                  Valid Gemini keys stored
+                </div>
+              </div>
+
+              <div class="card" style="padding: var(--spacing-4)">
+                <div class="text-xs text-muted" style="text-transform: uppercase; font-weight: 600">
+                  Completed Recoveries
+                </div>
+                <div
+                  id="kpiCompletedRecoveries"
+                  style="
+                    font-size: var(--font-size-2xl);
+                    font-weight: 700;
+                    color: var(--color-success);
+                    margin-top: 4px;
+                  "
+                >
+                  0
+                </div>
+                <div class="text-xs text-muted" style="margin-top: 4px">
+                  Verified circular actions
+                </div>
+              </div>
+            </div>
+
+            <!-- Mini Analytics Charts -->
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: var(--spacing-6);
+                margin-bottom: var(--spacing-8);
+              "
+            >
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4)">
+                <div class="card" style="padding: var(--spacing-4)">
+                  <h4 style="font-size: var(--font-size-sm); margin-bottom: var(--spacing-3)">
+                    Waste Stream Breakdown
+                  </h4>
+                  <div style="height: 220px; position: relative">
+                    <canvas id="adminCategoryChart"></canvas>
+                  </div>
+                </div>
+                <div class="card" style="padding: var(--spacing-4)">
+                  <h4 style="font-size: var(--font-size-sm); margin-bottom: var(--spacing-3)">
+                    Recovery Methods Distribution
+                  </h4>
+                  <div style="height: 220px; position: relative">
+                    <canvas id="adminMethodChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 2: User Management -->
+          <section id="secUsers" class="admin-section" role="tabpanel" style="display: none">
+            <div class="card" style="padding: var(--spacing-4); margin-bottom: var(--spacing-4)">
+              <div
+                style="
+                  display: flex;
+                  gap: var(--spacing-3);
+                  flex-wrap: wrap;
+                  align-items: center;
+                  justify-content: space-between;
+                "
+              >
+                <div style="display: flex; gap: var(--spacing-3); flex: 1; min-width: 280px">
+                  <input
+                    type="text"
+                    id="adminUserSearch"
+                    class="form-control"
+                    placeholder="Search by name or email..."
+                    aria-label="Search users"
+                  />
+                  <select id="adminUserStatusFilter" class="form-control" style="width: auto">
+                    <option value="all">All Statuses</option>
+                    <option value="active">Active Only</option>
+                    <option value="suspended">Suspended Only</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Account Status</th>
+                    <th>BYOK Key</th>
+                    <th>Scans</th>
+                    <th>Joined</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adminUsersTableBody">
+                  <tr>
+                    <td colspan="7" style="text-align: center; padding: 20px">Loading users...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Section 3: Audit Log -->
+          <section id="secAudit" class="admin-section" role="tabpanel" style="display: none">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: var(--spacing-4);
+              "
+            >
+              <p class="text-xs text-muted" style="margin: 0">
+                Showing append-only administrative mutation logs. Immutable and tamper-evident.
+              </p>
+              <button type="button" id="btnRefreshAudit" class="btn btn-outline btn-sm">
+                🔄 Refresh Trail
+              </button>
+            </div>
+
+            <div class="admin-table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>Admin Actor</th>
+                    <th>Target</th>
+                    <th>Metadata Change</th>
+                  </tr>
+                </thead>
+                <tbody id="adminAuditTableBody">
+                  <tr>
+                    <td colspan="5" style="text-align: center; padding: 20px">
+                      Loading audit trail...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+      <a href="dashboard.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+          <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+          <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+          <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="scanner.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path
+            d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+          ></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <span>Scan</span>
+      </a>
+      <a href="history.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <span>History</span>
+      </a>
+      <a href="admin.html" class="mobile-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+        <span>Admin</span>
+      </a>
+      <a href="profile.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="8" r="5"></circle>
+          <path d="M20 21a8 8 0 1 0-16 0"></path>
+        </svg>
+        <span>Profile</span>
+      </a>
+    </nav>
+
+    <script type="module">
+      import { requireAuth, getUserProfile, signOut } from './js/auth.js';
+      import { initAdmin } from './js/admin.js';
+
+      const session = await requireAuth();
+      const profile = await getUserProfile(session.user.id);
+
+      // Client-side guard: verify role
+      if (profile?.role !== 'admin') {
+        // Not admin: redirect to dashboard
+        window.location.replace('dashboard.html');
+      } else {
+        document.getElementById('btnAdminSignOut')?.addEventListener('click', () => signOut());
+        await initAdmin(session);
+      }
+    </script>
+  </body>
+</html>

@@ -1,56 +1,319 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Circular Recovery — EcoLith</title>
-  <link rel="stylesheet" href="css/global.css">
-  <link rel="stylesheet" href="css/components.css">
-</head>
-<body>
-  <header class="app-header">
-    <div class="app-container header-container">
-      <a href="dashboard.html" class="brand-link">
-        <svg class="brand-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v8"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m8 6 4-4 4 4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>
-        <span>EcoLith</span>
-      </a>
-      <nav class="desktop-nav">
-        <a href="dashboard.html" class="nav-link">Dashboard</a>
-        <a href="scanner.html" class="nav-link">Scanner</a>
-        <a href="recovery.html" class="nav-link active">Recovery</a>
-        <a href="history.html" class="nav-link">History</a>
-        <a href="keyvault.html" class="nav-link">Key Vault</a>
-      </nav>
-      <div class="header-actions">
-        <a href="profile.html" class="nav-link">Profile</a>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Circular Resource Recovery — EcoLith</title>
+    <meta
+      name="description"
+      content="Manage and track circular food waste recovery pathways, from composting to bio-refining."
+    />
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/recovery.css" />
+  </head>
+  <body>
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="app-container header-container">
+        <a href="dashboard.html" class="brand-link" aria-label="EcoLith Home">
+          <svg
+            class="brand-logo-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M12 2v8"></path>
+            <path d="m4.93 10.93 1.41 1.41"></path>
+            <path d="M2 18h2"></path>
+            <path d="M20 18h2"></path>
+            <path d="m19.07 10.93-1.41 1.41"></path>
+            <path d="M22 22H2"></path>
+            <path d="m8 6 4-4 4 4"></path>
+            <path d="M16 18a4 4 0 0 0-8 0"></path>
+          </svg>
+          <span>EcoLith</span>
+          <span class="brand-tagline-subtle">— Turning Waste Into Opportunity</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="desktop-nav" aria-label="Main Navigation">
+          <a href="dashboard.html" class="nav-link">Dashboard</a>
+          <a href="scanner.html" class="nav-link">Scanner</a>
+          <a href="recovery.html" class="nav-link active" aria-current="page">Recovery</a>
+          <a href="history.html" class="nav-link">History</a>
+          <a href="keyvault.html" class="nav-link">Key Vault</a>
+        </nav>
+
+        <div class="header-actions">
+          <a href="profile.html" class="nav-link">Profile</a>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="main-content">
-    <div class="app-container">
-      <div class="card" style="max-width: 600px; margin: var(--spacing-8) auto; text-align: center; padding: var(--spacing-8);">
-        <div style="font-size: 2.5rem; margin-bottom: var(--spacing-3);">♻️</div>
-        <h2>Circular Resource Recovery</h2>
-        <p class="text-sm text-muted" style="margin-block: var(--spacing-3);">
-          The recovery pathway management module will be active in Phase 3.
-        </p>
-        <a href="dashboard.html" class="btn btn-primary">Return to Dashboard</a>
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="app-container">
+        <!-- Page Header & Action -->
+        <div class="recovery-page-header">
+          <div>
+            <h1 class="text-2xl font-bold">Circular Resource Recovery</h1>
+            <p class="text-sm text-muted">
+              Track and divert organic waste into high-value circular pathways.
+            </p>
+          </div>
+          <div>
+            <a href="scanner.html" class="btn btn-primary">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                ></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              <span>Scan New Item</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Facility & Recovery Disclaimer (Mandatory per AGENTS.md) -->
+        <div
+          class="card"
+          style="
+            background-color: var(--color-surface);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-3) var(--spacing-4);
+            margin-bottom: var(--spacing-6);
+            font-size: var(--font-size-xs);
+            color: var(--color-text-muted);
+          "
+        >
+          <strong>Circular Process Notice:</strong> EcoLith converts food waste data into actionable
+          resource recovery opportunities. EcoLith does not physically collect or process waste.
+          Physical conversion feasibility depends on local municipal services, commercial processing
+          facilities, or home composting access.
+        </div>
+
+        <!-- Quick KPI Stats -->
+        <div class="recovery-stats-grid">
+          <div class="recovery-stat-card">
+            <div id="stat-total-records" class="recovery-stat-number">0</div>
+            <div class="recovery-stat-label">Total Opportunities</div>
+          </div>
+          <div class="recovery-stat-card">
+            <div
+              id="stat-suggested-records"
+              class="recovery-stat-number"
+              style="color: var(--color-text-muted)"
+            >
+              0
+            </div>
+            <div class="recovery-stat-label">Suggested</div>
+          </div>
+          <div class="recovery-stat-card">
+            <div
+              id="stat-planned-records"
+              class="recovery-stat-number"
+              style="color: var(--color-accent)"
+            >
+              0
+            </div>
+            <div class="recovery-stat-label">Planned Actions</div>
+          </div>
+          <div class="recovery-stat-card">
+            <div
+              id="stat-completed-records"
+              class="recovery-stat-number"
+              style="color: var(--color-success)"
+            >
+              0
+            </div>
+            <div class="recovery-stat-label">Completed Diversions</div>
+          </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="recovery-filter-nav" role="tablist" aria-label="Filter recovery opportunities">
+          <button
+            type="button"
+            class="filter-tab-btn active"
+            data-filter="all"
+            role="tab"
+            aria-selected="true"
+          >
+            All Opportunities
+          </button>
+          <button
+            type="button"
+            class="filter-tab-btn"
+            data-filter="suggested"
+            role="tab"
+            aria-selected="false"
+          >
+            Suggested
+          </button>
+          <button
+            type="button"
+            class="filter-tab-btn"
+            data-filter="planned"
+            role="tab"
+            aria-selected="false"
+          >
+            Planned
+          </button>
+          <button
+            type="button"
+            class="filter-tab-btn"
+            data-filter="completed"
+            role="tab"
+            aria-selected="false"
+          >
+            Completed
+          </button>
+          <button
+            type="button"
+            class="filter-tab-btn"
+            data-filter="dismissed"
+            role="tab"
+            aria-selected="false"
+          >
+            Dismissed
+          </button>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="recovery-loading-indicator" class="text-center py-8 text-muted" aria-live="polite">
+          <p>Loading circular recovery records...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="recovery-empty-state" class="recovery-empty-state is-hidden">
+          <div style="font-size: 3rem" aria-hidden="true">🌱</div>
+          <h3 class="font-bold text-lg">No Recovery Records Found</h3>
+          <p class="text-sm text-muted" style="max-width: 380px">
+            Scan food scraps or surplus items to generate circular recovery recommendations, or
+            switch filters to view other records.
+          </p>
+          <a href="scanner.html" class="btn btn-primary" style="margin-top: var(--spacing-2)">
+            Open AI Scanner
+          </a>
+        </div>
+
+        <!-- Recovery Cards Grid Container -->
+        <div id="recovery-records-container" class="recovery-cards-grid" aria-live="polite">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Circular Pathways Directory / Educational Showcase -->
+        <section class="pathways-directory-section" aria-labelledby="showcase-heading">
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: var(--spacing-2);
+              margin-bottom: var(--spacing-4);
+            "
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                flex-wrap: wrap;
+                gap: var(--spacing-2);
+              "
+            >
+              <div>
+                <h2 id="showcase-heading" class="text-xl font-bold">
+                  Explore Circular Recovery Pathways
+                </h2>
+                <p class="text-xs text-muted" style="margin-top: var(--spacing-1)">
+                  Comprehensive circular intelligence for all organic streams across Household,
+                  Community, and Industrial facilities.
+                </p>
+              </div>
+              <span class="badge badge-primary">22 Circular Pathways</span>
+            </div>
+
+            <!-- Search & Stream Filter Controls -->
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: var(--spacing-3);
+                margin-top: var(--spacing-2);
+              "
+            >
+              <input
+                type="text"
+                id="rules-search-input"
+                class="form-input"
+                placeholder="Search any organic material (e.g., citrus, coffee, bread, oil, bones, eggshell)..."
+                aria-label="Search recovery rules"
+              />
+              <div
+                id="rules-category-filters"
+                class="recovery-filter-nav"
+                style="margin-bottom: 0"
+                role="tablist"
+              >
+                <button type="button" class="filter-tab-btn active" data-group="all">
+                  All Materials
+                </button>
+                <button type="button" class="filter-tab-btn" data-group="fruit">
+                  Fruits & Citrus
+                </button>
+                <button type="button" class="filter-tab-btn" data-group="bakery">
+                  Bakery & Grains
+                </button>
+                <button type="button" class="filter-tab-btn" data-group="vegetable">
+                  Vegetables
+                </button>
+                <button type="button" class="filter-tab-btn" data-group="beverage">
+                  Coffee & Tea
+                </button>
+                <button type="button" class="filter-tab-btn" data-group="protein">
+                  Proteins & Meat
+                </button>
+                <button type="button" class="filter-tab-btn" data-group="dairy">Dairy</button>
+                <button type="button" class="filter-tab-btn" data-group="oils">Fats & Oils</button>
+                <button type="button" class="filter-tab-btn" data-group="seafood">
+                  Seafood & Shells
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="rules-showcase-container" class="rules-showcase-grid">
+            <!-- Rendered dynamically from recovery rules -->
+          </div>
+        </section>
       </div>
-    </div>
-  </main>
+    </main>
 
-  <nav class="mobile-bottom-nav">
-    <a href="dashboard.html" class="mobile-nav-item">Home</a>
-    <a href="scanner.html" class="mobile-nav-item">Scan</a>
-    <a href="recovery.html" class="mobile-nav-item active">Recovery</a>
-    <a href="keyvault.html" class="mobile-nav-item">Vault</a>
-    <a href="profile.html" class="mobile-nav-item">Profile</a>
-  </nav>
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+      <a href="dashboard.html" class="mobile-nav-item">Home</a>
+      <a href="scanner.html" class="mobile-nav-item">Scan</a>
+      <a href="recovery.html" class="mobile-nav-item active" aria-current="page">Recovery</a>
+      <a href="keyvault.html" class="mobile-nav-item">Vault</a>
+      <a href="profile.html" class="mobile-nav-item">Profile</a>
+    </nav>
 
-  <script type="module">
-    import { requireAuth } from './js/auth.js';
-    await requireAuth();
-  </script>
-</body>
+    <!-- Script Initialization -->
+    <script type="module">
+      import { requireAuth } from './js/auth.js';
+      import { initRecoveryPage } from './js/recovery-page.js';
+
+      await requireAuth();
+      await initRecoveryPage();
+    </script>
+  </body>
 </html>

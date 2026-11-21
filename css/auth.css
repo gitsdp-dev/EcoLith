@@ -64,7 +64,9 @@
   border: 1px solid var(--color-border);
   color: var(--color-text-main);
   font-weight: var(--font-weight-medium);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .btn-oauth:hover {

@@ -1,24 +1,254 @@
-# Environment variables
+# =============================================================================
+# EcoLith Production .gitignore
+# Strict security baseline: Zero secret leakage to public GitHub repositories
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. SECRETS & ENVIRONMENT CONFIGURATIONS (CRITICAL - HIGHEST PRIORITY)
+# -----------------------------------------------------------------------------
+# Matches any .env file anywhere in the workspace
 .env
+.env.*
+*.env
+.envrc
+.env.vault
 .env.local
-.env.*.local
-backend/.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+.env.production
+.env.backup
+*.env.bak
 
-# Dependencies
+# Preserve safe placeholder templates containing dummy values only
+!.env.example
+!backend/.env.example
+
+# -----------------------------------------------------------------------------
+# 2. PRIVATE KEYS, CERTIFICATES, CREDENTIALS & TOKENS
+# -----------------------------------------------------------------------------
+# Asymmetric private/public keys, certificates, keystores
+*.pem
+*.key
+*.pkcs12
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.keystore
+
+# SSH and GPG key material
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+id_ecdsa
+id_ecdsa.pub
+known_hosts
+*.gpg
+*.asc
+*.sig
+
+# Cloud service account keys & OAuth client secrets
+service-account*.json
+*-credentials.json
+client_secret*.json
+credentials.json
+google-credentials*.json
+firebase-adminsdk*.json
+
+# Session tokens, JWTs, and local auth state dumps
+*.token
+token.json
+auth.json
+*.jwt
+session*.json
+
+# Dedicated secret folders
+secrets/
+.secrets/
+vault/
+.vault/
+private_keys/
+
+# -----------------------------------------------------------------------------
+# 3. DATABASE DUMPS, BACKUPS & LOCAL STATE
+# -----------------------------------------------------------------------------
+# Binary databases, local SQLite files, Redis dumps
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+*.rdb
+*.dump
+*.bak
+*.backup
+
+# SQL dumps and backups (protects against leaking user data / credentials)
+dump*.sql
+backup*.sql
+backups/
+*.sql.gz
+*.sql.bak
+seed.local.sql
+
+# -----------------------------------------------------------------------------
+# 4. SUPABASE LOCAL DEVELOPMENT ARTIFACTS
+# -----------------------------------------------------------------------------
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+supabase/.env.local
+supabase/seed.local.sql
+supabase/.cache/
+
+# -----------------------------------------------------------------------------
+# 5. DEPENDENCIES & PACKAGE MANAGERS
+# -----------------------------------------------------------------------------
 node_modules/
+*/node_modules/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs
+# -----------------------------------------------------------------------------
+# 6. LOGS, CRASH DUMPS & PROCESS ARTIFACTS
+# -----------------------------------------------------------------------------
+*.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-logs/
-*.log
+pnpm-debug.log*
+lerna-debug.log*
+core.*
+vgcore.*
 
-# Build / Temp
+# -----------------------------------------------------------------------------
+# 7. HOSTING, SERVERLESS & CLOUD CLI ARTIFACTS
+# -----------------------------------------------------------------------------
+# Vercel project linking & build artifacts
+.vercel/
+
+# Netlify local configuration & build artifacts
+.netlify/
+
+# Serverless & Cloud provider configs
+.serverless/
+.aws/
+*.aws/
+.gcloud/
+.azure/
+
+# -----------------------------------------------------------------------------
+# 8. BUILD OUTPUTS, TRANSPILED CODE & CACHES
+# -----------------------------------------------------------------------------
 dist/
 build/
-.temp/
+out/
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.prettiercache
+*.tsbuildinfo
+
+# -----------------------------------------------------------------------------
+# 9. TESTING, COVERAGE & SECURITY SCAN AUDIT REPORTS
+# -----------------------------------------------------------------------------
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+.lighthouseci/
+
+# Security scanner outputs (may contain detected canary keys or endpoints)
+gitleaks-report*.json
+trufflehog-report*.json
+zap-report*.html
+zap-report*.json
+snyk-report*.json
+
+# -----------------------------------------------------------------------------
+# 10. USER DATA, UPLOADS, PHOTOS & TEMPORARY FILES
+# -----------------------------------------------------------------------------
+# User food waste photos, camera uploads, temporary buffers
+uploads/
+tmp/
+temp/
+*.tmp
+*.temp
+test-images/
+sample-photos/
+test-photos/
+
+# -----------------------------------------------------------------------------
+# 11. OPERATING SYSTEM & WORKSPACE ARTIFACTS
+# -----------------------------------------------------------------------------
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+
+# Editors & IDEs
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# -----------------------------------------------------------------------------
+# 12. COMPRESSED ARCHIVES & PACKAGES
+# -----------------------------------------------------------------------------
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.gz
+
+# -----------------------------------------------------------------------------
+# 13. AGENT & ASSISTANT CONTEXT (PRIVATE - DO NOT COMMIT TO GITHUB)
+# -----------------------------------------------------------------------------
+AGENTS.md
+GEMINI.md
+CLAUDE.md
+.agent/
+.agents/
+**/.agent/**
+**/.agents/**
+**/AGENTS.md
+**/GEMINI.md
+**/CLAUDE.md
+
+# =============================================================================
+# EXPLICIT REPOSITORY WHITELIST (PUBLIC ASSETS)
+#   - js/config.js              (Public Supabase URL & public anon key only)
+#   - .env.example              (Public environment template with dummy values)
+#   - backend/.env.example      (Backend environment template with dummy values)
+#   - package.json              (Dependencies manifest)
+#   - package-lock.json         (Auditable dependency lockfile)
+#   - supabase/migrations/*.sql (Reproducible DDL migrations)
+#   - README.md                 (Project documentation)
+# =============================================================================

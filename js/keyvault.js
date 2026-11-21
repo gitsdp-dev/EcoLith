@@ -50,9 +50,12 @@ function hideAlert() {
  */
 function resetInactivityTimer() {
   clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(() => {
-    wipeKeyInput();
-  }, 2 * 60 * 1000); // 2 minutes
+  inactivityTimer = setTimeout(
+    () => {
+      wipeKeyInput();
+    },
+    2 * 60 * 1000
+  ); // 2 minutes
 }
 
 function wipeKeyInput() {
@@ -68,7 +71,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 window.addEventListener('pagehide', wipeKeyInput);
-['mousemove', 'keydown', 'touchstart'].forEach(evt => {
+['mousemove', 'keydown', 'touchstart'].forEach((evt) => {
   window.addEventListener(evt, resetInactivityTimer, { passive: true });
 });
 
@@ -99,7 +102,7 @@ async function fetchKeyStatus() {
     const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys/status`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${currentSession.access_token}`
+        Authorization: `Bearer ${currentSession.access_token}`
       }
     });
 
@@ -188,7 +191,7 @@ async function submitKey(e) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${currentSession.access_token}`
+        Authorization: `Bearer ${currentSession.access_token}`
       },
       body: JSON.stringify({ apiKey: rawKey })
     });
@@ -200,7 +203,19 @@ async function submitKey(e) {
 
     currentKeyStatus = data;
     renderState();
-    showAlert('Gemini API key successfully verified and securely stored in vault.', 'success');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('init') === 'true') {
+      showAlert(
+        '🎉 Software Initialized Successfully! Your Google Gemini key is active. Redirecting to your dashboard in 2 seconds...',
+        'success'
+      );
+      setTimeout(() => {
+        window.location.href = '/dashboard.html';
+      }, 2000);
+    } else {
+      showAlert('Gemini API key successfully verified and securely stored in vault.', 'success');
+    }
   } catch (err) {
     showAlert(err.message || 'Failed to submit key.');
   } finally {
@@ -223,7 +238,7 @@ async function testKey() {
     const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys/revalidate`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${currentSession.access_token}`
+        Authorization: `Bearer ${currentSession.access_token}`
       }
     });
 
@@ -265,7 +280,7 @@ async function confirmDeleteKey() {
     const res = await fetch(`${CONFIG.API_BASE_URL}/api/keys`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${currentSession.access_token}`
+        Authorization: `Bearer ${currentSession.access_token}`
       }
     });
 
@@ -274,7 +289,10 @@ async function confirmDeleteKey() {
     currentKeyStatus = { hasKey: false, last4: null, status: null, validatedAt: null };
     closeDeleteModal();
     renderState();
-    showAlert('Your key has been deleted from the vault. AI scanning is now locked until a new key is added.', 'info');
+    showAlert(
+      'Your key has been deleted from the vault. AI scanning is now locked until a new key is added.',
+      'info'
+    );
   } catch (err) {
     showAlert(err.message || 'Failed to remove key.');
   } finally {
@@ -297,6 +315,13 @@ async function init() {
   try {
     currentSession = await requireAuth();
     resetInactivityTimer();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const initModeBanner = document.getElementById('initModeBanner');
+    if (urlParams.get('init') === 'true' && initModeBanner) {
+      initModeBanner.style.display = 'block';
+    }
+
     await fetchKeyStatus();
   } catch (err) {
     console.error('Key vault authentication required:', err);
