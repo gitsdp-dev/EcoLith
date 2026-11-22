@@ -261,6 +261,7 @@
       .hero-badge {
         display: inline-flex;
         margin-bottom: var(--spacing-3);
+        max-width: 100%;
       }
       .hero-title {
         font-family: var(--font-family-heading);
@@ -272,6 +273,7 @@
         margin-bottom: var(--spacing-4);
         color: var(--color-text-main);
         word-break: break-word;
+        overflow-wrap: break-word;
       }
       .hero-tagline {
         font-size: var(--font-size-sm);
@@ -281,6 +283,7 @@
         margin-inline: auto;
         margin-bottom: var(--spacing-6);
         line-height: var(--line-height-relaxed);
+        overflow-wrap: break-word;
       }
       @media (min-width: 640px) {
         .hero-tagline {
@@ -312,27 +315,27 @@
       }
       .hero-promo-grid {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: var(--spacing-4);
         margin-bottom: var(--spacing-8);
       }
       @media (min-width: 640px) {
         .hero-promo-grid {
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
       .features-grid {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: var(--spacing-6);
         margin-top: var(--spacing-6);
       }
       @media (min-width: 768px) {
         .hero-title {
-          font-size: 3.75rem;
+          font-size: clamp(2.5rem, 5.2vw, 3.5rem);
         }
         .features-grid {
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(3, minmax(0, 1fr));
         }
       }
       .feature-card {
@@ -1636,8 +1639,8 @@
               </div>
             </div>
             <div class="solver-card-footer">
-              <span style="font-weight: 700; color: var(--color-text-main);">Value Potential:</span>
-              <span style="font-family: var(--font-family-mono); font-weight: 700;">${escapeHtml(item.value)}</span>
+              <span class="solver-card-footer-label">Value Potential:</span>
+              <span class="solver-card-footer-value">${escapeHtml(item.value)}</span>
             </div>
           </article>
         `
