@@ -61,6 +61,9 @@ app.use(express.json({ limit: '5mb' }));
 // Redaction & No-Cache middleware
 app.use(redactMiddleware);
 
+// Serve static frontend assets from project root (HTML, CSS, JS, assets)
+app.use(express.static(path.resolve(process.cwd())));
+
 // Process-level crash prevention guards for high concurrency
 process.on('unhandledRejection', (reason) => {
   console.error(

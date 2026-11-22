@@ -7,6 +7,11 @@ let currentAdminId = null;
 let categoryChartInstance = null;
 let methodChartInstance = null;
 
+// Real-time online presence map: key -> { user_id, email, display_name, online_at }
+const onlinePresenceUsers = new Map();
+let cachedUsers = [];
+let presenceSubscribed = false;
+
 /**
  * Fetch helper with admin authorization headers.
  */
@@ -35,6 +40,129 @@ async function adminFetch(endpoint, options = {}) {
 }
 
 /**
+ * Switch Admin Panel Tab and auto-load its data immediately.
+ * @param {string} targetSection
+ */
+export function switchAdminTab(targetSection) {
+  const tabs = document.querySelectorAll('.admin-tab');
+  tabs.forEach((t) => {
+    if (t.dataset.target === targetSection) {
+      t.classList.add('active');
+    } else {
+      t.classList.remove('active');
+    }
+  });
+
+  const sections = document.querySelectorAll('.admin-section');
+  sections.forEach((sec) => {
+    sec.style.display = sec.id === targetSection ? 'block' : 'none';
+  });
+
+  if (targetSection === 'secUsers') {
+    loadUsers();
+  } else if (targetSection === 'secAudit') {
+    loadAuditLogs();
+  } else if (targetSection === 'secOverview') {
+    loadOverview();
+  }
+}
+
+/**
+ * Setup navigation tabs.
+ */
+export function setupTabs() {
+  const tabs = document.querySelectorAll('.admin-tab');
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = tab.dataset.target;
+      if (target) {
+        switchAdminTab(target);
+      }
+    });
+  });
+}
+
+/**
+ * Real-time Presence Tracker for Active Users across the platform.
+ * Listens to 'ecolith-online-presence' to track any logged-in user in real time.
+ */
+function initAdminPresence() {
+  if (presenceSubscribed) return;
+
+  try {
+    const presenceChannel = supabase.channel('ecolith-online-presence', {
+      config: { presence: { key: currentAdminId || 'admin-monitor' } }
+    });
+
+    const handlePresenceUpdate = () => {
+      const state = presenceChannel.presenceState();
+      onlinePresenceUsers.clear();
+
+      Object.values(state).forEach((presences) => {
+        if (Array.isArray(presences)) {
+          presences.forEach((p) => {
+            if (p && (p.user_id || p.email)) {
+              const key = p.user_id || p.email;
+              onlinePresenceUsers.set(key, p);
+            }
+          });
+        }
+      });
+
+      const onlineCount = onlinePresenceUsers.size;
+
+      // Update KPI active users badge
+      const elActiveUsers = document.getElementById('kpiActiveUsers');
+      if (elActiveUsers) {
+        elActiveUsers.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 6px #10b981;"></span>${onlineCount} active (online now)</span>`;
+      }
+
+      // If onlineCount > total users displayed, bump total users
+      const elTotalUsers = document.getElementById('kpiTotalUsers');
+      if (elTotalUsers) {
+        const cur = parseInt(elTotalUsers.textContent, 10) || 0;
+        if (onlineCount > cur) {
+          elTotalUsers.textContent = String(onlineCount);
+        }
+      }
+
+      // Re-render user table with live online indicators if visible
+      if (cachedUsers && cachedUsers.length > 0) {
+        renderUsersTable(cachedUsers);
+      }
+    };
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, handlePresenceUpdate)
+      .on('presence', { event: 'join' }, handlePresenceUpdate)
+      .on('presence', { event: 'leave' }, handlePresenceUpdate)
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          presenceSubscribed = true;
+          // Track admin presence as well
+          try {
+            const {
+              data: { user }
+            } = await supabase.auth.getUser();
+            if (user) {
+              await presenceChannel.track({
+                user_id: user.id,
+                email: user.email,
+                display_name:
+                  user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin',
+                online_at: new Date().toISOString()
+              });
+            }
+          } catch {}
+        }
+      });
+  } catch (err) {
+    console.warn('[ADMIN PRESENCE] Subscription notice:', err);
+  }
+}
+
+/**
  * Initialize Admin Panel.
  */
 export async function initAdmin(session) {
@@ -43,6 +171,7 @@ export async function initAdmin(session) {
 
   setupTabs();
   setupUserFilters();
+  initAdminPresence();
 
   document.getElementById('btnAdminRefreshLive')?.addEventListener('click', async () => {
     showToast('Refreshing live reports...');
@@ -83,27 +212,9 @@ export async function initAdmin(session) {
 }
 
 /**
- * Setup navigation tabs.
- */
-function setupTabs() {
-  const tabs = document.querySelectorAll('.admin-tab');
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      tabs.forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      const targetSection = tab.dataset.target;
-      document.querySelectorAll('.admin-section').forEach((sec) => {
-        sec.style.display = sec.id === targetSection ? 'block' : 'none';
-      });
-    });
-  });
-}
-
-/**
  * Load Overview KPIs with dual-channel resilience (Backend API + Live Database Fallback).
  */
-async function loadOverview() {
+export async function loadOverview() {
   let overviewData = null;
 
   // 1. Try Backend API first
@@ -138,9 +249,14 @@ async function loadOverview() {
         supabase.from('recovery_records').select('recovery_method, status')
       ]);
 
-      const profiles = profilesRes.status === 'fulfilled' && profilesRes.value.data ? profilesRes.value.data : [];
-      const scans = scansRes.status === 'fulfilled' && scansRes.value.data ? scansRes.value.data : [];
-      const recoveries = recoveriesRes.status === 'fulfilled' && recoveriesRes.value.data ? recoveriesRes.value.data : [];
+      const profiles =
+        profilesRes.status === 'fulfilled' && profilesRes.value.data ? profilesRes.value.data : [];
+      const scans =
+        scansRes.status === 'fulfilled' && scansRes.value.data ? scansRes.value.data : [];
+      const recoveries =
+        recoveriesRes.status === 'fulfilled' && recoveriesRes.value.data
+          ? recoveriesRes.value.data
+          : [];
 
       const totalUsers = Math.max(1, profiles.length);
       const activeUsers = Math.max(1, profiles.filter((p) => p.status === 'active').length);
@@ -197,12 +313,18 @@ async function loadOverview() {
 
   const { metrics, wasteCategoryDistribution, recoveryMethodDistribution } = overviewData;
 
+  const onlineCount = onlinePresenceUsers.size;
+  const displayTotal = Math.max(metrics.totalUsers || 1, onlineCount);
+  const displayActive = Math.max(metrics.activeUsers || 1, onlineCount);
+
   // Populate KPI cards
   const elTotalUsers = document.getElementById('kpiTotalUsers');
-  if (elTotalUsers) elTotalUsers.textContent = metrics.totalUsers;
+  if (elTotalUsers) elTotalUsers.textContent = String(displayTotal);
 
   const elActiveUsers = document.getElementById('kpiActiveUsers');
-  if (elActiveUsers) elActiveUsers.textContent = `${metrics.activeUsers} active`;
+  if (elActiveUsers) {
+    elActiveUsers.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 6px #10b981;"></span>${displayActive} active (online now)</span>`;
+  }
 
   const elTotalScans = document.getElementById('kpiTotalScans');
   if (elTotalScans) elTotalScans.textContent = metrics.totalScans;
@@ -279,9 +401,9 @@ async function loadOverview() {
 }
 
 /**
- * Load User Management Table with live database fallback.
+ * Load User Management Table with live database and presence fallback.
  */
-async function loadUsers() {
+export async function loadUsers() {
   const search = document.getElementById('adminUserSearch')?.value.trim() || '';
   const status = document.getElementById('adminUserStatusFilter')?.value || '';
 
@@ -291,89 +413,117 @@ async function loadUsers() {
   tbody.innerHTML =
     '<tr><td colspan="7" style="text-align:center; padding: 20px;">Fetching live users from database...</td></tr>';
 
-  let users = null;
-
-  // 1. Try Backend API first
   try {
-    let url = `/api/admin/users?limit=50`;
-    if (search) url += `&q=${encodeURIComponent(search)}`;
-    if (status && status !== 'all') url += `&status=${encodeURIComponent(status)}`;
+    let users = null;
 
-    const res = await adminFetch(url);
-    if (res && Array.isArray(res.users)) {
-      users = res.users;
+    // 1. Try Backend API first
+    try {
+      let url = `/api/admin/users?limit=50`;
+      if (search) url += `&q=${encodeURIComponent(search)}`;
+      if (status && status !== 'all') url += `&status=${encodeURIComponent(status)}`;
+
+      const res = await adminFetch(url);
+      if (res && Array.isArray(res.users)) {
+        users = res.users;
+      }
+    } catch (err) {
+      console.warn('[ADMIN USERS] Backend API deferred, querying database directly:', err.message);
     }
-  } catch (err) {
-    console.warn('[ADMIN USERS] Backend API deferred, querying database directly:', err.message);
-  }
 
-  // 2. Try Supabase RPC
-  if (!users) {
-    try {
-      const { data: rpcUsers, error: rpcErr } = await supabase.rpc('admin_get_users', {
-        p_search: search,
-        p_status: status
-      });
-      if (!rpcErr && Array.isArray(rpcUsers)) {
-        users = rpcUsers;
-      }
-    } catch {}
-  }
-
-  // 3. Fallback: Query public.profiles directly
-  if (!users) {
-    try {
-      let query = supabase
-        .from('profiles')
-        .select('id, email, display_name, avatar_url, role, status, created_at')
-        .order('created_at', { ascending: false });
-
-      if (status && status !== 'all') {
-        query = query.eq('status', status);
-      }
-
-      const { data: profileRows } = await query;
-
-      if (profileRows && profileRows.length > 0) {
-        users = profileRows.map((p) => {
-          const isSoleAdmin = isUserAdmin(p.email);
-          return {
-            id: p.id,
-            email: p.email,
-            display_name: p.display_name || p.email?.split('@')[0] || 'User',
-            avatar_url: p.avatar_url,
-            role: isSoleAdmin ? 'admin' : 'user',
-            status: p.status || 'active',
-            scan_count: 0,
-            key_status: isSoleAdmin ? 'valid' : 'none',
-            created_at: p.created_at
-          };
+    // 2. Try Supabase RPC
+    if (!users) {
+      try {
+        const { data: rpcUsers, error: rpcErr } = await supabase.rpc('admin_get_users', {
+          p_search: search,
+          p_status: status
         });
-
-        // Filter search term client-side if needed
-        if (search) {
-          const s = search.toLowerCase();
-          users = users.filter(
-            (u) =>
-              (u.email && u.email.toLowerCase().includes(s)) ||
-              (u.display_name && u.display_name.toLowerCase().includes(s))
-          );
+        if (!rpcErr && Array.isArray(rpcUsers)) {
+          users = rpcUsers;
         }
-      }
-    } catch (dbErr) {
-      console.warn('[ADMIN USERS] Direct profiles query notice:', dbErr);
+      } catch {}
     }
-  }
 
-  // Ensure current administrator is always displayed
-  if (!users || users.length === 0) {
-    const {
-      data: { user: currentUser }
-    } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+    // 3. Fallback: Query public.profiles directly
+    if (!users) {
+      try {
+        let query = supabase
+          .from('profiles')
+          .select('id, email, display_name, avatar_url, role, status, created_at')
+          .order('created_at', { ascending: false });
 
-    if (currentUser) {
-      users = [
-        {
+        if (status && status !== 'all') {
+          query = query.eq('status', status);
+        }
+
+        const { data: profileRows } = await query;
+
+        if (profileRows && profileRows.length > 0) {
+          users = profileRows.map((p) => {
+            const isSoleAdmin = isUserAdmin(p.email);
+            return {
+              id: p.id,
+              email: p.email,
+              display_name: p.display_name || p.email?.split('@')[0] || 'User',
+              avatar_url: p.avatar_url,
+              role: isSoleAdmin ? 'admin' : 'user',
+              status: p.status || 'active',
+              scan_count: 0,
+              key_status: isSoleAdmin ? 'valid' : 'none',
+              created_at: p.created_at
+            };
+          });
+
+          // Filter search term client-side if needed
+          if (search) {
+            const s = search.toLowerCase();
+            users = users.filter(
+              (u) =>
+                (u.email && u.email.toLowerCase().includes(s)) ||
+                (u.display_name && u.display_name.toLowerCase().includes(s))
+            );
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[ADMIN USERS] Direct profiles query notice:', dbErr);
+      }
+    }
+
+    if (!users) {
+      users = [];
+    }
+
+    // Merge any online presence users who might not yet be returned by profiles query
+    onlinePresenceUsers.forEach((presUser) => {
+      const alreadyInList = users.some(
+        (u) =>
+          u.id === presUser.user_id ||
+          (u.email &&
+            presUser.email &&
+            u.email.toLowerCase() === presUser.email.toLowerCase())
+      );
+      if (!alreadyInList && presUser.email) {
+        users.push({
+          id: presUser.user_id || `online-${Math.random()}`,
+          email: presUser.email,
+          display_name: presUser.display_name || presUser.email.split('@')[0],
+          avatar_url: null,
+          role: isUserAdmin(presUser.email) ? 'admin' : 'user',
+          status: 'active',
+          scan_count: 0,
+          key_status: 'none',
+          created_at: presUser.online_at || new Date().toISOString()
+        });
+      }
+    });
+
+    // Ensure current administrator is always displayed
+    if (!users.some((u) => isUserAdmin(u.email))) {
+      const {
+        data: { user: currentUser }
+      } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+
+      if (currentUser) {
+        users.unshift({
           id: currentUser.id,
           email: currentUser.email,
           display_name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
@@ -383,10 +533,25 @@ async function loadUsers() {
           scan_count: 0,
           key_status: 'valid',
           created_at: currentUser.created_at || new Date().toISOString()
-        }
-      ];
+        });
+      }
     }
+
+    cachedUsers = users;
+    renderUsersTable(users);
+  } catch (err) {
+    console.error('[LOAD USERS ERROR]', err);
+    tbody.innerHTML = `<tr><td colspan="7" class="alert alert-danger" style="margin: 10px;">Failed to load user list: ${escapeHtml(err.message)}</td></tr>`;
   }
+}
+
+/**
+ * Render User Table rows.
+ * @param {Array} users
+ */
+function renderUsersTable(users) {
+  const tbody = document.getElementById('adminUsersTableBody');
+  if (!tbody) return;
 
   if (!users || users.length === 0) {
     tbody.innerHTML =
@@ -399,6 +564,13 @@ async function loadUsers() {
     const tr = document.createElement('tr');
     const isOwner = user.role === 'admin' || isUserAdmin(user.email);
 
+    // Check if user is currently active/online in presence tracker
+    const isOnline =
+      onlinePresenceUsers.has(user.id) ||
+      Array.from(onlinePresenceUsers.values()).some(
+        (p) => p.email && user.email && p.email.toLowerCase() === user.email.toLowerCase()
+      );
+
     // 1. User (Name + Email)
     const userTd = document.createElement('td');
     userTd.innerHTML = `
@@ -410,10 +582,20 @@ async function loadUsers() {
     const roleTd = document.createElement('td');
     roleTd.innerHTML = `<span class="badge ${isOwner ? 'badge-primary' : ''}">${isOwner ? 'ADMIN (Owner)' : 'User'}</span>`;
 
-    // 3. Status
+    // 3. Status (Live Online vs DB Status)
     const statusTd = document.createElement('td');
     const isSuspended = user.status === 'suspended';
-    statusTd.innerHTML = `<span class="badge ${isSuspended ? 'badge-status-suspended' : 'badge-status-active'}">${user.status || 'active'}</span>`;
+
+    if (isOnline) {
+      statusTd.innerHTML = `
+        <span class="badge" style="background:#052e16; color:#4ade80; border:1.5px solid #16a34a; font-weight:800; display:inline-flex; align-items:center; gap:5px; padding: 2px 8px;">
+          <span style="width:6px; height:6px; border-radius:50%; background:#22c55e; display:inline-block; box-shadow:0 0 6px #22c55e;"></span>
+          ONLINE NOW
+        </span>
+      `;
+    } else {
+      statusTd.innerHTML = `<span class="badge ${isSuspended ? 'badge-status-suspended' : 'badge-status-active'}">${user.status || 'active'}</span>`;
+    }
 
     // 4. Key Status
     const keyTd = document.createElement('td');
@@ -469,11 +651,6 @@ async function loadUsers() {
     tbody.appendChild(tr);
   });
 }
-  } catch (err) {
-    console.error('[LOAD USERS ERROR]', err);
-    tbody.innerHTML = `<tr><td colspan="7" class="alert alert-danger" style="margin: 10px;">Failed to load user list: ${escapeHtml(err.message)}</td></tr>`;
-  }
-}
 
 /**
  * Suspend or Reactivate a user.
@@ -505,7 +682,7 @@ async function toggleUserSuspension(user) {
 /**
  * Load Audit Logs.
  */
-async function loadAuditLogs() {
+export async function loadAuditLogs() {
   const tbody = document.getElementById('adminAuditTableBody');
   if (!tbody) return;
 
@@ -564,57 +741,6 @@ async function loadAuditLogs() {
   }
 }
 
-/**
- * Filter event listeners.
- */
-function setupUserFilters() {
-  document.getElementById('adminUserSearch')?.addEventListener(
-    'input',
-    debounce(() => loadUsers(), 300)
-  );
-  document.getElementById('adminUserStatusFilter')?.addEventListener('change', () => loadUsers());
-  document.getElementById('btnRefreshAudit')?.addEventListener('click', () => loadAuditLogs());
-}
 
-/**
- * Utility: Debounce
- */
-function debounce(fn, delay) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn.apply(this, args), delay);
-  };
-}
 
-/**
- * Utility: Safe HTML Escape
- */
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
-/**
- * Lightweight Toast notification
- */
-function showToast(message, type = 'success') {
-  let toast = document.getElementById('adminToast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'adminToast';
-    toast.className = 'toast';
-    document.body.appendChild(toast);
-  }
-  toast.textContent = message;
-  toast.className = `toast ${type === 'danger' ? 'toast-error' : 'toast-success'} show`;
-
-  setTimeout(() => {
-    toast.className = 'toast';
-  }, 3500);
-}

@@ -259,6 +259,57 @@ export async function getSession() {
 }
 
 /**
+ * Updates last_seen_at timestamp in public.profiles.
+ * @param {string} userId
+ */
+export async function touchLastSeen(userId) {
+  if (!userId) return;
+  try {
+    await supabase
+      .from('profiles')
+      .update({ last_seen_at: new Date().toISOString() })
+      .eq('id', userId);
+  } catch {}
+}
+
+let activePresenceChannel = null;
+
+/**
+ * Broadcasts user online status via Supabase Realtime Presence.
+ * Automatically detected by the Admin Panel to show real-time active users.
+ * @param {import('@supabase/supabase-js').Session} session
+ */
+export function initPresenceTracker(session) {
+  if (!session?.user || activePresenceChannel) return activePresenceChannel;
+
+  try {
+    activePresenceChannel = supabase.channel('ecolith-online-presence', {
+      config: { presence: { key: session.user.id } }
+    });
+
+    activePresenceChannel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await activePresenceChannel.track({
+          user_id: session.user.id,
+          email: session.user.email,
+          display_name:
+            session.user.user_metadata?.full_name ||
+            session.user.email?.split('@')[0] ||
+            'User',
+          online_at: new Date().toISOString()
+        });
+      }
+    });
+
+    touchLastSeen(session.user.id);
+  } catch (err) {
+    console.warn('[PRESENCE] Tracker deferred:', err);
+  }
+
+  return activePresenceChannel;
+}
+
+/**
  * Auth guard for protected pages. Redirects to login.html if not authenticated
  * or if 14-day inactivity limit is exceeded.
  * @returns {Promise<import('@supabase/supabase-js').Session>}
@@ -274,6 +325,11 @@ export async function requireAuth() {
     }
     throw new Error('Unauthenticated');
   }
+
+  try {
+    initPresenceTracker(session);
+  } catch {}
+
   return session;
 }
 

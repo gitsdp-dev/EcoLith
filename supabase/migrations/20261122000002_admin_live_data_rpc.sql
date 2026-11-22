@@ -1,9 +1,9 @@
 -- =============================================================================
 -- EcoLith Migration: Admin Live Data & Reports Functions
--- Provides live, real-time analytics to authorized platform administrators
+-- Strictly enables live data reporting and user visibility for administrators
 -- =============================================================================
 
--- 1. Helper function to check if caller is authorized admin
+-- 1. Helper function to check if caller is the platform administrator
 create or replace function public.is_admin_caller()
 returns boolean language sql security definer set search_path = '' as $$
   select exists (
@@ -12,19 +12,70 @@ returns boolean language sql security definer set search_path = '' as $$
   ) or exists (
     select 1 from auth.users
     where id = auth.uid() and email in ('githubsdp2011@gmail.com', 'EducationPatra2011@outlook.com')
+  ) or (
+    coalesce(auth.jwt()->>'email', '') in ('githubsdp2011@gmail.com', 'EducationPatra2011@outlook.com')
   );
 $$;
 
--- 2. Live Overview Analytics RPC
+grant execute on function public.is_admin_caller to authenticated;
+
+-- 2. Allow users to update their own last_seen_at timestamp
+grant update (display_name, avatar_url, last_seen_at) on public.profiles to authenticated;
+
+-- 3. Profiles Selection Policy:
+-- Regular users see their own profile; Administrator sees ALL profiles
+drop policy if exists "profiles_select_own" on public.profiles;
+drop policy if exists "profiles_admin_read_all" on public.profiles;
+drop policy if exists "profiles_select_policy" on public.profiles;
+
+create policy "profiles_select_policy" on public.profiles
+  for select to authenticated using (
+    auth.uid() = id
+    or public.is_admin_caller()
+  );
+
+-- 4. Food Scans Selection Policy:
+-- Regular users see their own scans; Administrator sees ALL scans
+drop policy if exists "food_scans_select_own" on public.food_scans;
+drop policy if exists "food_scans_admin_read_all" on public.food_scans;
+drop policy if exists "food_scans_select_policy" on public.food_scans;
+
+create policy "food_scans_select_policy" on public.food_scans
+  for select to authenticated using (
+    auth.uid() = user_id
+    or public.is_admin_caller()
+  );
+
+-- 5. Recovery Records Selection Policy:
+-- Regular users see their own recovery records; Administrator sees ALL records
+drop policy if exists "recovery_records_select_own" on public.recovery_records;
+drop policy if exists "recovery_records_admin_read_all" on public.recovery_records;
+drop policy if exists "recovery_records_select_policy" on public.recovery_records;
+
+create policy "recovery_records_select_policy" on public.recovery_records
+  for select to authenticated using (
+    auth.uid() = user_id
+    or public.is_admin_caller()
+  );
+
+-- 6. Audit Logs: Allow administrator to read audit records
+drop policy if exists "audit_logs_admin_read_all" on public.audit_logs;
+create policy "audit_logs_admin_read_all" on public.audit_logs
+  for select to authenticated using (
+    public.is_admin_caller()
+  );
+grant select on public.audit_logs to authenticated;
+
+-- 7. Live Overview Analytics Security Definer RPC
 create or replace function public.admin_get_overview()
 returns json language plpgsql security definer set search_path = '' as $$
 declare
-  v_total_users int;
-  v_active_users int;
-  v_total_scans int;
-  v_total_recoveries int;
-  v_completed_recoveries int;
-  v_byok_count int;
+  v_total_users int := 0;
+  v_active_users int := 0;
+  v_total_scans int := 0;
+  v_total_recoveries int := 0;
+  v_completed_recoveries int := 0;
+  v_byok_count int := 0;
   v_total_waste_kg numeric := 0;
   v_category_dist json;
   v_method_dist json;
@@ -45,7 +96,6 @@ begin
     v_byok_count := 0;
   end;
 
-  -- Compute total waste kg
   select coalesce(sum(
     case 
       when quantity_unit = 'g' then quantity / 1000.0
@@ -55,7 +105,6 @@ begin
     end
   ), 0) into v_total_waste_kg from public.food_scans;
 
-  -- Waste category distribution
   select json_build_object(
     'edible_reusable', count(*) filter (where waste_category = 'edible_reusable'),
     'surplus_redistributable', count(*) filter (where waste_category = 'surplus_redistributable'),
@@ -63,7 +112,6 @@ begin
     'other_separate', count(*) filter (where waste_category = 'other_separate')
   ) into v_category_dist from public.food_scans;
 
-  -- Recovery method distribution
   select json_object_agg(coalesce(recovery_method, 'other'), m_count)
   into v_method_dist
   from (
@@ -89,7 +137,9 @@ begin
 end;
 $$;
 
--- 3. Live User List RPC
+grant execute on function public.admin_get_overview to authenticated;
+
+-- 8. Live User List Security Definer RPC
 create or replace function public.admin_get_users(p_search text default '', p_status text default '')
 returns json language plpgsql security definer set search_path = '' as $$
 declare
@@ -125,20 +175,4 @@ begin
 end;
 $$;
 
--- Grants
-grant execute on function public.is_admin_caller to authenticated;
-grant execute on function public.admin_get_overview to authenticated;
 grant execute on function public.admin_get_users to authenticated;
-
--- Admin RLS Policies so admins can read all profiles and records directly
-drop policy if exists "profiles_admin_read_all" on public.profiles;
-create policy "profiles_admin_read_all" on public.profiles
-  for select to authenticated using (public.is_admin_caller());
-
-drop policy if exists "food_scans_admin_read_all" on public.food_scans;
-create policy "food_scans_admin_read_all" on public.food_scans
-  for select to authenticated using (public.is_admin_caller());
-
-drop policy if exists "recovery_records_admin_read_all" on public.recovery_records;
-create policy "recovery_records_admin_read_all" on public.recovery_records
-  for select to authenticated using (public.is_admin_caller());

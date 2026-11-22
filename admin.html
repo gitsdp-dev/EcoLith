@@ -151,13 +151,31 @@
 
           <!-- Navigation Tabs -->
           <div class="admin-tabs" role="tablist">
-            <button type="button" class="admin-tab active" data-target="secOverview" role="tab">
+            <button
+              type="button"
+              id="adminTabOverview"
+              class="admin-tab active"
+              data-target="secOverview"
+              role="tab"
+            >
               📊 Platform Overview
             </button>
-            <button type="button" class="admin-tab" data-target="secUsers" role="tab">
+            <button
+              type="button"
+              id="adminTabUsers"
+              class="admin-tab"
+              data-target="secUsers"
+              role="tab"
+            >
               👥 User Management
             </button>
-            <button type="button" class="admin-tab" data-target="secAudit" role="tab">
+            <button
+              type="button"
+              id="adminTabAudit"
+              class="admin-tab"
+              data-target="secAudit"
+              role="tab"
+            >
               📜 Audit Log
             </button>
           </div>
@@ -418,7 +436,14 @@
 
     <script type="module">
       import { requireAuth, getUserProfile, isUserAdmin, signOut } from './js/auth.js';
-      import { initAdmin } from './js/admin.js';
+      import { initAdmin, switchAdminTab } from './js/admin.js';
+
+      window.switchAdminTab = switchAdminTab;
+
+      // Immediate synchronous tab bindings for instant responsiveness
+      document.getElementById('adminTabOverview')?.addEventListener('click', () => switchAdminTab('secOverview'));
+      document.getElementById('adminTabUsers')?.addEventListener('click', () => switchAdminTab('secUsers'));
+      document.getElementById('adminTabAudit')?.addEventListener('click', () => switchAdminTab('secAudit'));
 
       try {
         const session = await requireAuth();

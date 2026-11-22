@@ -1,10 +1,30 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { createClient } from '@supabase/supabase-js';
 import { supabaseAdmin } from '../lib/supabaseAdmin.js';
 import { logAdminAction } from '../lib/audit.js';
 import { isUserAdmin } from '../middleware/requireAdmin.js';
 
 export const adminRouter = Router();
+
+function getAdminClient(req) {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (serviceKey && serviceKey !== 'placeholder-service-role-key') {
+    return supabaseAdmin;
+  }
+  const token = req.headers.authorization;
+  if (token && token.startsWith('Bearer ')) {
+    return createClient(
+      process.env.SUPABASE_URL || 'https://triwyjoaeglrolyutkef.supabase.co',
+      process.env.SUPABASE_ANON_KEY || 'sb_publishable_hu0glsh8zIMQhfsXjidbgQ_PXY6xh3G',
+      {
+        global: { headers: { Authorization: token } },
+        auth: { persistSession: false, autoRefreshToken: false }
+      }
+    );
+  }
+  return supabaseAdmin;
+}
 
 const patchUserSchema = z.object({
   status: z.enum(['active', 'suspended']).optional(),
@@ -17,9 +37,11 @@ const patchUserSchema = z.object({
  */
 adminRouter.get('/overview', async (req, res, next) => {
   try {
+    const client = getAdminClient(req);
+
     // 0. Try live RPC overview first
     try {
-      const { data: rpcOverview, error: rpcErr } = await supabaseAdmin.rpc('admin_get_overview');
+      const { data: rpcOverview, error: rpcErr } = await client.rpc('admin_get_overview');
       if (!rpcErr && rpcOverview && rpcOverview.metrics) {
         return res.json(rpcOverview);
       }
@@ -29,37 +51,40 @@ adminRouter.get('/overview', async (req, res, next) => {
     let totalUsers = 1;
     let activeUsers = 1;
     try {
-      const { count: uCount } = await supabaseAdmin
+      const { count: uCount, data: uList } = await client
         .from('profiles')
-        .select('*', { count: 'exact', head: true });
-      if (uCount !== null && uCount !== undefined) totalUsers = Math.max(1, uCount);
+        .select('id, status', { count: 'exact' });
+      if (uCount !== null && uCount !== undefined) {
+        totalUsers = Math.max(1, uCount);
+      } else if (uList && uList.length) {
+        totalUsers = Math.max(1, uList.length);
+      }
 
-      const { count: aCount } = await supabaseAdmin
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'active');
-      if (aCount !== null && aCount !== undefined) activeUsers = Math.max(1, aCount);
+      if (uList && uList.length) {
+        activeUsers = Math.max(1, uList.filter((u) => u.status === 'active').length);
+      }
     } catch {}
 
     // 2. Total scans
     let totalScans = 0;
     try {
-      const { count: sCount } = await supabaseAdmin
+      const { count: sCount, data: sList } = await client
         .from('food_scans')
         .select('*', { count: 'exact', head: true });
       if (sCount !== null && sCount !== undefined) totalScans = sCount;
+      else if (sList && sList.length) totalScans = sList.length;
     } catch {}
 
     // 3. Total recovery records
     let totalRecoveries = 0;
     let completedRecoveries = 0;
     try {
-      const { count: rCount } = await supabaseAdmin
+      const { count: rCount } = await client
         .from('recovery_records')
         .select('*', { count: 'exact', head: true });
       if (rCount !== null && rCount !== undefined) totalRecoveries = rCount;
 
-      const { count: cCount } = await supabaseAdmin
+      const { count: cCount } = await client
         .from('recovery_records')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'completed');
@@ -69,7 +94,7 @@ adminRouter.get('/overview', async (req, res, next) => {
     // 4. BYOK adoption: count users with valid keys
     let byokValidCount = 0;
     try {
-      const { count } = await supabaseAdmin
+      const { count } = await client
         .from('user_api_keys')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'valid');
@@ -81,7 +106,7 @@ adminRouter.get('/overview', async (req, res, next) => {
     // 5. Recent scans for category distribution aggregation
     let recentScans = [];
     try {
-      const { data: scans } = await supabaseAdmin
+      const { data: scans } = await client
         .from('food_scans')
         .select('waste_category, quantity, quantity_unit, created_at')
         .order('created_at', { ascending: false })
@@ -153,12 +178,29 @@ adminRouter.get('/overview', async (req, res, next) => {
 adminRouter.get('/users', async (req, res, next) => {
   try {
     const { q, status, role, limit = 50, offset = 0 } = req.query;
+    const client = getAdminClient(req);
+
+    // 0. Try RPC admin_get_users first
+    try {
+      const { data: rpcUsers, error: rpcErr } = await client.rpc('admin_get_users', {
+        p_search: q || '',
+        p_status: status || ''
+      });
+      if (!rpcErr && Array.isArray(rpcUsers) && rpcUsers.length > 0) {
+        return res.json({
+          users: rpcUsers,
+          total: rpcUsers.length,
+          limit: Number(limit),
+          offset: Number(offset)
+        });
+      }
+    } catch {}
 
     let users = [];
     let count = 0;
 
     try {
-      let query = supabaseAdmin
+      let query = client
         .from('profiles')
         .select('id, email, display_name, avatar_url, role, status, last_seen_at, created_at', {
           count: 'exact'
@@ -189,7 +231,7 @@ adminRouter.get('/users', async (req, res, next) => {
 
     if (userIds.length > 0) {
       try {
-        const { data: scanRows } = await supabaseAdmin
+        const { data: scanRows } = await client
           .from('food_scans')
           .select('user_id')
           .in('user_id', userIds);
@@ -200,7 +242,7 @@ adminRouter.get('/users', async (req, res, next) => {
       } catch {}
 
       try {
-        const { data: keyRows } = await supabaseAdmin.rpc('vault_get_all_statuses');
+        const { data: keyRows } = await client.rpc('vault_get_all_statuses');
         if (keyRows) {
           keyRows.forEach((k) => {
             keyStatuses[k.user_id] = k.status;
@@ -402,12 +444,13 @@ adminRouter.patch('/users/:id', async (req, res, next) => {
 adminRouter.get('/audit-logs', async (req, res, next) => {
   try {
     const { limit = 50, offset = 0 } = req.query;
+    const client = getAdminClient(req);
 
     const {
       data: logs,
       count,
       error
-    } = await supabaseAdmin
+    } = await client
       .from('audit_logs')
       .select('id, actor_id, action, target_type, target_id, metadata, created_at', {
         count: 'exact'
