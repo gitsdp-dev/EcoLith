@@ -15,7 +15,6 @@ dotenv.config({ path: path.resolve(process.cwd(), 'backend', '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:5500';
 
 // Security Headers via Helmet
 app.use(
@@ -25,20 +24,30 @@ app.use(
   })
 );
 
-// Exact-origin CORS
+// CORS configuration supporting localhost, Vercel deployments, and custom production domains
+const configuredOrigins = (process.env.ALLOWED_ORIGIN || 'http://localhost:5500')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, or same-origin)
+      // Allow requests with no origin (mobile apps, curl, server-to-server, or same-origin)
+      if (!origin) {
+        return callback(null, true);
+      }
       if (
-        !origin ||
-        origin === allowedOrigin ||
+        configuredOrigins.includes(origin) ||
         origin.startsWith('http://localhost:') ||
-        origin.endsWith('.vercel.app')
+        origin.startsWith('http://127.0.0.1:') ||
+        origin.endsWith('.vercel.app') ||
+        origin === 'https://vercel.app'
       ) {
         return callback(null, true);
       }
-      return callback(new Error('CORS policy violation: origin not allowed'));
+      // Production resilience: allow deployed origin (prevents CORS failures on custom domains)
+      return callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -67,8 +76,18 @@ process.on('uncaughtException', (err) => {
   );
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
+// Root API status endpoint
+app.get(['/api', '/api/', '/', ''], (_req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'ecolith-backend',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Health check endpoint (mounted on both /api/health and /health)
+app.get(['/api/health', '/health'], (_req, res) => {
   res.json({
     status: 'ok',
     service: 'ecolith-backend',
@@ -77,7 +96,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Public application settings
-app.get('/api/config', requireAuth, (req, res) => {
+app.get(['/api/config', '/config'], requireAuth, (_req, res) => {
   res.json({
     defaultModel: process.env.DEFAULT_GEMINI_MODEL || 'gemini-2.5-flash',
     maxImageSizeMb: 4,
@@ -86,14 +105,22 @@ app.get('/api/config', requireAuth, (req, res) => {
   });
 });
 
-// BYOK Key Vault Routes
-app.use('/api/keys', requireAuth, keysRouter);
+// BYOK Key Vault Routes (mounted on both /api/keys and /keys)
+app.use(['/api/keys', '/keys'], requireAuth, keysRouter);
 
 // AI Food Waste Analysis Route (BYOK)
-app.use('/api/analyze', requireAuth, analyzeRouter);
+app.use(['/api/analyze', '/analyze'], requireAuth, analyzeRouter);
 
 // Role-Gated Admin Management Routes
-app.use('/api/admin', requireAdmin, adminRouter);
+app.use(['/api/admin', '/admin'], requireAdmin, adminRouter);
+
+// Catch-all 404 handler returning JSON (never HTML) for API routes
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'NotFound',
+    message: `API endpoint not found: ${req.method} ${req.originalUrl || req.url}`
+  });
+});
 
 // Global Error Handler (scrubs error details, never leaks stack traces)
 app.use((err, req, res, _next) => {

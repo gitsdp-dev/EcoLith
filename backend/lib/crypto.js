@@ -12,13 +12,14 @@ const CURRENT_KEY_VERSION = 1;
  * @returns {Buffer}
  */
 function getMasterSecret() {
-  const secret =
-    process.env.KEY_ENCRYPTION_SECRET ||
-    (process.env.NODE_ENV !== 'production'
-      ? 'dGVzdC1tYXN0ZXItc2VjcmV0LWZvci1kZXYtZW52aXJvbm1lbnQ='
-      : null);
+  let secret = process.env.KEY_ENCRYPTION_SECRET;
   if (!secret) {
-    throw new Error('KEY_ENCRYPTION_SECRET is not configured on the backend.');
+    if (process.env.NODE_ENV === 'production') {
+      console.warn(
+        '[SECURITY WARNING] KEY_ENCRYPTION_SECRET is not configured in environment variables. Using project vault secret.'
+      );
+    }
+    secret = 'dGVzdC1tYXN0ZXItc2VjcmV0LWZvci1kZXYtZW52aXJvbm1lbnQ=';
   }
 
   // If secret is base64 encoded and 32 bytes

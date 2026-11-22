@@ -27,7 +27,7 @@ async function adminFetch(endpoint, options = {}) {
     throw new Error(errorData.message || `Request failed with status ${response.status}`);
   }
 
-  return response.json();
+  return response.json().catch(() => ({}));
 }
 
 /**

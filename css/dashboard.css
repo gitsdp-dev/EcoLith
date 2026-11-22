@@ -33,7 +33,9 @@
   justify-content: space-between;
   position: relative;
   overflow: hidden;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .stat-card:hover {
@@ -249,7 +251,9 @@
   display: flex;
   gap: var(--spacing-3);
   align-items: flex-start;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .suggestion-card:hover {

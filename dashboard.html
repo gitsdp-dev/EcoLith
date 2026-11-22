@@ -342,7 +342,9 @@
       >
         <div
           class="modal-header"
-          style="background: linear-gradient(135deg, var(--color-primary-surface), var(--color-surface))"
+          style="
+            background: linear-gradient(135deg, var(--color-primary-surface), var(--color-surface));
+          "
         >
           <div style="display: flex; align-items: center; gap: var(--spacing-2)">
             <span style="font-size: 1.5rem">🔑</span>
@@ -368,8 +370,12 @@
           <div class="modal-body">
             <div id="initModalAlert" class="auth-alert" role="alert" style="display: none"></div>
 
-            <p class="text-sm" style="margin-bottom: var(--spacing-3); color: var(--color-text-main)">
-              Welcome to EcoLith! To initialize the software and activate AI visual food waste scanning, please connect your <strong>Google Gemini API Key</strong>.
+            <p
+              class="text-sm"
+              style="margin-bottom: var(--spacing-3); color: var(--color-text-main)"
+            >
+              Welcome to EcoLith! To initialize the software and activate AI visual food waste
+              scanning, please connect your <strong>Google Gemini API Key</strong>.
             </p>
 
             <div
@@ -383,7 +389,11 @@
             >
               <div
                 class="text-xs"
-                style="margin-bottom: var(--spacing-2); font-weight: var(--font-weight-medium); color: var(--color-text-main)"
+                style="
+                  margin-bottom: var(--spacing-2);
+                  font-weight: var(--font-weight-medium);
+                  color: var(--color-text-main);
+                "
               >
                 ⚡ Free 30-Second Key Setup:
               </div>
@@ -407,7 +417,11 @@
             </div>
 
             <div class="form-group" style="margin-bottom: var(--spacing-3)">
-              <label for="initApiKeyInput" class="form-label" style="font-size: var(--font-size-xs)">
+              <label
+                for="initApiKeyInput"
+                class="form-label"
+                style="font-size: var(--font-size-xs)"
+              >
                 Google Gemini API Key
               </label>
               <div style="position: relative; display: flex; align-items: center">
@@ -419,7 +433,11 @@
                   placeholder="AIzaSy..."
                   autocomplete="off"
                   spellcheck="false"
-                  style="padding-right: 48px; font-family: monospace; font-size: var(--font-size-sm)"
+                  style="
+                    padding-right: 48px;
+                    font-family: monospace;
+                    font-size: var(--font-size-sm);
+                  "
                 />
                 <button
                   type="button"
@@ -440,7 +458,8 @@
                 </button>
               </div>
               <span class="text-xs text-muted" style="margin-top: 4px; display: block">
-                🔒 Stored strictly in Supabase private vault (AES-256-GCM). Inaccessible even to admins.
+                🔒 Stored strictly in Supabase private vault (AES-256-GCM). Inaccessible even to
+                admins.
               </span>
             </div>
 
@@ -635,7 +654,10 @@
               throw new Error(data.message || 'Key validation failed.');
             }
 
-            showInitAlert('🎉 Software Initialized! EcoLith AI scanning is now fully active.', 'success');
+            showInitAlert(
+              '🎉 Software Initialized! EcoLith AI scanning is now fully active.',
+              'success'
+            );
             const keyNotice = document.getElementById('keyNotice');
             if (keyNotice) keyNotice.style.display = 'none';
 

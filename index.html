@@ -96,7 +96,9 @@
         text-align: left;
         border: 2px solid var(--color-border);
         box-shadow: 4px 4px 0px var(--color-border);
-        transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        transition:
+          transform var(--transition-fast),
+          box-shadow var(--transition-fast);
       }
       .feature-card:hover {
         transform: translate(-2px, -2px);
@@ -192,20 +194,40 @@
           <div class="hero-promo-grid">
             <div class="promo-card promo-card-lime">
               <div>
-                <span class="badge badge-dark" style="margin-bottom: var(--spacing-2);">EFFICIENCY</span>
-                <h3 style="font-size: var(--font-size-xl); margin-top: 4px;">CIRCULAR DIVERSION<br/>UP TO 85% RECOVERY</h3>
+                <span class="badge badge-dark" style="margin-bottom: var(--spacing-2)"
+                  >EFFICIENCY</span
+                >
+                <h3 style="font-size: var(--font-size-xl); margin-top: 4px">
+                  CIRCULAR DIVERSION<br />UP TO 85% RECOVERY
+                </h3>
               </div>
-              <div style="display: flex; justify-content: flex-end; margin-top: var(--spacing-3);">
-                <a href="login.html?returnTo=recovery.html" id="recoveryPromoBtn" class="btn btn-square btn-square-dark" aria-label="Explore recovery">↗</a>
+              <div style="display: flex; justify-content: flex-end; margin-top: var(--spacing-3)">
+                <a
+                  href="login.html?returnTo=recovery.html"
+                  id="recoveryPromoBtn"
+                  class="btn btn-square btn-square-dark"
+                  aria-label="Explore recovery"
+                  >↗</a
+                >
               </div>
             </div>
             <div class="promo-card promo-card-white">
               <div>
-                <span class="badge badge-primary" style="margin-bottom: var(--spacing-2);">PRIVACY</span>
-                <h3 style="font-size: var(--font-size-xl); margin-top: 4px;">BYOK INTELLIGENCE<br/>NO KEY STORAGE</h3>
+                <span class="badge badge-primary" style="margin-bottom: var(--spacing-2)"
+                  >PRIVACY</span
+                >
+                <h3 style="font-size: var(--font-size-xl); margin-top: 4px">
+                  BYOK INTELLIGENCE<br />NO KEY STORAGE
+                </h3>
               </div>
-              <div style="display: flex; justify-content: flex-end; margin-top: var(--spacing-3);">
-                <a href="login.html?returnTo=keyvault.html" id="byokPromoBtn" class="btn btn-square btn-square-dark" aria-label="Explore Key Vault">↗</a>
+              <div style="display: flex; justify-content: flex-end; margin-top: var(--spacing-3)">
+                <a
+                  href="login.html?returnTo=keyvault.html"
+                  id="byokPromoBtn"
+                  class="btn btn-square btn-square-dark"
+                  aria-label="Explore Key Vault"
+                  >↗</a
+                >
               </div>
             </div>
           </div>
@@ -312,7 +334,7 @@
       if (session) {
         if (byokPromoBtn) byokPromoBtn.href = 'keyvault.html';
         if (recoveryPromoBtn) recoveryPromoBtn.href = 'recovery.html';
-        
+
         const heroSecondary = document.querySelector('.hero-actions .btn-secondary');
         if (heroSecondary) {
           heroSecondary.href = 'dashboard.html';

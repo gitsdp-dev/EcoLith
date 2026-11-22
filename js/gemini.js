@@ -49,7 +49,12 @@ export async function analyzeFoodImage(base64Image, mimeType = 'image/jpeg') {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    const error = new Error(data.message || `Analysis failed with status ${response.status}`);
+    const error = new Error(
+      data.message ||
+        (response.status === 404
+          ? 'EcoLith analysis API route not found (404). Please ensure the backend is running.'
+          : `Analysis failed with status ${response.status}`)
+    );
     error.code = data.code || 'ANALYSIS_ERROR';
     error.status = response.status;
     throw error;

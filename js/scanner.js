@@ -101,7 +101,7 @@ async function verifyKeyStatus() {
       return { hasKey: false, status: null };
     }
 
-    return await res.json();
+    return await res.json().catch(() => ({ hasKey: false, status: null }));
   } catch (err) {
     console.warn('Could not verify key status:', err);
     return { hasKey: false, status: null };

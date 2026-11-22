@@ -90,7 +90,11 @@ export async function enforce14DaySession(session) {
 
   // If user is logged in but no session start recorded yet, initialize it
   try {
-    if (typeof window !== 'undefined' && window.localStorage && !window.localStorage.getItem(SESSION_START_KEY)) {
+    if (
+      typeof window !== 'undefined' &&
+      window.localStorage &&
+      !window.localStorage.getItem(SESSION_START_KEY)
+    ) {
       recordLoginSession(session.user?.id);
     }
   } catch {}
@@ -259,19 +263,26 @@ export async function requireAuth() {
 // Background session checker: periodically verifies 14-day expiry if tab is kept open
 if (typeof window !== 'undefined') {
   // Check every 5 minutes and on window visibility / focus
-  setInterval(async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        await enforce14DaySession(session);
-      }
-    } catch {}
-  }, 5 * 60 * 1000);
+  setInterval(
+    async () => {
+      try {
+        const {
+          data: { session }
+        } = await supabase.auth.getSession();
+        if (session) {
+          await enforce14DaySession(session);
+        }
+      } catch {}
+    },
+    5 * 60 * 1000
+  );
 
   document.addEventListener('visibilitychange', async () => {
     if (document.visibilityState === 'visible') {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session }
+        } = await supabase.auth.getSession();
         if (session) {
           await enforce14DaySession(session);
         }

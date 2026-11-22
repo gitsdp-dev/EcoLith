@@ -61,15 +61,15 @@ EcoLith ships with **zero platform-owned AI keys**. Every user supplies their pe
 
 ## Tech Stack
 
-| Layer               | Technology                                                     |
-| ------------------- | -------------------------------------------------------------- |
-| **Frontend**        | Semantic HTML5, CSS3 Tokens, Vanilla JavaScript (ES Modules)   |
-| **Visual Charts**   | Chart.js 4.4.7 (pinned CDN)                                    |
-| **Auth & Database** | Supabase Auth (Email, Google) + Supabase PostgreSQL           |
-| **Encryption**      | Node.js `crypto` AES-256-GCM with user-ID AAD binding          |
-| **Backend & API**   | Node.js Express 4 + Zod schema validation + Helmet             |
-| **Serverless Host** | Vercel Serverless Functions (`api/index.js` + `vercel.json`)   |
-| **AI Provider**     | Google Gemini (User BYOK via `x-goog-api-key` header)          |
+| Layer               | Technology                                                   |
+| ------------------- | ------------------------------------------------------------ |
+| **Frontend**        | Semantic HTML5, CSS3 Tokens, Vanilla JavaScript (ES Modules) |
+| **Visual Charts**   | Chart.js 4.4.7 (pinned CDN)                                  |
+| **Auth & Database** | Supabase Auth (Email, Google) + Supabase PostgreSQL          |
+| **Encryption**      | Node.js `crypto` AES-256-GCM with user-ID AAD binding        |
+| **Backend & API**   | Node.js Express 4 + Zod schema validation + Helmet           |
+| **Serverless Host** | Vercel Serverless Functions (`api/index.js` + `vercel.json`) |
+| **AI Provider**     | Google Gemini (User BYOK via `x-goog-api-key` header)        |
 
 ---
 

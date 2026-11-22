@@ -95,6 +95,28 @@ btnToggleMask.addEventListener('click', () => {
 });
 
 /**
+ * Safely parses response JSON with fallback to plain text/HTML error detection.
+ * Prevents "Unexpected token 'T', "The page c"... is not valid JSON" crashes.
+ */
+async function safeParseResponse(res) {
+  let data = null;
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    data = await res.json().catch(() => null);
+  } else {
+    const text = await res.text().catch(() => '');
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = null;
+      }
+    }
+  }
+  return data;
+}
+
+/**
  * Fetch Key Status from Backend API
  */
 async function fetchKeyStatus() {
@@ -106,11 +128,18 @@ async function fetchKeyStatus() {
       }
     });
 
+    const data = await safeParseResponse(res);
+
     if (!res.ok) {
-      throw new Error(`Failed to check key status (${res.status})`);
+      throw new Error(
+        data?.message ||
+          (res.status === 404
+            ? 'Key Vault API endpoint not found (404).'
+            : `Failed to check key status (${res.status})`)
+      );
     }
 
-    currentKeyStatus = await res.json();
+    currentKeyStatus = data;
     renderState();
   } catch (err) {
     showAlert(err.message || 'Unable to connect to key vault service.');
@@ -217,9 +246,16 @@ async function submitKey(e) {
       body: JSON.stringify({ apiKey: rawKey })
     });
 
-    const data = await res.json();
+    const data = await safeParseResponse(res);
     if (!res.ok) {
-      throw new Error(data.message || 'Key validation failed.');
+      throw new Error(
+        data?.message ||
+          (res.status === 404
+            ? 'Key Vault API endpoint not found (404). Please ensure the backend server is deployed and running.'
+            : res.status === 502 || res.status === 504
+              ? 'Backend service temporarily unavailable. Please try again in a moment.'
+              : `Key validation failed with status ${res.status}.`)
+      );
     }
 
     currentKeyStatus = data;
@@ -263,8 +299,15 @@ async function testKey() {
       }
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Validation request failed.');
+    const data = await safeParseResponse(res);
+    if (!res.ok) {
+      throw new Error(
+        data?.message ||
+          (res.status === 404
+            ? 'Key test API endpoint not found (404).'
+            : `Validation request failed with status ${res.status}.`)
+      );
+    }
 
     currentKeyStatus.status = data.status;
     currentKeyStatus.validatedAt = data.validatedAt;
@@ -310,7 +353,10 @@ async function confirmDeleteKey() {
       }
     });
 
-    if (!res.ok) throw new Error('Failed to delete key.');
+    const data = await safeParseResponse(res);
+    if (!res.ok) {
+      throw new Error(data?.message || `Failed to delete key with status ${res.status}.`);
+    }
 
     currentKeyStatus = { hasKey: false, last4: null, status: null, validatedAt: null };
     closeDeleteModal();

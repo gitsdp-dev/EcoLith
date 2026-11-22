@@ -20,7 +20,7 @@ if (!supabaseUrl || !supabaseServiceRoleKey) {
  * Bypasses RLS to call security definer functions and perform admin tasks.
  */
 export const supabaseAdmin = createClient(
-  supabaseUrl || 'https://placeholder-project.supabase.co',
+  supabaseUrl || 'https://triwyjoaeglrolyutkef.supabase.co',
   supabaseServiceRoleKey || 'placeholder-service-role-key',
   {
     auth: {

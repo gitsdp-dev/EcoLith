@@ -119,7 +119,9 @@
   flex-direction: column;
   justify-content: space-between;
   gap: var(--spacing-4);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .recovery-card:hover {

@@ -294,7 +294,11 @@ export function renderCharts(scans = [], metrics) {
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { color: textColor, boxWidth: 12, font: { weight: 'bold', family: 'Space Grotesk' } }
+            labels: {
+              color: textColor,
+              boxWidth: 12,
+              font: { weight: 'bold', family: 'Space Grotesk' }
+            }
           }
         },
         cutout: '65%'
