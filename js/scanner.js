@@ -39,6 +39,7 @@ const btnEmptyRetake = document.getElementById('btn-empty-retake');
 const confidencePill = document.getElementById('confidence-pill');
 const editFoodName = document.getElementById('edit-food-name');
 const editFoodCategory = document.getElementById('edit-food-category');
+const editCondition = document.getElementById('edit-condition');
 const editWasteCategory = document.getElementById('edit-waste-category');
 const editQuantity = document.getElementById('edit-quantity');
 const editQuantityUnit = document.getElementById('edit-quantity-unit');
@@ -48,6 +49,19 @@ const reusePillsList = document.getElementById('reuse-pills-list');
 const btnConfirmScan = document.getElementById('btn-confirm-scan');
 const btnDiscardScan = document.getElementById('btn-discard-scan');
 const formErrorNotice = document.getElementById('form-error-notice');
+
+// Condition & Safety Assessment Elements
+const conditionAssessmentCard = document.getElementById('condition-assessment-card');
+const conditionGradeBadge = document.getElementById('condition-grade-badge');
+const wasteTypePill = document.getElementById('waste-type-pill');
+const reusabilityScoreText = document.getElementById('reusability-score-text');
+const reusabilityMeterFill = document.getElementById('reusability-meter-fill');
+const conditionDetailsText = document.getElementById('condition-details-text');
+const foodSafetyBanner = document.getElementById('food-safety-banner');
+const industrialSafetyBanner = document.getElementById('industrial-safety-banner');
+const hazardAlertsBanner = document.getElementById('hazard-alerts-banner');
+const hazardAlertsList = document.getElementById('hazard-alerts-list');
+const reuseTipsHeading = document.getElementById('reuse-tips-heading');
 
 // Success Action Elements
 const btnScanAnother = document.getElementById('btn-scan-another');
@@ -152,7 +166,6 @@ function stopCamera() {
  */
 async function startCamera() {
   try {
-    // Reset any previous capture preview
     capturedImagePreview.classList.add('is-hidden');
     viewfinderStandby.classList.add('is-hidden');
     btnRetake.classList.add('is-hidden');
@@ -206,12 +219,14 @@ function captureFrame() {
 
 /**
  * Renders an emerald green bounding box overlay with pinned tag and corner brackets.
+ *
  * @param {HTMLElement} container - DOM container for overlay
  * @param {number[]} box - [ymin, xmin, ymax, xmax] normalized (0 to 1000)
- * @param {string} label - Name of detected food item
+ * @param {string} label - Name of detected item
  * @param {number} confidence - AI detection confidence (0.0 to 1.0)
+ * @param {string} [conditionText] - Optional condition or reusability tag
  */
-function drawDetectionBoundingBoxes(container, box, label, confidence) {
+function drawDetectionBoundingBoxes(container, box, label, confidence, conditionText = '') {
   if (!container) return;
   container.innerHTML = '';
   if (!box || !Array.isArray(box) || box.length !== 4) return;
@@ -232,7 +247,8 @@ function drawDetectionBoundingBoxes(container, box, label, confidence) {
   const tagEl = document.createElement('div');
   tagEl.className = 'ai-box-tag';
   const confText = Math.round((confidence || 0.85) * 100);
-  tagEl.innerHTML = `<span>🟩</span> <span>${escapeHtml(label || 'Organic Waste')}</span> <span class="ai-box-confidence">${confText}%</span>`;
+  const condBadge = conditionText ? ` • ${escapeHtml(conditionText)}` : '';
+  tagEl.innerHTML = `<span>🟩</span> <span>${escapeHtml(label || 'Material')}${condBadge}</span> <span class="ai-box-confidence">${confText}%</span>`;
   boxEl.appendChild(tagEl);
 
   // Corner brackets
@@ -253,13 +269,12 @@ function drawDetectionBoundingBoxes(container, box, label, confidence) {
 }
 
 /**
- * Handles image processing and sends to backend for AI classification.
+ * Handles image processing and sends to backend for universal AI classification.
  * @param {string} dataUrl - Downscaled JPEG base64 data URL
  */
 async function processCapturedImage(dataUrl) {
   currentImageDataUrl = dataUrl;
 
-  // Show captured image preview in viewfinder
   capturedImagePreview.src = dataUrl;
   capturedImagePreview.classList.remove('is-hidden');
   viewfinderStandby.classList.add('is-hidden');
@@ -268,7 +283,6 @@ async function processCapturedImage(dataUrl) {
   btnCapture.classList.add('is-hidden');
   btnRetake.classList.remove('is-hidden');
 
-  // Show analyzing spinner
   analyzingOverlay.classList.remove('is-hidden');
 
   try {
@@ -276,14 +290,14 @@ async function processCapturedImage(dataUrl) {
     currentAiAnalysis = result;
     analyzingOverlay.classList.add('is-hidden');
 
-    // Draw live green box in viewfinder preview if object detected
     const firstItem = result.items?.[0];
     if (firstItem && firstItem.bounding_box && viewfinderDetectionOverlay) {
       drawDetectionBoundingBoxes(
         viewfinderDetectionOverlay,
         firstItem.bounding_box,
         firstItem.food_name,
-        firstItem.confidence
+        firstItem.confidence,
+        firstItem.condition ? firstItem.condition.replace(/_/g, ' ') : ''
       );
       viewfinderDetectionOverlay.classList.remove('is-hidden');
     }
@@ -318,144 +332,202 @@ async function processCapturedImage(dataUrl) {
 
 /**
  * Populates and displays the Confirmation & Correction Screen.
- * Handles both detected waste and empty scans with high fidelity.
+ * Handles organic food waste and inorganic industrial, mechanical, and electronic materials.
  * @param {object} analysis - Validated AI output
  */
 async function showConfirmationScreen(analysis) {
   const item = analysis.items?.[0];
 
-  // Set thumbnail in inspector
   scanThumbnail.src = currentImageDataUrl;
 
-  // Case 1: Empty Scan / No food waste detected
+  // Case 1: Empty Scan / No item detected
   if (!item || !item.food_name) {
     if (emptyScanNotice) emptyScanNotice.classList.remove('is-hidden');
     if (aiInspectorCard) aiInspectorCard.classList.add('is-hidden');
+    if (conditionAssessmentCard) conditionAssessmentCard.classList.add('is-hidden');
     if (detectionBoxesLayer) detectionBoxesLayer.innerHTML = '';
 
     confidencePill.textContent = '0% Detected';
     confidencePill.style.backgroundColor = '#4b5563';
     confidencePill.style.color = '#ffffff';
 
-    // Clear all fields per user instructions
     editFoodName.value = '';
     editFoodCategory.value = '';
     editWasteCategory.value = '';
     editQuantity.value = '';
     editQuantityUnit.value = '';
+    if (editCondition) editCondition.value = 'reusable_intact';
 
     correctionIndicator.classList.remove('visible');
     formErrorNotice.classList.add('is-hidden');
 
-    // Clear recycling and reuse suggestions
     recoveryPreviewList.innerHTML =
-      '<p class="text-xs text-muted" style="padding: var(--spacing-2) 0;">No circular recovery pathways (no organic waste identified in image).</p>';
+      '<p class="text-xs text-muted" style="padding: var(--spacing-2) 0;">No circular recovery pathways (no material identified in image).</p>';
     reusePillsList.innerHTML =
-      '<span class="text-xs text-muted">No reuse ideas (no food waste detected).</span>';
+      '<span class="text-xs text-muted">No reuse ideas (no object detected).</span>';
 
-    // Disable Save button
     btnConfirmScan.disabled = true;
-    btnConfirmScan.textContent = 'No Waste Detected to Save';
+    btnConfirmScan.textContent = 'No Material Detected to Save';
 
-    // Transition UI
     activeScannerSection.classList.add('is-hidden');
     confirmationSection.classList.remove('is-hidden');
     confirmationSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return;
   }
 
-  // Case 2: Organic waste identified
+  // Case 2: Item identified
   if (emptyScanNotice) emptyScanNotice.classList.add('is-hidden');
   if (aiInspectorCard) aiInspectorCard.classList.remove('is-hidden');
+  if (conditionAssessmentCard) conditionAssessmentCard.classList.remove('is-hidden');
   btnConfirmScan.disabled = false;
   btnConfirmScan.textContent = 'Confirm & Save Scan';
 
   originalAiItem = {
     food_name: item.food_name,
     food_category: item.food_category,
-    waste_category: item.waste_category
+    waste_category: item.waste_category,
+    condition: item.condition
   };
   userCorrected = false;
 
   // Confidence pill
-  const pct = Math.round((item.confidence || 0.85) * 100);
-  confidencePill.textContent = `${pct}% AI Confidence`;
-  confidencePill.style.backgroundColor = '';
-  confidencePill.style.color = '';
+  const confidencePercent = Math.round((item.confidence || 0.85) * 100);
+  confidencePill.textContent = `${confidencePercent}% AI Confidence`;
+  if (confidencePercent >= 80) {
+    confidencePill.style.backgroundColor = '#00ff66';
+    confidencePill.style.color = '#000000';
+  } else if (confidencePercent >= 50) {
+    confidencePill.style.backgroundColor = '#eab308';
+    confidencePill.style.color = '#000000';
+  } else {
+    confidencePill.style.backgroundColor = '#ef4444';
+    confidencePill.style.color = '#ffffff';
+  }
 
-  // Draw Live Green Bounding Box on Preview
-  if (item.bounding_box) {
+  // Condition Grade & Badging
+  const condition = item.condition || 'reusable_intact';
+  const conditionMeta = {
+    new_surplus: { label: 'New / Unused Surplus', class: 'condition-new' },
+    reusable_intact: { label: 'Reusable Intact', class: 'condition-intact' },
+    minor_wear_refurbishable: { label: 'Minor Wear (Refurbishable)', class: 'condition-refurb' },
+    damaged_repairable: { label: 'Damaged (Repairable)', class: 'condition-repair' },
+    scrap_recyclable: { label: 'Scrap Only (Recyclable)', class: 'condition-scrap' },
+    hazardous_damaged: { label: 'Hazardous / Damaged', class: 'condition-hazard' },
+    degraded_end_of_life: { label: 'Degraded / End of Life', class: 'condition-scrap' }
+  }[condition] || { label: condition.replace(/_/g, ' '), class: 'condition-intact' };
+
+  if (conditionGradeBadge) {
+    conditionGradeBadge.textContent = conditionMeta.label;
+    conditionGradeBadge.className = `condition-badge ${conditionMeta.class}`;
+  }
+
+  if (editCondition) {
+    editCondition.value = condition;
+  }
+
+  // Waste Type Pill (Organic vs Inorganic)
+  const isOrganic = item.waste_type === 'organic';
+  if (wasteTypePill) {
+    wasteTypePill.textContent = isOrganic
+      ? '🌱 Organic Residue'
+      : '⚙️ Inorganic Hardware / Material';
+    wasteTypePill.className = isOrganic ? 'badge badge-success' : 'badge badge-primary';
+  }
+
+  // Reusability Score Index Meter
+  const score = typeof item.reusability_score === 'number' ? item.reusability_score : 80;
+  if (reusabilityScoreText) {
+    const scoreTier =
+      score >= 80
+        ? 'High Reusability'
+        : score >= 50
+          ? 'Medium Reusability (Servicing Recommended)'
+          : 'Low Reusability (Scrap / Raw Material)';
+    reusabilityScoreText.textContent = `${score}% (${scoreTier})`;
+  }
+  if (reusabilityMeterFill) {
+    reusabilityMeterFill.style.width = `${score}%`;
+  }
+
+  // Condition details inspection text
+  if (conditionDetailsText) {
+    conditionDetailsText.textContent =
+      item.condition_details ||
+      (isOrganic
+        ? 'Organic biomass assessed for soil composting and bio-refining.'
+        : 'Material condition inspected for reusability, tolerances, and component harvesting.');
+  }
+
+  // Toggle Context-aware Safety Notices
+  if (foodSafetyBanner && industrialSafetyBanner) {
+    if (isOrganic) {
+      foodSafetyBanner.classList.remove('is-hidden');
+      industrialSafetyBanner.classList.add('is-hidden');
+    } else {
+      foodSafetyBanner.classList.add('is-hidden');
+      industrialSafetyBanner.classList.remove('is-hidden');
+    }
+  }
+
+  // Hazard alerts
+  if (hazardAlertsBanner && hazardAlertsList) {
+    if (Array.isArray(item.hazard_alerts) && item.hazard_alerts.length > 0) {
+      hazardAlertsList.innerHTML = '';
+      item.hazard_alerts.forEach((alertMsg) => {
+        const li = document.createElement('li');
+        li.textContent = alertMsg;
+        hazardAlertsList.appendChild(li);
+      });
+      hazardAlertsBanner.classList.remove('is-hidden');
+    } else {
+      hazardAlertsBanner.classList.add('is-hidden');
+    }
+  }
+
+  // Dynamic heading for reuse tips
+  if (reuseTipsHeading) {
+    reuseTipsHeading.textContent = isOrganic
+      ? 'Household & Kitchen Reuse Tips'
+      : 'Workshop, Engineering & Component Salvage Ideas';
+  }
+
+  // Draw 2D Bounding Box in Inspector
+  if (item.bounding_box && detectionBoxesLayer) {
     drawDetectionBoundingBoxes(
       detectionBoxesLayer,
       item.bounding_box,
       item.food_name,
-      item.confidence
+      item.confidence,
+      conditionMeta.label
     );
     if (detectionCoordsBadge) {
-      const [ymin, xmin, ymax, xmax] = item.bounding_box;
-      detectionCoordsBadge.textContent = `Target Box: [${ymin}, ${xmin}, ${ymax}, ${xmax}]`;
-    }
-  } else {
-    if (detectionBoxesLayer) detectionBoxesLayer.innerHTML = '';
-    if (detectionCoordsBadge) {
-      detectionCoordsBadge.textContent = `Visual scan confirmed`;
+      detectionCoordsBadge.textContent = `Target: [${item.bounding_box.join(', ')}]`;
     }
   }
 
-  // Populate inputs with precise AI detection values
+  // Populate Form Fields
   editFoodName.value = item.food_name || '';
 
-  // Food Category select matching (intelligent fallback mapping)
-  const detectedCategory = (item.food_category || 'vegetable').toLowerCase().trim();
-  let matchedCategory = 'other';
-  const categoryOptions = Array.from(editFoodCategory.options).map((opt) => opt.value);
-  if (categoryOptions.includes(detectedCategory)) {
-    matchedCategory = detectedCategory;
-  } else if (detectedCategory.includes('fruit')) {
-    matchedCategory = 'fruit';
-  } else if (detectedCategory.includes('veg')) {
-    matchedCategory = 'vegetable';
-  } else if (
-    detectedCategory.includes('plant') ||
-    detectedCategory.includes('aloe') ||
-    detectedCategory.includes('leaf')
-  ) {
-    matchedCategory = 'plant_material';
-  } else if (detectedCategory.includes('bread') || detectedCategory.includes('bake')) {
-    matchedCategory = 'bakery';
-  } else if (detectedCategory.includes('grain') || detectedCategory.includes('rice')) {
-    matchedCategory = 'grain';
-  } else if (detectedCategory.includes('dairy')) {
-    matchedCategory = 'dairy';
-  } else if (
-    detectedCategory.includes('meat') ||
-    detectedCategory.includes('fish') ||
-    detectedCategory.includes('egg')
-  ) {
-    matchedCategory = 'meat_fish';
-  } else if (
-    detectedCategory.includes('meal') ||
-    detectedCategory.includes('cook') ||
-    detectedCategory.includes('prepar')
-  ) {
-    matchedCategory = 'prepared_food';
-  } else if (
-    detectedCategory.includes('coffee') ||
-    detectedCategory.includes('tea') ||
-    detectedCategory.includes('beverag')
-  ) {
-    matchedCategory = 'beverage';
+  // Select matching category option
+  const matchedCategory = item.food_category || (isOrganic ? 'vegetable' : 'mechanical_hardware');
+  let optionFound = false;
+  for (let i = 0; i < editFoodCategory.options.length; i++) {
+    if (editFoodCategory.options[i].value === matchedCategory) {
+      editFoodCategory.selectedIndex = i;
+      optionFound = true;
+      break;
+    }
   }
-  editFoodCategory.value = matchedCategory;
+  if (!optionFound) {
+    editFoodCategory.value = isOrganic ? 'other' : 'mechanical_hardware';
+  }
 
   // Waste category
   editWasteCategory.value = item.waste_category || 'unavoidable_organic';
 
-  // Realistic quantity & unit estimation (e.g. 10 g for a leaf instead of 1.0 kg)
-  editQuantity.value = String(
-    item.estimated_quantity != null ? item.estimated_quantity : '1'
-  );
-  editQuantityUnit.value = item.estimated_unit || 'g';
+  // Realistic quantity & unit estimation
+  editQuantity.value = String(item.estimated_quantity != null ? item.estimated_quantity : '1');
+  editQuantityUnit.value = item.estimated_unit || (isOrganic ? 'g' : 'piece');
 
   correctionIndicator.classList.remove('visible');
   formErrorNotice.classList.add('is-hidden');
@@ -471,7 +543,6 @@ async function showConfirmationScreen(analysis) {
     item.recovery_options
   );
 
-  // Transition UI
   activeScannerSection.classList.add('is-hidden');
   confirmationSection.classList.remove('is-hidden');
   confirmationSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -490,7 +561,7 @@ async function renderRecoveryOptions(foodName, wasteCategory, foodCategory, aiOp
 
   optionsToRender.forEach((opt) => {
     const meta = RECOVERY_METHOD_METADATA[opt.method] || {
-      label: opt.method,
+      label: opt.method.replace(/_/g, ' '),
       badgeClass: 'badge-primary',
       icon: '♻️'
     };
@@ -505,6 +576,15 @@ async function renderRecoveryOptions(foodName, wasteCategory, foodCategory, aiOp
     tag.className = `badge ${meta.badgeClass}`;
     tag.textContent = `${meta.icon} ${meta.label}`;
     topRow.appendChild(tag);
+
+    if (opt.estimatedValue || opt.estimated_value) {
+      const valBadge = document.createElement('span');
+      valBadge.className = 'text-xs text-muted';
+      valBadge.style.fontWeight = 'bold';
+      valBadge.textContent = opt.estimatedValue || opt.estimated_value;
+      topRow.appendChild(valBadge);
+    }
+
     card.appendChild(topRow);
 
     const reason = document.createElement('p');
@@ -515,7 +595,7 @@ async function renderRecoveryOptions(foodName, wasteCategory, foodCategory, aiOp
     if (opt.requirements) {
       const req = document.createElement('p');
       req.className = 'recovery-requirements';
-      req.textContent = `Conditions: ${opt.requirements}`;
+      req.textContent = `Handling & Conditions: ${opt.requirements}`;
       card.appendChild(req);
     }
 
@@ -524,14 +604,14 @@ async function renderRecoveryOptions(foodName, wasteCategory, foodCategory, aiOp
 }
 
 /**
- * Renders culinary or home reuse suggestions.
+ * Renders repurposing or salvage suggestions.
  */
 function renderReuseSuggestions(suggestions) {
   reusePillsList.innerHTML = '';
   if (!suggestions || suggestions.length === 0) {
     const emptyPill = document.createElement('span');
     emptyPill.className = 'text-xs text-muted';
-    emptyPill.textContent = 'No specific household reuse tips for this item.';
+    emptyPill.textContent = 'No specific repurposing suggestions for this item.';
     reusePillsList.appendChild(emptyPill);
     return;
   }
@@ -553,11 +633,13 @@ function checkUserModifications() {
   const currentName = editFoodName.value.trim();
   const currentCat = editFoodCategory.value.trim();
   const currentWaste = editWasteCategory.value;
+  const currentCond = editCondition ? editCondition.value : '';
 
   if (
     currentName !== originalAiItem.food_name ||
     currentCat !== originalAiItem.food_category ||
-    currentWaste !== originalAiItem.waste_category
+    currentWaste !== originalAiItem.waste_category ||
+    (currentCond && currentCond !== originalAiItem.condition)
   ) {
     userCorrected = true;
     correctionIndicator.classList.add('visible');
@@ -574,13 +656,13 @@ async function handleConfirmScan() {
   formErrorNotice.classList.add('is-hidden');
 
   const foodName = editFoodName.value.trim();
-  const foodCategory = editFoodCategory.value.trim() || 'organic';
+  const foodCategory = editFoodCategory.value.trim() || 'mechanical_hardware';
   const wasteCategory = editWasteCategory.value;
   const quantity = parseFloat(editQuantity.value);
   const quantityUnit = editQuantityUnit.value;
 
   if (!foodName) {
-    formErrorNotice.textContent = 'Please enter a valid food or material name.';
+    formErrorNotice.textContent = 'Please enter a valid item or material name.';
     formErrorNotice.classList.remove('is-hidden');
     editFoodName.focus();
     return;
@@ -607,6 +689,18 @@ async function handleConfirmScan() {
 
     const aiConfidence = currentAiAnalysis?.items?.[0]?.confidence || 0.85;
 
+    // Database check constraint compatibility mapping for quantity_unit
+    let dbQuantityUnit = quantityUnit;
+    let dbQuantity = quantity;
+    if (quantityUnit === 'unit') {
+      dbQuantityUnit = 'piece';
+    } else if (quantityUnit === 'ton') {
+      dbQuantity = Math.round(quantity * 1000 * 100) / 100;
+      dbQuantityUnit = 'kg';
+    } else if (quantityUnit === 'm') {
+      dbQuantityUnit = 'piece';
+    }
+
     // 1. Insert into public.food_scans
     const { data: scanRow, error: scanInsertError } = await supabase
       .from('food_scans')
@@ -615,8 +709,8 @@ async function handleConfirmScan() {
         food_name: foodName,
         food_category: foodCategory,
         waste_category: wasteCategory,
-        quantity: quantity,
-        quantity_unit: quantityUnit,
+        quantity: dbQuantity,
+        quantity_unit: dbQuantityUnit,
         ai_confidence: aiConfidence,
         user_corrected: userCorrected
       })
@@ -637,7 +731,8 @@ async function handleConfirmScan() {
 
     if (recoveryOptions && recoveryOptions.length > 0) {
       for (const opt of recoveryOptions) {
-        const method = opt.method || opt.recovery_method || opt.recoveryMethod || 'composting';
+        const method =
+          opt.method || opt.recovery_method || opt.recoveryMethod || 'material_recovery';
         await createRecoveryRecord({
           scanId: scanRow.id,
           userId: user.id,
@@ -651,9 +746,9 @@ async function handleConfirmScan() {
       await createRecoveryRecord({
         scanId: scanRow.id,
         userId: user.id,
-        recoveryMethod: 'composting',
-        reason: 'Organic plant material decomposes into beneficial soil compost.',
-        estimatedValue: 'Restores organic garden soil fertility',
+        recoveryMethod: 'material_recovery',
+        reason: 'Circular material recovery pathway.',
+        estimatedValue: 'Material diversion',
         status: 'suggested'
       });
     }
@@ -685,73 +780,48 @@ function resetScanner() {
   userCorrected = false;
 
   stopCamera();
-
   capturedImagePreview.src = '';
   capturedImagePreview.classList.add('is-hidden');
-  viewfinderStandby.classList.remove('is-hidden');
-  btnRetake.classList.add('is-hidden');
-  btnStartCamera.classList.remove('is-hidden');
-  btnUpload.classList.remove('is-hidden');
-
   if (viewfinderDetectionOverlay) {
     viewfinderDetectionOverlay.innerHTML = '';
     viewfinderDetectionOverlay.classList.add('is-hidden');
   }
-  if (detectionBoxesLayer) {
-    detectionBoxesLayer.innerHTML = '';
-  }
+  if (detectionBoxesLayer) detectionBoxesLayer.innerHTML = '';
 
   confirmationSection.classList.add('is-hidden');
   successSection.classList.add('is-hidden');
   activeScannerSection.classList.remove('is-hidden');
+  viewfinderStandby.classList.remove('is-hidden');
+  btnRetake.classList.add('is-hidden');
+  btnCapture.classList.add('is-hidden');
+  btnStartCamera.classList.remove('is-hidden');
+  btnUpload.classList.remove('is-hidden');
+  formErrorNotice.classList.add('is-hidden');
+  fileInput.value = '';
 }
 
 /**
- * Initializes the scanner module and event listeners.
+ * Setup DOM event listeners.
  */
-export async function initScanner() {
-  // Check key status first (BYOK rule: No key, no scan)
-  const keyInfo = await verifyKeyStatus();
+function setupEventListeners() {
+  btnStartCamera?.addEventListener('click', startCamera);
+  btnCapture?.addEventListener('click', captureFrame);
+  btnCancelCamera?.addEventListener('click', stopCamera);
+  btnRetake?.addEventListener('click', resetScanner);
+  btnScanAnother?.addEventListener('click', resetScanner);
+  btnDiscardScan?.addEventListener('click', resetScanner);
+  btnEmptyRetake?.addEventListener('click', resetScanner);
 
-  if (!keyInfo.hasKey || keyInfo.status !== 'valid') {
-    lockedStateSection.classList.remove('is-hidden');
-    activeScannerSection.classList.add('is-hidden');
-    confirmationSection.classList.add('is-hidden');
-    successSection.classList.add('is-hidden');
-    return;
-  }
-
-  // Key is valid -> Show active scanner
-  lockedStateSection.classList.add('is-hidden');
-  activeScannerSection.classList.remove('is-hidden');
-
-  // Event Listeners
-  btnStartCamera.addEventListener('click', startCamera);
-  btnCapture.addEventListener('click', captureFrame);
-  btnCancelCamera.addEventListener('click', stopCamera);
-
-  btnRetake.addEventListener('click', () => {
-    resetScanner();
-    startCamera();
-  });
-
-  if (btnEmptyRetake) {
-    btnEmptyRetake.addEventListener('click', () => {
-      resetScanner();
-      startCamera();
-    });
-  }
-
-  btnUpload.addEventListener('click', () => {
+  btnUpload?.addEventListener('click', () => {
     fileInput.click();
   });
 
-  fileInput.addEventListener('change', (e) => {
+  fileInput?.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      alert('Please select a JPG, PNG, or WebP image.');
+      alert('Please upload a valid image (JPEG, PNG, or WebP).');
       return;
     }
 
@@ -759,43 +829,80 @@ export async function initScanner() {
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        const downscaled = downscaleImage(img, 1024, 0.8);
-        processCapturedImage(downscaled);
+        const dataUrl = downscaleImage(img, 1024, 0.8);
+        processCapturedImage(dataUrl);
       };
       img.src = event.target.result;
     };
     reader.readAsDataURL(file);
-    // Reset file input value so same file can be re-selected if needed
-    fileInput.value = '';
   });
 
-  // Track user edits
-  editFoodName.addEventListener('input', checkUserModifications);
-  editFoodCategory.addEventListener('change', checkUserModifications);
-  editWasteCategory.addEventListener('change', async () => {
+  editFoodName?.addEventListener('input', checkUserModifications);
+  editFoodCategory?.addEventListener('change', async () => {
     checkUserModifications();
-    await renderRecoveryOptions(
-      editFoodName.value,
-      editWasteCategory.value,
-      editFoodCategory.value
-    );
-  });
-
-  btnConfirmScan.addEventListener('click', handleConfirmScan);
-
-  btnDiscardScan.addEventListener('click', () => {
-    if (confirm('Discard this scan? The photo and classification will not be saved.')) {
-      resetScanner();
+    if (editFoodName.value.trim()) {
+      await renderRecoveryOptions(
+        editFoodName.value.trim(),
+        editWasteCategory.value,
+        editFoodCategory.value
+      );
     }
   });
 
-  btnScanAnother.addEventListener('click', resetScanner);
+  editCondition?.addEventListener('change', () => {
+    checkUserModifications();
+    const cond = editCondition.value;
+    const condMeta = {
+      new_surplus: { label: 'New / Unused Surplus', class: 'condition-new' },
+      reusable_intact: { label: 'Reusable Intact', class: 'condition-intact' },
+      minor_wear_refurbishable: { label: 'Minor Wear (Refurbishable)', class: 'condition-refurb' },
+      damaged_repairable: { label: 'Damaged (Repairable)', class: 'condition-repair' },
+      scrap_recyclable: { label: 'Scrap Only (Recyclable)', class: 'condition-scrap' },
+      hazardous_damaged: { label: 'Hazardous / Damaged', class: 'condition-hazard' },
+      degraded_end_of_life: { label: 'Degraded / End of Life', class: 'condition-scrap' }
+    }[cond] || { label: cond.replace(/_/g, ' '), class: 'condition-intact' };
 
-  // Clean up camera on tab leave / unload
-  window.addEventListener('beforeunload', stopCamera);
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      stopCamera();
+    if (conditionGradeBadge) {
+      conditionGradeBadge.textContent = condMeta.label;
+      conditionGradeBadge.className = `condition-badge ${condMeta.class}`;
     }
   });
+
+  editWasteCategory?.addEventListener('change', async () => {
+    checkUserModifications();
+    if (editFoodName.value.trim()) {
+      await renderRecoveryOptions(
+        editFoodName.value.trim(),
+        editWasteCategory.value,
+        editFoodCategory.value
+      );
+    }
+  });
+
+  btnConfirmScan?.addEventListener('click', handleConfirmScan);
+}
+
+/**
+ * Initializes the Scanner page.
+ */
+async function initScanner() {
+  const keyInfo = await verifyKeyStatus();
+
+  if (!keyInfo.hasKey || keyInfo.status === 'invalid') {
+    lockedStateSection?.classList.remove('is-hidden');
+    activeScannerSection?.classList.add('is-hidden');
+    return;
+  }
+
+  lockedStateSection?.classList.add('is-hidden');
+  activeScannerSection?.classList.remove('is-hidden');
+
+  setupEventListeners();
+}
+
+// Run on page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initScanner);
+} else {
+  initScanner();
 }

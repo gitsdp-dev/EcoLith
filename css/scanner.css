@@ -76,7 +76,9 @@
   right: 0;
   height: 2px;
   background: linear-gradient(90deg, transparent, #00ff66, #ccff00, transparent);
-  box-shadow: 0 0 10px #00ff66, 0 0 20px #ccff00;
+  box-shadow:
+    0 0 10px #00ff66,
+    0 0 20px #ccff00;
   animation: laserSweep 2.2s ease-in-out infinite alternate;
 }
 
@@ -123,8 +125,15 @@
 }
 
 @keyframes hudPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.3; transform: scale(0.75); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.75);
+  }
 }
 
 .guide-corner {
@@ -513,7 +522,9 @@
 .ai-detected-green-box {
   position: absolute;
   border: 2.5px solid #00ff66;
-  box-shadow: 0 0 16px rgba(0, 255, 102, 0.7), inset 0 0 14px rgba(0, 255, 102, 0.25);
+  box-shadow:
+    0 0 16px rgba(0, 255, 102, 0.7),
+    inset 0 0 14px rgba(0, 255, 102, 0.25);
   border-radius: 3px;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   animation: boxGlow 2s infinite alternate;
@@ -521,10 +532,14 @@
 
 @keyframes boxGlow {
   0% {
-    box-shadow: 0 0 12px rgba(0, 255, 102, 0.6), inset 0 0 8px rgba(0, 255, 102, 0.2);
+    box-shadow:
+      0 0 12px rgba(0, 255, 102, 0.6),
+      inset 0 0 8px rgba(0, 255, 102, 0.2);
   }
   100% {
-    box-shadow: 0 0 22px rgba(0, 255, 102, 0.9), inset 0 0 18px rgba(0, 255, 102, 0.35);
+    box-shadow:
+      0 0 22px rgba(0, 255, 102, 0.9),
+      inset 0 0 18px rgba(0, 255, 102, 0.35);
   }
 }
 
@@ -565,10 +580,26 @@
   border-color: #ffffff;
   border-style: solid;
 }
-.bracket-tl { top: -2px; left: -2px; border-width: 2px 0 0 2px; }
-.bracket-tr { top: -2px; right: -2px; border-width: 2px 2px 0 0; }
-.bracket-bl { bottom: -2px; left: -2px; border-width: 0 0 2px 2px; }
-.bracket-br { bottom: -2px; right: -2px; border-width: 0 2px 2px 0; }
+.bracket-tl {
+  top: -2px;
+  left: -2px;
+  border-width: 2px 0 0 2px;
+}
+.bracket-tr {
+  top: -2px;
+  right: -2px;
+  border-width: 2px 2px 0 0;
+}
+.bracket-bl {
+  bottom: -2px;
+  left: -2px;
+  border-width: 0 0 2px 2px;
+}
+.bracket-br {
+  bottom: -2px;
+  right: -2px;
+  border-width: 0 2px 2px 0;
+}
 
 .ai-inspector-meta {
   display: flex;
@@ -607,4 +638,144 @@
 .empty-scan-icon {
   font-size: 1.75rem;
   line-height: 1;
+}
+
+/* =============================================================================
+ * Universal & Inorganic Waste UI Extensions
+ * Condition Badges, Reusability Score Index, and Industrial Safety Notices
+ * ============================================================================= */
+
+.condition-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border: 1.5px solid var(--color-border);
+  box-shadow: 2px 2px 0px var(--color-border);
+}
+
+.condition-new {
+  background-color: #00ff66 !important;
+  color: #000000 !important;
+}
+
+.condition-intact {
+  background-color: var(--color-primary) !important;
+  color: #000000 !important;
+}
+
+.condition-refurb {
+  background-color: #38bdf8 !important;
+  color: #000000 !important;
+}
+
+.condition-repair {
+  background-color: #facc15 !important;
+  color: #000000 !important;
+}
+
+.condition-scrap {
+  background-color: #94a3b8 !important;
+  color: #000000 !important;
+}
+
+.condition-hazard {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+/* Reusability Score Index Meter */
+.reusability-meter-wrapper {
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  padding: var(--spacing-3);
+  box-shadow: 2px 2px 0px var(--color-border);
+  margin-top: var(--spacing-2);
+}
+
+.reusability-meter-bar {
+  width: 100%;
+  height: 10px;
+  background: #1e293b;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  position: relative;
+}
+
+.reusability-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444 0%, #facc15 50%, #00ff66 100%);
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Condition Details Card */
+.condition-details-card {
+  background-color: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  box-shadow: 2px 2px 0px var(--color-border);
+  padding: var(--spacing-3);
+  margin-top: var(--spacing-2);
+}
+
+.condition-details-title {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+
+/* Industrial Handling & Safety Banner */
+.industrial-safety-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  background-color: #2a1b02;
+  color: #fde047;
+  border: 2px solid #ca8a04;
+  box-shadow: 3px 3px 0px #000000;
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-3);
+}
+
+.industrial-safety-banner strong {
+  color: #fef08a;
+}
+
+/* Hazard Alerts Banner */
+.hazard-alerts-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  background-color: #2b0b0b;
+  color: #fca5a5;
+  border: 2px solid #ef4444;
+  box-shadow: 3px 3px 0px #000000;
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  margin-bottom: var(--spacing-3);
+}
+
+.hazard-alerts-banner strong {
+  color: #fecaca;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.hazard-alerts-list {
+  margin: 4px 0 0 16px;
+  padding: 0;
+  color: #fee2e2;
+}
+
+.hazard-alerts-list li {
+  margin-bottom: 2px;
 }

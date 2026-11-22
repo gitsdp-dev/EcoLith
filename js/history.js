@@ -7,13 +7,13 @@ const pageSize = 10;
 let currentUserId = null;
 
 /**
- * Waste category friendly labels and badges
+ * Waste category friendly labels and badges for universal circular streams
  */
 const CATEGORY_NAMES = {
-  edible_reusable: 'Edible & Reusable',
-  surplus_redistributable: 'Surplus Redistributable',
-  unavoidable_organic: 'Unavoidable Organic',
-  other_separate: 'Other / Non-Organic'
+  edible_reusable: 'Directly Reusable / Intact',
+  surplus_redistributable: 'Surplus / Refurbishable',
+  unavoidable_organic: 'Recyclable Scrap / Residue',
+  other_separate: 'Regulated / Hazardous Stream'
 };
 
 const CATEGORY_BADGES = {
@@ -175,6 +175,16 @@ export function renderHistoryPage() {
     const catBadge = document.createElement('span');
     catBadge.className = `badge ${CATEGORY_BADGES[scan.waste_category] || 'badge-primary'}`;
     catBadge.textContent = CATEGORY_NAMES[scan.waste_category] || scan.waste_category;
+
+    if (scan.food_category) {
+      const materialBadge = document.createElement('span');
+      materialBadge.className = 'badge';
+      materialBadge.style.background = '#1e293b';
+      materialBadge.style.color = '#38bdf8';
+      materialBadge.style.border = '1px solid #334155';
+      materialBadge.textContent = scan.food_category.replace(/_/g, ' ');
+      meta.appendChild(materialBadge);
+    }
 
     meta.appendChild(dateSpan);
     meta.appendChild(catBadge);

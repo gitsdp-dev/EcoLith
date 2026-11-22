@@ -1,12 +1,307 @@
 import { supabase } from './supabase.js';
 
 /**
- * Built-in circular resource recovery rules fallback (22 comprehensive rules).
- * Ensures instant, reliable recommendations for every type of food waste and user persona
- * (Home cooks, restaurants, bakeries, cafes, food banks, and municipal processors).
+ * Built-in circular resource recovery rules fallback.
+ * Strictly adheres to database check constraint recovery_method in
+ * ('reuse', 'redistribution', 'composting', 'biogas', 'pectin_recovery', 'material_recovery', 'separate_disposal')
+ * while providing comprehensive coverage for both organic and inorganic materials.
  */
 export const DEFAULT_RECOVERY_RULES = [
-  // 1. Citrus Peels / Rinds (Pectin Extraction)
+  // =========================================================================
+  // 1. INORGANIC: ELECTRONIC & ELECTRICAL (E-WASTE)
+  // =========================================================================
+  {
+    material_pattern:
+      'pcb|circuit|motherboard|logic board|microcontroller|integrated circuit|\\bic\\b|server board',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Use temperature-controlled hot air rework stations and ESD-safe grounding to desolder undamaged discrete components (FPGA, MOSFETs, tantalum capacitors, quartz crystals).',
+    explanation:
+      'High-density server and computer circuit boards contain functioning microprocessors, power ICs, and high-purity gold-plated pin headers suitable for component harvesting.',
+    estimated_resource_value: 'High ($15–$60 salvaged functional component value per board)',
+    category_group: 'electronics',
+    tier: 'community'
+  },
+  {
+    material_pattern:
+      'pcb|circuit|motherboard|logic board|e-waste|telecom board|ram stick|gold contact',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Consolidate in dry totes; route to ISO 14001 / R2 certified electronic scrap smelting and hydrometallurgical refining refineries; avoid open-flame burning.',
+    explanation:
+      'Printed circuit boards yield 100–300g gold, 1kg silver, and 100kg copper per metric ton, exceeding the yield of primary raw ore mining by 40-50x.',
+    estimated_resource_value: 'High ($3,500–$12,000/ton refined e-scrap yield)',
+    category_group: 'electronics',
+    tier: 'industrial'
+  },
+  {
+    material_pattern:
+      'battery|lithium|18650|lifepo4|li-ion|battery pack|cell pack|prismatic \\bcell\\b',
+    waste_category: 'other_separate',
+    recovery_method: 'separate_disposal',
+    requirements:
+      'Tape open terminals with non-conductive electrical tape; store in non-combustible sand or vermiculite containers; never puncture, crush, or heat.',
+    explanation:
+      'Spent lithium-ion battery cells undergo cryogenic shredding and hydrometallurgical leaching to recover battery-grade lithium carbonate, nickel sulfate, and cobalt.',
+    estimated_resource_value: 'High (Critical minerals security: Li, Co, Ni recovery)',
+    category_group: 'electronics',
+    tier: 'industrial'
+  },
+  {
+    material_pattern:
+      'electric motor|stepper motor|servo motor|bldc motor|alternator rotor|induction motor',
+    waste_category: 'edible_reusable',
+    recovery_method: 'reuse',
+    requirements:
+      'Measure phase winding resistance; inspect bearings for play; clean shaft and repack grease to restore operational specification.',
+    explanation:
+      'Industrial electric motors and precision steppers feature robust lamination stacks that can be rebuilt with new bearings and brushes for robotics and automation.',
+    estimated_resource_value: 'High ($25–$120 remanufactured motor replacement value)',
+    category_group: 'mechanical',
+    tier: 'community'
+  },
+  {
+    material_pattern:
+      'copper wire|electrical cable|wiring harness|copper winding|busbar|coaxial cable',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Mechanically strip outer PVC/rubber insulation with automated rotary wire strippers; keep bare bright copper (Millberry) segregated.',
+    explanation:
+      'Scrap electrical copper maintains 100% of its electrical conductivity upon remelting, requiring 85% less energy than producing virgin copper from chalcopyrite ore.',
+    estimated_resource_value: 'High ($6.50–$8.80/kg Bare Bright #1 copper scrap)',
+    category_group: 'metals',
+    tier: 'industrial'
+  },
+
+  // =========================================================================
+  // 2. INORGANIC: MECHANICAL & ENGINEERING HARDWARE
+  // =========================================================================
+  {
+    material_pattern:
+      'bearing|ball bearing|roller bearing|tapered bearing|pillow block|needle bearing',
+    waste_category: 'edible_reusable',
+    recovery_method: 'reuse',
+    requirements:
+      'Degrease in solvent wash; inspect raceway for micro-pitting or brinelling using dial indicator; repack with EP2 synthetic lithium grease.',
+    explanation:
+      'Quality 52100 chrome steel ball bearings with minor cosmetic wear can be inspected, cleaned, and redeployed in secondary low-speed conveyors or workshop equipment.',
+    estimated_resource_value: 'Medium ($5–$25 per refurbished precision bearing assembly)',
+    category_group: 'mechanical',
+    tier: 'community'
+  },
+  {
+    material_pattern: 'gear|sprocket|spline shaft|timing pulley|spur gear|bevel gear|helical gear',
+    waste_category: 'edible_reusable',
+    recovery_method: 'reuse',
+    requirements:
+      'Check pitch line wear and tooth flank backlash; re-machine root radius or induction harden for secondary mechanical drives.',
+    explanation:
+      'Carburized steel gears can be resurfaced or adapted with keyways for custom mechanical drives, prototype gearboxes, or agricultural repairs.',
+    estimated_resource_value: 'High ($20–$80 per remanufactured machine drive gear)',
+    category_group: 'mechanical',
+    tier: 'industrial'
+  },
+  {
+    material_pattern:
+      'bolt|fastener|screw|hex nut|stud|socket cap|machine screw|high tensile|grade 8.8|grade 10.9',
+    waste_category: 'edible_reusable',
+    recovery_method: 'reuse',
+    requirements:
+      'Clean in ultrasonic bath; check thread pitch with thread gauge; discard any stretched neck or stripped fasteners.',
+    explanation:
+      'High-strength structural and alloy steel fasteners can be segregated into hardware storage bin systems for maintenance and prototyping.',
+    estimated_resource_value: 'Medium ($0.20–$1.50 per sorted structural fastener)',
+    category_group: 'mechanical',
+    tier: 'household'
+  },
+  {
+    material_pattern:
+      'hydraulic cylinder|pneumatic cylinder|hydraulic valve|directional valve|spool valve|manifold',
+    waste_category: 'edible_reusable',
+    recovery_method: 'reuse',
+    requirements:
+      'Inspect chrome rod for scoring; hone cylinder bore; install replacement polyurethane U-cup seal and wiper kit; pressure test to 200 bar.',
+    explanation:
+      'Hydraulic rams and valves are engineered for multi-decade service life; seal rebuilds restore full operating pressure at 20% of new equipment cost.',
+    estimated_resource_value: 'High ($80–$300 cylinder rebuild value)',
+    category_group: 'mechanical',
+    tier: 'industrial'
+  },
+  {
+    material_pattern:
+      'carbide insert|toolholder|endmill|drill bit|tool steel|hss|cutting tool|milling insert',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Collect in segregated tungsten carbide scrap canisters; send to specialized zinc-process or acid digestion recycling refiners.',
+    explanation:
+      'Spent carbide milling inserts contain 90%+ tungsten carbide (WC) and cobalt binder, yielding high scrap value and conserving critical tungsten reserves.',
+    estimated_resource_value: 'High ($18–$28/kg solid tungsten carbide scrap)',
+    category_group: 'metals',
+    tier: 'industrial'
+  },
+
+  // =========================================================================
+  // 3. INORGANIC: INDUSTRIAL SCRAP METALS
+  // =========================================================================
+  {
+    material_pattern:
+      'aluminum extrusion|structural aluminum|t-slot|6061|6063|aluminum plate|aluminum sheet|billet',
+    waste_category: 'edible_reusable',
+    recovery_method: 'reuse',
+    requirements:
+      'Inspect for squareness and straightness; remove steel fasteners and chips; square cut ends on cold saw.',
+    explanation:
+      'Modular 6061/6063 aluminum T-slot extrusions can be immediately repurposed to construct 3D printer frames, robotics testbeds, safety guarding, and workshop tables.',
+    estimated_resource_value: 'High ($12–$45/meter structural framing value)',
+    category_group: 'metals',
+    tier: 'community'
+  },
+  {
+    material_pattern:
+      'aluminum scrap|aluminum turnings|aluminum chips|aluminum shavings|aluminum can',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Centrifuge to remove water-soluble machining coolant; briquette turnings to minimize oxidation during induction furnace melting.',
+    explanation:
+      'Recycling clean aluminum scraps requires only 5% of the electrical energy required to produce primary aluminum from bauxite ore, reducing 95% of greenhouse emissions.',
+    estimated_resource_value: 'High ($1.80–$2.50/kg segregated aluminum scrap)',
+    category_group: 'metals',
+    tier: 'industrial'
+  },
+  {
+    material_pattern:
+      'copper scrap|copper pipe|copper tube|copper bar|brass fitting|bronze bushing|plumbing scrap',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Cut away lead solder joints; drain fluids; segregate clean unalloyed copper from yellow brass (Cu-Zn) and bronze (Cu-Sn).',
+    explanation:
+      'Scrap copper and copper alloys are 100% recyclable without any loss of ductility or thermal/electrical conductivity, serving as premier feedstock for foundries.',
+    estimated_resource_value: 'High ($5.50–$8.20/kg clean copper and brass scrap)',
+    category_group: 'metals',
+    tier: 'industrial'
+  },
+  {
+    material_pattern:
+      'stainless steel|304 stainless|316 stainless|stainless tank|stainless pipe|ferritic stainless',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Test with magnet to distinguish austenitic (300-series non-magnetic) from 400-series; degrease and shear into furnace-ready charging sizes.',
+    explanation:
+      'Stainless steel scrap provides essential recycled chromium (18%) and nickel (8-10%), drastically lowering carbon intensity for stainless steel production.',
+    estimated_resource_value: 'High ($1.40–$2.60/kg stainless scrap)',
+    category_group: 'metals',
+    tier: 'industrial'
+  },
+  {
+    material_pattern:
+      'cast iron|engine block|brake rotor|machine casting|flywheel|pig iron|heavy melt',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Remove bearings, bronze bushings, and aluminum pistons; break oversized castings into charge dimensions for foundry cupola or electric arc furnace.',
+    explanation:
+      'Gray and ductile cast iron scrap has superior remelting fluidity, serving as primary feedstock for new machine tools, pump housings, and municipal castings.',
+    estimated_resource_value: 'Medium ($0.30–$0.55/kg heavy foundry scrap)',
+    category_group: 'metals',
+    tier: 'industrial'
+  },
+
+  // =========================================================================
+  // 4. INORGANIC: ENGINEERING POLYMERS & PLASTICS
+  // =========================================================================
+  {
+    material_pattern:
+      'hdpe|high density polyethylene|plastic drum|plastic pallet|pipe scrap|hdpe pipe',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Rinse residual chemicals; shred into 8mm flakes; wash in detergent bath and dry; pelletize through single-screw vented extruder.',
+    explanation:
+      'HDPE retains high tensile impact strength across recycling cycles, producing commercial recycled pellets for underground corrugated drainage pipe and composite plastic lumber.',
+    estimated_resource_value: 'Medium ($1.10–$1.80/kg clean recycled HDPE regrind)',
+    category_group: 'polymers',
+    tier: 'industrial'
+  },
+  {
+    material_pattern:
+      '\\babs\\b|polycarbonate|nylon|pa6|pa66|teflon|ptfe|polypropylene|engineering plastic|3d print scrap',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Keep resin codes strictly segregated; desiccant dry at 80°C to eliminate absorbed atmospheric moisture before extrusion or re-molding.',
+    explanation:
+      'Engineering polymers (ABS, Nylon, Polycarbonate) can be ground and re-extruded into 3D printer filament or blended with virgin resin for injection-molded enclosures.',
+    estimated_resource_value: 'Medium ($2.00–$4.50/kg clean engineering polymer regrind)',
+    category_group: 'polymers',
+    tier: 'community'
+  },
+
+  // =========================================================================
+  // 5. INORGANIC: AUTOMOTIVE & HEAVY EQUIPMENT
+  // =========================================================================
+  {
+    material_pattern: 'alternator|starter motor|ac compressor|power steering pump|caliper core',
+    waste_category: 'surplus_redistributable',
+    recovery_method: 'redistribution',
+    requirements:
+      'Verify casting housing has no structural cracks; pack in core return crate for remanufacturing supplier deposit return.',
+    explanation:
+      'Automotive component cores are remanufactured by replacing worn brushes, commutators, and bearings, saving 85% of raw manufacturing material and energy.',
+    estimated_resource_value: 'High ($30–$90 core deposit credit value)',
+    category_group: 'automotive',
+    tier: 'industrial'
+  },
+  {
+    material_pattern: 'catalytic converter|exhaust catalyst|diesel particulate filter|dpf',
+    waste_category: 'other_separate',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Do not crush or breathe monolith ceramic dust; deliver intact to licensed precious metal assay refiner.',
+    explanation:
+      'Catalytic converters contain cordierite honeycomb wash-coated with platinum (Pt), palladium (Pd), and rhodium (Rh), yielding the highest precious metal scrap value per unit.',
+    estimated_resource_value: 'Very High ($80–$350+ depending on OEM catalyst code)',
+    category_group: 'automotive',
+    tier: 'industrial'
+  },
+
+  // =========================================================================
+  // 6. INORGANIC: CONSTRUCTION & DEMOLITION
+  // =========================================================================
+  {
+    material_pattern: 'concrete|masonry rubble|brick|crushed concrete|demolition rubble|mortar',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Run through magnetic overband separator to remove rebar; crush with primary jaw crusher and screen into 20mm/40mm aggregate sizes.',
+    explanation:
+      'Crushed concrete replaces virgin quarried stone as Department of Transportation approved road sub-base (Class 2 aggregate), reducing quarrying impact.',
+    estimated_resource_value: 'Medium ($15–$25/ton recycled concrete road-base aggregate)',
+    category_group: 'construction',
+    tier: 'industrial'
+  },
+  {
+    material_pattern: 'plate glass|architectural glass|window pane|float glass|tempered glass',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'material_recovery',
+    requirements:
+      'Separate window frames, rubber gaskets, and sealants; separate clear float glass from tinted glass; collect in sturdy glass bins.',
+    explanation:
+      'Clean plate glass cullet melts at lower furnace temperatures than raw sand and soda ash, reducing glass manufacturing energy and producing fiberglass insulation.',
+    estimated_resource_value: 'Medium ($50–$90/ton clean flat glass cullet)',
+    category_group: 'construction',
+    tier: 'industrial'
+  },
+
+  // =========================================================================
+  // 7. ORGANIC: CITRUS, PRODUCE, FOOD & RESIDUES
+  // =========================================================================
   {
     material_pattern: 'citrus|lemon|orange|lime|grapefruit|tangerine|citron|peel|rind',
     waste_category: 'unavoidable_organic',
@@ -19,7 +314,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'fruit',
     tier: 'industrial'
   },
-  // 2. Citrus Peels / Rinds (Aerobic Composting)
   {
     material_pattern: 'citrus|lemon|orange|lime|grapefruit|tangerine|citron',
     waste_category: 'unavoidable_organic',
@@ -32,7 +326,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'fruit',
     tier: 'household'
   },
-  // 3. Banana & Tropical Fruit Peels
   {
     material_pattern: 'banana|plantain|mango skin|papaya peel|tropical fruit peel',
     waste_category: 'unavoidable_organic',
@@ -45,7 +338,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'fruit',
     tier: 'household'
   },
-  // 4. Pome Fruits & Pomace (Apple, Pear, Quince)
   {
     material_pattern: 'apple|pear|quince|cider pomace|fruit core',
     waste_category: 'unavoidable_organic',
@@ -58,7 +350,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'fruit',
     tier: 'industrial'
   },
-  // 5. Spent Coffee Grounds & Tea Leaves (Mushroom Substrate)
   {
     material_pattern: 'coffee ground|spent coffee|coffee residue|tea leaf|tea leaves|spent tea',
     waste_category: 'unavoidable_organic',
@@ -71,7 +362,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'beverage',
     tier: 'community'
   },
-  // 5b. Aloe Vera & Botanical Succulents
   {
     material_pattern: 'aloe|aloe vera|succulent|cactus|medicinal leaf|herbal leaf',
     waste_category: 'unavoidable_organic',
@@ -96,7 +386,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'vegetable',
     tier: 'household'
   },
-  // 6. Spent Coffee Grounds (Compost Activator)
   {
     material_pattern: 'coffee ground|spent coffee|tea leaf|tea leaves',
     waste_category: 'unavoidable_organic',
@@ -109,7 +398,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'beverage',
     tier: 'household'
   },
-  // 7. Surplus Fresh Bakery & Bread (Food Rescue)
   {
     material_pattern: 'bread|bakery|pastry|croissant|bagel|bun|loaf|fresh bread',
     waste_category: 'surplus_redistributable',
@@ -118,11 +406,10 @@ export const DEFAULT_RECOVERY_RULES = [
       'Must be wholesome, unexpired, stored dry in original sealed food-grade packaging; verify allergen labeling (gluten, dairy, nuts).',
     explanation:
       'Fresh surplus baked goods can be immediately diverted to local hunger relief charities, community pantries, and youth breakfast clubs.',
-    estimated_resource_value: 'High (Immediate human caloric and social impact: ~2,500 kcal/kg)',
+    estimated_resource_value: 'High (Immediate community food security)',
     category_group: 'bakery',
     tier: 'community'
   },
-  // 8. Stale Bread & Crusts (Culinary Upcycling)
   {
     material_pattern: 'stale bread|bread crust|baguette|pita|tortilla|crouton',
     waste_category: 'edible_reusable',
@@ -131,11 +418,10 @@ export const DEFAULT_RECOVERY_RULES = [
       'Ensure zero signs of visible mold; bake at low heat (150°C) until bone dry, or store in sealed jars.',
     explanation:
       'Stale bread can be transformed into shelf-stable seasoned croutons, Japanese-style panko breadcrumbs, French toast, bread pudding, or kvass.',
-    estimated_resource_value: 'Medium ($4–$8 equivalent pantry grocery savings)',
+    estimated_resource_value: 'Medium ($4–$8 bakery ingredient savings)',
     category_group: 'bakery',
     tier: 'household'
   },
-  // 9. Spent Brewer's Grain & Distillery Mash
   {
     material_pattern:
       'spent.*grain|brewer.*grain|brewery mash|malt residue|distillery grain|spent mash',
@@ -145,11 +431,10 @@ export const DEFAULT_RECOVERY_RULES = [
       'Dehydrate promptly within 6 hours of brewing to prevent lactic souring; store in moisture-sealed totes.',
     explanation:
       'Spent barley grain contains up to 20% protein and 70% fiber, making it a high-value input for upcycled baking flours, artisanal dog biscuits, and livestock feed.',
-    estimated_resource_value: 'High ($0.50–$1.20/kg high-protein animal feed value)',
+    estimated_resource_value: 'High ($200–$400/ton dehydrated feed value)',
     category_group: 'grain',
     tier: 'industrial'
   },
-  // 10. Clean Vegetable Scraps & Tops (Stock Simmering)
   {
     material_pattern:
       'vegetable scrap|carrot peel|onion skin|celery top|leek green|herb stem|root peel',
@@ -159,11 +444,10 @@ export const DEFAULT_RECOVERY_RULES = [
       'Wash thoroughly to remove soil grit; freeze in a dedicated sealed container until gathering a 500g batch; avoid brassicas (cabbage/broccoli can impart bitterness).',
     explanation:
       'Clean vegetable trimmings simmered with water and bay leaves yield an aromatic, nutrient-rich culinary vegetable stock for soups and risottos.',
-    estimated_resource_value: 'Low-Medium ($3–$6 commercial stock replacement)',
+    estimated_resource_value: 'Medium ($3–$6 culinary stock equivalent)',
     category_group: 'vegetable',
     tier: 'household'
   },
-  // 11. Raw Vegetable Scraps & Salad Greens (Composting)
   {
     material_pattern: 'raw vegetable scrap|salad greens|leafy green|cabbage|lettuce|spinach|kale',
     waste_category: 'unavoidable_organic',
@@ -172,11 +456,10 @@ export const DEFAULT_RECOVERY_RULES = [
       'Mix high-moisture greens with dry brown leaves or shredded cardboard in a 1:2 volume ratio to prevent anaerobic slime.',
     explanation:
       'Microbial aerobic digestion converts succulent vegetable matter into bioactive organic humus that rebuilds soil structure and locks in soil moisture.',
-    estimated_resource_value: 'Medium (Prevents 0.8 kg CO2e per kg landfill diversion)',
+    estimated_resource_value: 'Medium (Restores garden soil fertility)',
     category_group: 'vegetable',
     tier: 'household'
   },
-  // 12. Surplus Whole Produce & Blemished Produce
   {
     material_pattern:
       'whole fruit|whole vegetable|blemished fruit|ugly produce|surplus produce|farm surplus',
@@ -186,11 +469,10 @@ export const DEFAULT_RECOVERY_RULES = [
       'Sort to remove bruised or decaying specimens; pack in clean ventilated crates; maintain ambient or cool conditions.',
     explanation:
       'Cosmetically imperfect but nutritionally wholesome produce can be supplied directly to community kitchen gleaning programs and food banks.',
-    estimated_resource_value: 'High (Saves 100% of embedded farm water and labor)',
+    estimated_resource_value: 'High (Immediate nutrition for vulnerable families)',
     category_group: 'produce',
     tier: 'community'
   },
-  // 13. Cooked Food & Prepared Meal Leftovers
   {
     material_pattern:
       'cooked food|cooked meal|prepared surplus|curry|casserole|pasta dish|rice dish|leftover meal',
@@ -204,7 +486,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'prepared',
     tier: 'household'
   },
-  // 14. Surplus Dairy, Milk & Whey
   {
     material_pattern: 'surplus milk|dairy|yogurt|cream|whey|curd|cottage cheese',
     waste_category: 'edible_reusable',
@@ -216,7 +497,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'dairy',
     tier: 'household'
   },
-  // 15. Commercial Surplus Dairy (Food Rescue)
   {
     material_pattern: 'surplus milk|carton milk|sealed cheese|packaged dairy',
     waste_category: 'surplus_redistributable',
@@ -229,7 +509,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'dairy',
     tier: 'community'
   },
-  // 16. Used Cooking Oil & Deep Fryer Grease
   {
     material_pattern: 'used cooking oil|fryer oil|grease|vegetable fat|tallow|lard|spent oil',
     waste_category: 'other_separate',
@@ -242,7 +521,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'oils',
     tier: 'industrial'
   },
-  // 17. Eggshells (Calcium Soil Amendment)
   {
     material_pattern: 'egg shell|eggshell',
     waste_category: 'unavoidable_organic',
@@ -255,7 +533,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'dairy',
     tier: 'household'
   },
-  // 18. Meat Bones & Carcasses (Broth Extraction)
   {
     material_pattern: 'meat bone|animal carcass|chicken bone|beef bone|bone scrap',
     waste_category: 'unavoidable_organic',
@@ -268,7 +545,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'protein',
     tier: 'household'
   },
-  // 19. Meat Bones & Animal Offal (Anaerobic Biogas)
   {
     material_pattern: 'meat bone|animal carcass|connective tissue|offal|animal byproduct',
     waste_category: 'unavoidable_organic',
@@ -281,7 +557,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'protein',
     tier: 'industrial'
   },
-  // 20. Seafood Byproducts & Crustacean Shells
   {
     material_pattern: 'crustacean shell|shrimp shell|crab shell|lobster shell|fish bone|fish scrap',
     waste_category: 'unavoidable_organic',
@@ -294,7 +569,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'seafood',
     tier: 'industrial'
   },
-  // 21. Nut Shells & Fruit Pits
   {
     material_pattern:
       'nut shell|walnut shell|coconut shell|pecan shell|avocado pit|peach stone|fruit pit',
@@ -307,7 +581,6 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'nuts_seeds',
     tier: 'industrial'
   },
-  // 22. Contaminated Food Packaging & Waxed Paper
   {
     material_pattern:
       'takeout container|greasy cardboard|food packaging|waxed paper|soiled packaging|napkin',
@@ -325,70 +598,117 @@ export const DEFAULT_RECOVERY_RULES = [
 
 export const RECOVERY_METHOD_METADATA = {
   reuse: {
-    label: 'Direct Reuse',
+    label: 'Direct Reuse & Redeployment',
     badgeClass: 'badge-success',
     icon: '🔁',
-    description: 'Transform or repurpose in the kitchen or home before discarding.'
+    description: 'Transform, remount, or repurpose intact components or culinary portions directly.'
+  },
+  refurbishment: {
+    label: 'Precision Refurbishment',
+    badgeClass: 'badge-primary',
+    icon: '🔧',
+    description:
+      'Ultrasonic cleaning, bearing repacking, and servicing to restore factory tolerances.'
+  },
+  remanufacturing: {
+    label: 'Industrial Remanufacturing',
+    badgeClass: 'badge-primary',
+    icon: '🏭',
+    description: 'Rebuild core assemblies (alternators, cylinders, gearboxes) with full warranty.'
+  },
+  component_harvesting: {
+    label: 'Component Harvesting',
+    badgeClass: 'badge-success',
+    icon: '🪛',
+    description: 'Desolder or extract functioning ICs, motors, sensors, and discrete hardware.'
+  },
+  precious_metal_recovery: {
+    label: 'Precious Metal Smelting',
+    badgeClass: 'badge-warning',
+    icon: '🪙',
+    description: 'Hydrometallurgically refine gold, silver, copper, and platinum group metals.'
+  },
+  scrap_recycling: {
+    label: 'Scrap Metal Recycling',
+    badgeClass: 'badge-secondary',
+    icon: '⚙️',
+    description:
+      'Melt segregated ferrous and non-ferrous alloys into secondary ingots (95% energy savings).'
+  },
+  chemical_recycling: {
+    label: 'Polymer & Chemical Recycling',
+    badgeClass: 'badge-secondary',
+    icon: '🧪',
+    description: 'Shred, wash, and re-pelletize engineering thermoplastics (HDPE, ABS, Nylon).'
+  },
+  hazardous_neutralization: {
+    label: 'Hazardous Regulated Handling',
+    badgeClass: 'badge-danger',
+    icon: '⚠️',
+    description:
+      'Regulated neutralization and closed-loop recycling for batteries, chemicals, and solvents.'
   },
   redistribution: {
-    label: 'Redistribution',
+    label: 'Surplus Redistribution',
     badgeClass: 'badge-primary',
     icon: '🤝',
-    description: 'Donate safe surplus food to local community food pantries or shelters.'
+    description:
+      'Route surplus inventory to secondary industrial markets or community food pantries.'
   },
   composting: {
     label: 'Aerobic Composting',
     badgeClass: 'badge-success',
     icon: '🌱',
-    description: 'Decompose organic matter into nutrient-dense humus for soil regeneration.'
+    description: 'Decompose biodegradable organic matter into nutrient-dense humic soil humus.'
   },
   biogas: {
     label: 'Anaerobic Biogas',
     badgeClass: 'badge-warning',
     icon: '⚡',
-    description: 'Convert high-energy food residue into renewable biogas and green electricity.'
+    description: 'Convert organic residues into renewable biomethane fuel and clean electricity.'
   },
   pectin_recovery: {
     label: 'Pectin Extraction',
     badgeClass: 'badge-secondary',
     icon: '🧪',
-    description: 'Extract valuable biological polymers from fruit rinds for food and medicine.'
+    description:
+      'Extract biological polymers from fruit rinds for food stabilizing and pharmaceuticals.'
   },
   material_recovery: {
     label: 'Material Recovery',
     badgeClass: 'badge-secondary',
     icon: '🔬',
-    description: 'Upcycle residues into biomaterials, mushroom substrate, or clean biofuel.'
+    description: 'Upcycle residues into biomaterials, bio-fertilizers, or clean renewable biofuels.'
   },
   separate_disposal: {
     label: 'Specialized Disposal',
     badgeClass: 'badge-muted',
     icon: '🗑️',
-    description: 'Segregate non-compostable food contact waste to avoid contamination.'
+    description: 'Segregate non-recyclable or contaminated residues to protect recycling purity.'
   }
 };
 
 export const WASTE_CATEGORY_METADATA = {
   edible_reusable: {
-    label: 'Edible Leftover / Reusable',
+    label: 'Directly Reusable / Intact Component',
     badgeClass: 'badge-success',
-    description: 'Clean, safe leftovers or trimmings suitable for meals or culinary reuse.'
+    description: 'Intact, high-integrity hardware or clean edible food ready for immediate reuse.'
   },
   surplus_redistributable: {
-    label: 'Surplus Food (Redistributable)',
+    label: 'Surplus / Refurbishable',
     badgeClass: 'badge-primary',
-    description: 'Wholesome surplus food ideal for donation before quality declines.'
+    description: 'Surplus inventory, items needing minor servicing, or wholesome surplus food.'
   },
   unavoidable_organic: {
-    label: 'Unavoidable Organic Residue',
+    label: 'Recyclable Scrap / Material Core',
     badgeClass: 'badge-warning',
     description:
-      'Inedible organic parts (peels, grounds, shells, bones) ready for circular processing.'
+      'Non-reusable material residue, scrap metal, polymers, or unavoidable organic scraps.'
   },
   other_separate: {
-    label: 'Specialized Stream',
-    badgeClass: 'badge-muted',
-    description: 'Fats, oils, or contaminated residues requiring isolated collection.'
+    label: 'Regulated / Hazardous Stream',
+    badgeClass: 'badge-danger',
+    description: 'Batteries, spent chemicals, contaminated packaging, or regulated e-waste.'
   }
 };
 
@@ -410,9 +730,52 @@ export async function getActiveRecoveryRules() {
 }
 
 /**
- * Computes matching recovery pathway recommendations for a given food waste item.
+ * Maps an advanced recovery method to one of the 7 core database check constraint values
+ * to guarantee 100% database compatibility even on legacy or unmigrated Supabase databases.
+ *
+ * @param {string} method
+ * @returns {string} One of: 'reuse', 'redistribution', 'composting', 'biogas', 'pectin_recovery', 'material_recovery', 'separate_disposal'
+ */
+export function mapToDbRecoveryMethod(method) {
+  const m = (method || '').toLowerCase().trim();
+  const VALID_DB_METHODS = new Set([
+    'reuse',
+    'redistribution',
+    'composting',
+    'biogas',
+    'pectin_recovery',
+    'material_recovery',
+    'separate_disposal'
+  ]);
+
+  if (VALID_DB_METHODS.has(m)) return m;
+
+  if (m === 'refurbishment' || m === 'remanufacturing') {
+    return 'reuse';
+  }
+  if (
+    m === 'component_harvesting' ||
+    m === 'precious_metal_recovery' ||
+    m === 'scrap_recycling' ||
+    m === 'chemical_recycling'
+  ) {
+    return 'material_recovery';
+  }
+  if (m === 'hazardous_neutralization') {
+    return 'separate_disposal';
+  }
+  if (m.includes('compost')) return 'composting';
+  if (m.includes('biogas')) return 'biogas';
+  if (m.includes('redistribut') || m.includes('donat')) return 'redistribution';
+  if (m.includes('pectin')) return 'pectin_recovery';
+
+  return 'material_recovery';
+}
+
+/**
+ * Computes matching recovery pathway recommendations for a given waste item.
  * Supports multi-tier matching (material pattern, keyword inference, and category fallback)
- * to provide comprehensive, actionable coverage for any user type.
+ * covering organic food residues and inorganic industrial, mechanical, and electronic materials.
  *
  * @param {string} foodName
  * @param {string} wasteCategory
@@ -489,9 +852,114 @@ export async function getRecoveryRecommendations(
     }
   }
 
-  // 3. Intelligent Keyword Inference (Covers arbitrary / exotic unlisted inputs)
+  // 3. Intelligent Keyword Inference (Covers inorganic & organic unlisted inputs)
   if (rawMatches.length === 0) {
-    if (/(aloe|succulent|cactus|herbal|medicinal|gel)/i.test(searchString)) {
+    // Inorganic Electronic & Electrical
+    if (
+      /(pcb|motherboard|logic board|\bchip\b|\bic\b|transistor|capacitor|resistor)/i.test(
+        searchString
+      )
+    ) {
+      rawMatches.push({
+        method: 'material_recovery',
+        reason:
+          'Desolder and salvage functional high-value ICs, microcontrollers, and discrete components.',
+        requirements: 'Use temperature-controlled hot air rework and ESD protection.',
+        estimatedValue: 'High ($10–$50 salvaged electronic component value)',
+        tier: 'community',
+        score: 8
+      });
+    } else if (/(battery|18650|lithium|lead acid|lifepo4|\bcell\b)/i.test(searchString)) {
+      rawMatches.push({
+        method: 'separate_disposal',
+        reason:
+          'Isolate specialized hazardous material and route to closed-loop hydrometallurgical recycling.',
+        requirements: 'Tape battery terminals; store in fire-retardant vermiculite container.',
+        estimatedValue: 'Safety compliance & critical mineral recovery',
+        tier: 'industrial',
+        score: 8
+      });
+    } else if (/(bearing|ball bearing|roller bearing)/i.test(searchString)) {
+      rawMatches.push({
+        method: 'reuse',
+        reason:
+          'Ultrasonic degreasing and repacking with high-pressure grease restores operational tolerances.',
+        requirements: 'Inspect raceways for micro-pitting; repack with EP2 synthetic grease.',
+        estimatedValue: 'Medium ($5–$25 per refurbished precision bearing)',
+        tier: 'community',
+        score: 8
+      });
+    } else if (/(gear|sprocket|pulley|spline|shaft)/i.test(searchString)) {
+      rawMatches.push({
+        method: 'reuse',
+        reason:
+          'Re-machine gear teeth flanks or adapt keyways for secondary mechanical drive applications.',
+        requirements: 'Check backlash and tooth root wear tolerances.',
+        estimatedValue: 'High ($20–$80 per remanufactured machine drive gear)',
+        tier: 'industrial',
+        score: 8
+      });
+    } else if (/(bolt|screw|fastener|\bnut\b|stud|washer)/i.test(searchString)) {
+      rawMatches.push({
+        method: 'reuse',
+        reason:
+          'Clean, gauge, and organize into workshop inventory bins for maintenance and prototyping.',
+        requirements: 'Check thread pitch with thread gauge; discard stretched fasteners.',
+        estimatedValue: 'Workshop hardware inventory savings',
+        tier: 'household',
+        score: 8
+      });
+    } else if (/(aluminum|aluminium|extrusion|t-slot|6061)/i.test(searchString)) {
+      rawMatches.push({
+        method: 'reuse',
+        reason:
+          'Modular structural aluminum can be repurposed for machinery guarding, frames, and workbenches.',
+        requirements: 'Check straightness and square cut ends on cold saw.',
+        estimatedValue: 'High ($12–$45/meter structural framing value)',
+        tier: 'community',
+        score: 8
+      });
+      rawMatches.push({
+        method: 'material_recovery',
+        reason:
+          'Melt into secondary alloy billet with 95% energy savings compared to primary smelting.',
+        requirements: 'Keep free from iron bolts and non-metallic contamination.',
+        estimatedValue: 'High ($1.80–$2.50/kg aluminum scrap)',
+        tier: 'industrial',
+        score: 7
+      });
+    } else if (/(copper|brass|bronze|wire|pipe|tubing)/i.test(searchString)) {
+      rawMatches.push({
+        method: 'material_recovery',
+        reason:
+          'Melt clean non-ferrous metal into secondary electrical-grade copper or foundry ingots.',
+        requirements: 'Strip insulation or cut away lead solder joints.',
+        estimatedValue: 'High ($5.50–$8.20/kg clean copper/brass scrap)',
+        tier: 'industrial',
+        score: 8
+      });
+    } else if (
+      /(hdpe|polypropylene|\babs\b|nylon|polycarbonate|polymer|plastic)/i.test(searchString)
+    ) {
+      rawMatches.push({
+        method: 'material_recovery',
+        reason:
+          'Shred, wash, and re-pelletize thermoplastic resin for secondary extrusion or molding.',
+        requirements: 'Keep polymer resin codes strictly segregated to prevent contamination.',
+        estimatedValue: 'Medium ($1.20–$2.40/kg clean regrind value)',
+        tier: 'industrial',
+        score: 8
+      });
+    } else if (/(concrete|brick|masonry|rubble)/i.test(searchString)) {
+      rawMatches.push({
+        method: 'material_recovery',
+        reason: 'Crush and screen demolition rubble into DOT-certified road sub-base aggregate.',
+        requirements: 'Separate rebar and foreign debris.',
+        estimatedValue: 'Medium ($15–$25/ton aggregate value)',
+        tier: 'industrial',
+        score: 8
+      });
+    } else if (/(aloe|succulent|cactus|herbal|medicinal|gel)/i.test(searchString)) {
       rawMatches.push({
         method: 'reuse',
         reason:
@@ -596,32 +1064,30 @@ export async function getRecoveryRecommendations(
     }
   }
 
-  // 3. Fallback based on waste category if still no match
+  // 4. Fallback based on waste category if still no match
   if (rawMatches.length === 0) {
     if (wasteCategory === 'edible_reusable') {
       rawMatches.push({
         method: 'reuse',
-        reason: 'Edible portions can be safely consumed or incorporated into new recipes.',
-        requirements:
-          'Store below 4°C within 2 hours; reheat thoroughly to 74°C before consumption.',
-        estimatedValue: 'Avoids new grocery expenditure',
+        reason: 'Item is intact and suitable for direct reuse or culinary consumption.',
+        requirements: 'Ensure clean and uncontaminated handling.',
+        estimatedValue: 'Direct replacement and savings value',
         tier: 'household',
         score: 4
       });
     } else if (wasteCategory === 'surplus_redistributable') {
       rawMatches.push({
         method: 'redistribution',
-        reason: 'Wholesome surplus can support local community nutrition.',
-        requirements:
-          'Must be within use-by dates and unadulterated; follow food rescue guidelines.',
-        estimatedValue: 'Direct social impact',
+        reason: 'Wholesome surplus or reusable hardware suitable for secondary distribution.',
+        requirements: 'Ensure proper sorting and transport.',
+        estimatedValue: 'Direct community or secondary market value',
         tier: 'community',
         score: 4
       });
     } else if (wasteCategory === 'unavoidable_organic') {
       rawMatches.push({
         method: 'composting',
-        reason: 'Plant-based organic matter decomposes into beneficial soil compost.',
+        reason: 'Organic plant material decomposes into beneficial soil compost.',
         requirements: 'Keep free from plastics, stickers, chemicals, and excess salt or fat.',
         estimatedValue: 'Rich organic soil amendment',
         tier: 'household',
@@ -630,16 +1096,16 @@ export async function getRecoveryRecommendations(
     } else {
       rawMatches.push({
         method: 'separate_disposal',
-        reason: 'Isolate contaminated materials from clean organic waste streams.',
-        requirements: 'Check local municipal guidelines for specialized disposal.',
-        estimatedValue: 'Prevents landfill stream contamination',
+        reason: 'Isolate specialized or hazardous materials from general waste streams.',
+        requirements: 'Check local regulations for certified hazardous or e-waste disposal.',
+        estimatedValue: 'Prevents environmental contamination',
         tier: 'household',
         score: 4
       });
     }
   }
 
-  // Deduplicate matches by recovery method, picking the highest-scoring explanation
+  // Deduplicate matches by recovery method, picking highest score
   const dedupedMap = new Map();
   for (const match of rawMatches) {
     if (!match || !match.method) continue;
@@ -658,10 +1124,10 @@ export async function getRecoveryRecommendations(
 
   if (result.length === 0) {
     result.push({
-      method: 'composting',
-      reason: 'Organic plant material decomposes into beneficial soil compost.',
-      requirements: 'Keep free from plastics, stickers, chemicals, and contaminants.',
-      estimatedValue: 'Rich organic soil amendment',
+      method: 'material_recovery',
+      reason: 'Circular material recovery pathway.',
+      requirements: 'Keep free from foreign contaminants.',
+      estimatedValue: 'Material diversion',
       tier: 'household'
     });
   }
@@ -670,12 +1136,13 @@ export async function getRecoveryRecommendations(
 }
 
 /**
- * Creates a new recovery record tied to a food scan.
+ * Creates a new recovery record tied to a scan.
+ * Automatically maps advanced methods to valid DB constraints.
  *
  * @param {object} params
  * @param {string} params.scanId - UUID of the parent food scan
  * @param {string} params.userId - UUID of the authenticated user
- * @param {string} params.recoveryMethod - One of approved methods
+ * @param {string} params.recoveryMethod - Recovery method name
  * @param {string} params.reason - Recommendation reason
  * @param {string} [params.estimatedValue] - Estimated resource value
  * @param {'suggested'|'planned'|'completed'|'dismissed'} [params.status='suggested']
@@ -689,40 +1156,7 @@ export async function createRecoveryRecord({
   estimatedValue = null,
   status = 'suggested'
 }) {
-  const VALID_METHODS = new Set([
-    'reuse',
-    'redistribution',
-    'composting',
-    'biogas',
-    'pectin_recovery',
-    'material_recovery',
-    'separate_disposal'
-  ]);
-
-  let finalMethod = (recoveryMethod || '').toLowerCase().trim();
-  if (!VALID_METHODS.has(finalMethod)) {
-    if (finalMethod.includes('compost')) finalMethod = 'composting';
-    else if (
-      finalMethod.includes('reuse') ||
-      finalMethod.includes('craft') ||
-      finalMethod.includes('skin')
-    )
-      finalMethod = 'reuse';
-    else if (finalMethod.includes('redistribut') || finalMethod.includes('donat'))
-      finalMethod = 'redistribution';
-    else if (
-      finalMethod.includes('biogas') ||
-      finalMethod.includes('energy') ||
-      finalMethod.includes('fuel')
-    )
-      finalMethod = 'biogas';
-    else if (finalMethod.includes('pectin')) finalMethod = 'pectin_recovery';
-    else if (finalMethod.includes('material') || finalMethod.includes('extract'))
-      finalMethod = 'material_recovery';
-    else if (finalMethod.includes('dispos') || finalMethod.includes('separate'))
-      finalMethod = 'separate_disposal';
-    else finalMethod = 'composting'; // Fail-safe guaranteed valid enum
-  }
+  const finalMethod = mapToDbRecoveryMethod(recoveryMethod);
 
   const { data, error } = await supabase
     .from('recovery_records')
@@ -750,29 +1184,19 @@ export async function createRecoveryRecord({
  * @param {'all'|'suggested'|'planned'|'completed'|'dismissed'} [statusFilter='all']
  * @returns {Promise<Array<object>>}
  */
-export async function fetchUserRecoveryRecords(statusFilter = 'all') {
+export async function loadUserRecoveries(statusFilter = 'all') {
+  const {
+    data: { user },
+    error: authError
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    throw new Error('User must be authenticated to load recovery records.');
+  }
+
   let query = supabase
     .from('recovery_records')
-    .select(
-      `
-      id,
-      scan_id,
-      recovery_method,
-      recommendation_reason,
-      estimated_resource_value,
-      status,
-      created_at,
-      food_scans (
-        id,
-        food_name,
-        food_category,
-        waste_category,
-        quantity,
-        quantity_unit,
-        created_at
-      )
-    `
-    )
+    .select('*, food_scans(food_name, food_category, waste_category, quantity, quantity_unit)')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (statusFilter !== 'all') {
@@ -781,20 +1205,25 @@ export async function fetchUserRecoveryRecords(statusFilter = 'all') {
 
   const { data, error } = await query;
   if (error) {
-    throw new Error(`Failed to fetch recovery records: ${error.message}`);
+    throw new Error(`Failed to load recovery records: ${error.message}`);
   }
 
   return data || [];
 }
 
 /**
- * Updates the status of an existing recovery record.
+ * Updates the workflow status of a circular recovery record.
  *
  * @param {string} recordId - UUID of the recovery record
  * @param {'suggested'|'planned'|'completed'|'dismissed'} newStatus
- * @returns {Promise<object>}
+ * @returns {Promise<object>} Updated record
  */
-export async function updateRecoveryRecordStatus(recordId, newStatus) {
+export async function updateRecoveryStatus(recordId, newStatus) {
+  const VALID_STATUSES = ['suggested', 'planned', 'completed', 'dismissed'];
+  if (!VALID_STATUSES.includes(newStatus)) {
+    throw new Error(`Invalid recovery status: ${newStatus}`);
+  }
+
   const { data, error } = await supabase
     .from('recovery_records')
     .update({ status: newStatus })
@@ -803,7 +1232,7 @@ export async function updateRecoveryRecordStatus(recordId, newStatus) {
     .single();
 
   if (error) {
-    throw new Error(`Failed to update recovery record: ${error.message}`);
+    throw new Error(`Failed to update recovery status: ${error.message}`);
   }
 
   return data;

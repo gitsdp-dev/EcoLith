@@ -17,6 +17,12 @@ export function normalizeToKg(quantity, unit) {
       return qty;
     case 'piece':
       return qty * 0.15; // standard average estimate ~150g per piece
+    case 'unit':
+      return qty * 0.5; // standard component estimate ~500g
+    case 'ton':
+      return qty * 1000;
+    case 'm':
+      return qty * 0.8; // linear extrusion estimate ~800g/m
     case 'ml':
       return qty / 1000;
     case 'l':

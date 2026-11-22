@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
 /**
- * Zod validation schema for Gemini food waste analysis output.
- * Ensures the response strictly complies with database schema checks and AGENTS.md contract.
+ * Zod validation schema for Gemini circular waste analysis output.
+ * Ensures the response strictly complies with database schema checks,
+ * covering BOTH organic food residues and inorganic industrial, mechanical,
+ * electronic, automotive, polymer, and engineering materials.
  */
 const recoveryOptionSchema = z.object({
   method: z.enum([
@@ -12,90 +14,129 @@ const recoveryOptionSchema = z.object({
     'biogas',
     'pectin_recovery',
     'material_recovery',
-    'separate_disposal'
+    'separate_disposal',
+    'refurbishment',
+    'remanufacturing',
+    'component_harvesting',
+    'precious_metal_recovery',
+    'scrap_recycling',
+    'chemical_recycling',
+    'hazardous_neutralization'
   ]),
   reason: z.string().default(''),
-  requirements: z.string().default('')
+  requirements: z.string().default(''),
+  estimated_value: z.string().optional()
 });
 
-const foodItemSchema = z.object({
-  food_name: z.string().min(1, 'Food name is required'),
-  food_category: z.string().default('vegetable'),
+const wasteItemSchema = z.object({
+  food_name: z.string().min(1, 'Item name is required'),
+  waste_type: z.enum(['organic', 'inorganic']).default('inorganic'),
+  food_category: z.string().default('mechanical_hardware'),
   waste_category: z.enum([
     'edible_reusable',
     'surplus_redistributable',
     'unavoidable_organic',
     'other_separate'
   ]),
+  condition: z
+    .enum([
+      'new_surplus',
+      'reusable_intact',
+      'minor_wear_refurbishable',
+      'damaged_repairable',
+      'scrap_recyclable',
+      'hazardous_damaged',
+      'degraded_end_of_life'
+    ])
+    .default('reusable_intact'),
+  condition_details: z.string().default(''),
+  reusability_score: z.number().min(0).max(100).default(80),
   confidence: z.number().min(0).max(1).default(0.85),
-  estimated_quantity: z.number().min(0.001).default(1),
-  estimated_unit: z.enum(['g', 'kg', 'piece', 'ml', 'l']).default('g'),
+  estimated_quantity: z.number().min(0.0001).default(1),
+  estimated_unit: z.enum(['g', 'kg', 'piece', 'unit', 'ml', 'l', 'ton', 'm']).default('piece'),
   bounding_box: z.array(z.number()).length(4).optional().nullable(),
   recovery_options: z.array(recoveryOptionSchema).default([]),
-  reuse_suggestions: z.array(z.string()).default([])
+  reuse_suggestions: z.array(z.string()).default([]),
+  hazard_alerts: z.array(z.string()).default([])
 });
 
 export const geminiAnalysisSchema = z.object({
-  items: z.array(foodItemSchema).default([]),
-  notes: z
-    .string()
-    .default('Contamination and edibility cannot be reliably assessed from a photo alone.')
+  items: z.array(wasteItemSchema).default([]),
+  notes: z.string().default('Condition and reusability assessed via visual AI inspection.')
 });
 
 /**
- * System instruction and prompt guidelines for food waste analysis.
- * Explicitly optimized for Gemini 3.1 Flash-Lite vision and precise waste detection.
+ * System instruction and prompt guidelines for Universal Waste & Resource Intelligence.
+ * Explicitly optimized for Gemini 3.1 Flash-Lite vision across all waste streams:
+ * - Organic (food scraps, produce residues, agricultural biomass)
+ * - Inorganic (electronic e-waste, mechanical components, industrial metals, engineering polymers, automotive, construction)
  */
-const SYSTEM_INSTRUCTION = `You are EcoLith AI, an expert food waste intelligence, computer vision, and circular resource recovery specialist.
-Analyze the provided image of food waste, kitchen scraps, organic residues, or surplus food.
+const SYSTEM_INSTRUCTION = `You are EcoLith AI, an expert circular economy intelligence, industrial materials inspection, computer vision, and universal resource recovery specialist.
+Analyze the provided image containing ANY type of waste, discarded material, surplus inventory, decommissioned machinery, electronic hardware, scrap metal, polymer residue, or organic food scraps.
 Output ONLY valid JSON conforming strictly to the requested schema.
 
 CRITICAL INSTRUCTIONS:
 
-1. EMPTY SCANS OR NON-FOOD DETECTION:
-   - Carefully inspect the image first.
-   - If the image DOES NOT contain any food, food waste, kitchen scraps, agricultural residue, or surplus food (e.g. blank background, wall, desk, floor, furniture, electronics, empty plate, clothing, or non-food objects), you MUST return an empty items array: "items": [] and note in "notes": "No food waste or organic residue detected in image."
-   - NEVER hallucinate, invent, or guess food items if none are visible!
+1. UNIVERSAL DETECTION CAPABILITY (ORGANIC & INORGANIC):
+   - You MUST identify and classify ANY visible waste or surplus material:
+     * INORGANIC ELECTRONIC (E-WASTE): Printed circuit boards (PCBs), logic boards, microcontrollers, capacitors, transformers, heatsinks, wiring harnesses, electric motors, switches, sensors, lithium-ion/lead-acid batteries, power supplies, displays.
+     * INORGANIC MECHANICAL & HARDWARE: Ball/roller bearings, gears, pulleys, sprockets, drive belts, pneumatic/hydraulic cylinders, linear rails, steel/brass/bronze bushings, valves, high-tensile bolts, nuts, machine fasteners.
+     * INORGANIC INDUSTRIAL SCRAP METALS: Ferrous metals (mild steel, cast iron, structural steel, tool steel, stainless steel 304/316) and Non-ferrous metals (copper tubing/wire, aluminum extrusions/plates, brass, bronze, titanium, carbide tooling).
+     * INORGANIC POLYMERS & COMPOSITES: Engineering thermoplastics (HDPE, LDPE, Polypropylene PP, ABS, Polycarbonate, Nylon PA6/66, PTFE/Teflon, PET, PVC, acrylic, PEEK), carbon fiber scrap, fiberglass.
+     * INORGANIC AUTOMOTIVE & HEAVY EQUIPMENT: Engines, alternators, starter motors, brake calipers/rotors, suspension coils, radiators, catalytic converters, transmissions.
+     * INORGANIC CONSTRUCTION & DEMOLITION: Concrete rubble, bricks, ceramic tiles, gypsum drywall, insulation, plate glass.
+     * INORGANIC CHEMICAL & LIQUIDS: Spent cutting fluids, hydraulic oils, industrial solvents, aerosols, plating residues.
+     * ORGANIC & FOOD WASTE: Produce residues, vegetable trimmings, fruit peels/cores, bakery surplus, spent coffee grounds, grains, bones, eggshells, dairy, prepared leftovers, plant foliage.
+   - EMPTY SCANS: ONLY return "items": [] and note "No material or waste detected in image." if the image is truly empty, pitch black, completely blurred, or contains no physical objects/materials (e.g. a blank white wall with nothing). If ANY material, part, object, or scrap is visible, you MUST detect and classify it!
 
 2. 2D BOUNDING BOX OBJECT DETECTION (GREEN BOX):
-   - For every detected organic waste or food item, accurately supply its "bounding_box" as an array of 4 integers [ymin, xmin, ymax, xmax] normalized on a scale from 0 to 1000, where (0,0) is top-left and (1000,1000) is bottom-right.
-   - The bounding box must tightly enclose the detected item so that a live green box can be drawn accurately around the waste.
+   - For every detected waste or material item, accurately supply its "bounding_box" as an array of 4 integers [ymin, xmin, ymax, xmax] normalized on a scale from 0 to 1000, where (0,0) is top-left and (1000,1000) is bottom-right.
+   - The bounding box must tightly enclose the detected item so that a live green target box can be drawn accurately around it.
 
-3. ACCURATE FOOD CATEGORY:
-   - Select the most precise food category for each item: 'fruit', 'vegetable', 'plant_material', 'bakery', 'grain', 'dairy', 'meat_fish', 'prepared_food', 'beverage', or 'other'.
-   - DO NOT default to 'other'! Examples:
-     * Banana peel, orange peel, apple core, lemon rind, melon rind -> 'fruit'
-     * Potato peel, onion skin, carrot greens, vegetable scraps -> 'vegetable'
-     * Aloe vera leaf/cutting, botanical foliage, garden leaves, succulents -> 'plant_material'
-     * Stale bread, toast, croissant, bakery surplus -> 'bakery'
-     * Cooked rice, pasta, noodles, grains -> 'grain'
-     * Spent coffee grounds, used tea leaves -> 'beverage'
-     * Cheese rinds, expired milk/yogurt -> 'dairy'
-     * Bones, meat scraps, eggshells -> 'meat_fish'
-     * Cooked meals, leftovers, curries -> 'prepared_food'
+3. WASTE TYPE & PRECISE CATEGORY:
+   - "waste_type": Set to 'inorganic' for all industrial, mechanical, electronic, metallic, polymer, chemical, automotive, or construction materials. Set to 'organic' for food scraps and plant matter.
+   - "food_category": Select the most precise material category:
+     * Inorganic: 'electronic_ewaste', 'mechanical_hardware', 'industrial_scrap_metal', 'engineering_polymer', 'automotive_parts', 'construction_demolition', 'battery_storage', 'chemical_hazardous', 'glass_ceramic', 'textile_fiber'
+     * Organic: 'fruit', 'vegetable', 'plant_material', 'bakery', 'grain', 'dairy', 'meat_fish', 'prepared_food', 'beverage', 'other'
 
-4. WASTE STREAM CLASSIFICATION (SAFETY & EDIBILITY):
-   - Inedible parts, rinds, skins, bones, and shells MUST ALWAYS be classified as 'unavoidable_organic'. NEVER classify them as 'edible_reusable' or 'surplus_redistributable'!
-   - SPECIFICALLY: Aloe Vera leaves/rinds, banana peels, citrus peels, potato skins, onion skins, apple cores, avocado peels/pits, eggshells, coffee grounds, and bones are UNAVOIDABLE RESIDUES ('unavoidable_organic').
-   - 'edible_reusable': Reserved ONLY for genuinely safe, edible food portions (e.g. leftover rice, edible vegetable trimmings like carrot greens, bread crusts).
-   - 'surplus_redistributable': Reserved ONLY for wholesome, untouched, unexpired whole surplus food suitable for donation.
-   - 'other_separate': Contaminated materials, spent cooking oil, or non-food packaging.
+4. CONDITION & REUSABILITY ASSESSMENT:
+   - "condition": Evaluate the physical, structural, and mechanical condition:
+     * 'new_surplus': Unused, pristine surplus/dead stock.
+     * 'reusable_intact': Functionally intact, minimal wear, ready for immediate direct reuse or redeployment.
+     * 'minor_wear_refurbishable': Structurally sound, needs cleaning, servicing, repacking, or minor adjustment.
+     * 'damaged_repairable': Defective or worn sub-element (e.g. blown capacitor, worn bearing race) that can be economically repaired.
+     * 'scrap_recyclable': Beyond functional repair; optimal for raw material recycling, metal smelting, plastic pelletizing, or composting.
+     * 'hazardous_damaged': Leaking, swollen (batteries), burnt, or containing toxic substances requiring specialized containment.
+     * 'degraded_end_of_life': Severely corroded, fatigued, or chemically degraded.
+   - "condition_details": Provide detailed physical inspection findings (e.g., surface oxidation, corrosion level, electrical contact integrity, solder joint condition, bearing play, structural cracks, leakage, wear tolerances).
+   - "reusability_score": Integer 0 to 100 representing percentage reusability (e.g., 90 for intact components, 60 for refurbishable, 15 for pure scrap).
 
-5. REALISTIC QUANTITY ESTIMATION:
-   - Visually estimate the real-world mass or piece count based on visual scale. DO NOT default everything to 1 kg!
-   - Realistic benchmarks:
-     * A single leaf (aloe vera leaf, spinach, mint, tea leaf): 5-20 g, or 1 piece.
-     * A single fruit/vegetable peel (banana peel, orange rind): 25-50 g, or 1 piece.
-     * An apple core or vegetable trimmings: 20-40 g.
-     * Used coffee grounds (single cup): 15-25 g.
-     * An eggshell: 5-8 g, or 1 piece.
-     * Leftover plate portion: 150-350 g.
-     * Large bulk quantities (commercial bins, crates): only then use kg or l.
-   - Provide "estimated_quantity" (number) and "estimated_unit" ('g', 'kg', 'piece', 'ml', 'l').
+5. WASTE STREAM CLASSIFICATION (FOR DATABASE COMPATIBILITY):
+   - "waste_category": Map to one of the 4 universal stream classifications:
+     * 'edible_reusable': Reserved for directly reusable/intact components or wholesome edible food.
+     * 'surplus_redistributable': Reserved for surplus equipment, parts suitable for secondary markets, or surplus food.
+     * 'unavoidable_organic': Reserved for non-reusable core scrap, unavoidable organic residues, or raw recycling feedstock.
+     * 'other_separate': Reserved for hazardous, regulated streams (batteries, spent solvents, e-waste hazards, contaminated packaging).
 
-6. CIRCULAR RECOVERY PATHWAYS & REUSE SUGGESTIONS:
-   - Provide realistic circular recovery pathways ('reuse', 'redistribution', 'composting', 'biogas', 'pectin_recovery', 'material_recovery', 'separate_disposal') and 1-3 creative household/craft/culinary reuse ideas.
-   - State uncertainty honestly and do not guarantee microbial safety from photos.`;
+6. REALISTIC QUANTITY & UNIT ESTIMATION:
+   - Estimate realistic mass, piece count, or volume:
+     * Microchips, fasteners, small brackets: 5-50 g or 1 piece.
+     * Ball bearing, circuit board, hand tool: 100-500 g or 1 piece.
+     * Electric motor, alternator, pump: 2-15 kg or 1 unit.
+     * Structural aluminum extrusion: 1-5 kg or 1 piece.
+     * Bulk scrap piles: kg, ton, or m.
+   - Provide "estimated_quantity" (number) and "estimated_unit" ('g', 'kg', 'piece', 'unit', 'ml', 'l', 'ton', 'm').
+
+7. CIRCULAR RECOVERY PATHWAYS & ECONOMIC VALUE:
+   - Provide actionable circular recovery pathways:
+     * Inorganic methods: 'reuse', 'refurbishment', 'remanufacturing', 'component_harvesting', 'precious_metal_recovery', 'scrap_recycling', 'chemical_recycling', 'hazardous_neutralization', 'material_recovery', 'separate_disposal'
+     * Organic methods: 'reuse', 'redistribution', 'composting', 'biogas', 'pectin_recovery', 'material_recovery', 'separate_disposal'
+   - In "requirements", state critical safety and industrial handling conditions (e.g. ESD precautions, capacitor discharge, cut-resistant gloves, degreasing, PPE).
+   - In "estimated_value", provide realistic economic salvage or resale value (e.g., "$15–$35 functional motor resale", "$4.20/kg high-grade copper scrap", "$1.50/kg clean HDPE pellets").
+
+8. REUSE & SALVAGE SUGGESTIONS:
+   - Provide 1-3 practical workshop, engineering, maker, industrial, or household repurposing ideas.
+   - In "hazard_alerts", list any safety warnings (e.g. electrical shock, sharp burrs, toxic solder/lead, lithium puncture hazard).`;
 
 /**
  * Gemini response schema for Constrained Decoding.
@@ -110,9 +151,23 @@ const RESPONSE_SCHEMA = {
         type: 'OBJECT',
         properties: {
           food_name: { type: 'STRING' },
+          waste_type: {
+            type: 'STRING',
+            enum: ['organic', 'inorganic']
+          },
           food_category: {
             type: 'STRING',
             enum: [
+              'electronic_ewaste',
+              'mechanical_hardware',
+              'industrial_scrap_metal',
+              'engineering_polymer',
+              'automotive_parts',
+              'construction_demolition',
+              'battery_storage',
+              'chemical_hazardous',
+              'glass_ceramic',
+              'textile_fiber',
               'fruit',
               'vegetable',
               'plant_material',
@@ -134,11 +189,25 @@ const RESPONSE_SCHEMA = {
               'other_separate'
             ]
           },
+          condition: {
+            type: 'STRING',
+            enum: [
+              'new_surplus',
+              'reusable_intact',
+              'minor_wear_refurbishable',
+              'damaged_repairable',
+              'scrap_recyclable',
+              'hazardous_damaged',
+              'degraded_end_of_life'
+            ]
+          },
+          condition_details: { type: 'STRING' },
+          reusability_score: { type: 'INTEGER' },
           confidence: { type: 'NUMBER' },
           estimated_quantity: { type: 'NUMBER' },
           estimated_unit: {
             type: 'STRING',
-            enum: ['g', 'kg', 'piece', 'ml', 'l']
+            enum: ['g', 'kg', 'piece', 'unit', 'ml', 'l', 'ton', 'm']
           },
           bounding_box: {
             type: 'ARRAY',
@@ -158,11 +227,19 @@ const RESPONSE_SCHEMA = {
                     'biogas',
                     'pectin_recovery',
                     'material_recovery',
-                    'separate_disposal'
+                    'separate_disposal',
+                    'refurbishment',
+                    'remanufacturing',
+                    'component_harvesting',
+                    'precious_metal_recovery',
+                    'scrap_recycling',
+                    'chemical_recycling',
+                    'hazardous_neutralization'
                   ]
                 },
                 reason: { type: 'STRING' },
-                requirements: { type: 'STRING' }
+                requirements: { type: 'STRING' },
+                estimated_value: { type: 'STRING' }
               },
               required: ['method', 'reason']
             }
@@ -170,15 +247,25 @@ const RESPONSE_SCHEMA = {
           reuse_suggestions: {
             type: 'ARRAY',
             items: { type: 'STRING' }
+          },
+          hazard_alerts: {
+            type: 'ARRAY',
+            items: { type: 'STRING' }
           }
         },
-        required: ['food_name', 'waste_category']
+        required: ['food_name', 'waste_type', 'food_category', 'waste_category', 'condition']
       }
     },
     notes: { type: 'STRING' }
   },
   required: ['items']
 };
+
+/**
+ * Keywords for identifying inorganic materials and components.
+ */
+const INORGANIC_PATTERN =
+  /circuit|pcb|motherboard|chip|ic\b|transistor|capacitor|resistor|diode|transformer|motor|wire|cable|connector|battery|cell\b|bearing|gear|sprocket|pulley|valve|cylinder|shaft|piston|fastener|bolt|screw|nut\b|washer|metal|steel|iron|copper|brass|bronze|aluminum|aluminium|titanium|carbide|plastic|polymer|hdpe|ldpe|polypropylene|abs\b|nylon|polycarbonate|teflon|ptfe|acrylic|pvc|pet\b|composite|carbon fiber|fiberglass|concrete|brick|masonry|tile|drywall|glass|automotive|alternator|radiator|caliper|rotor|engine|catalytic/i;
 
 /**
  * Keywords for inedible plant/food residues that MUST NOT be classified as edible.
@@ -188,17 +275,20 @@ const INEDIBLE_RESIDUE_PATTERN =
 
 /**
  * Normalizes raw or irregular Gemini output into strict compliance with EcoLith schema:
- * - Accurately preserves empty detections (no hallucinated fake items)
- * - Enforces inedibility rule (Aloe vera and peels cannot be edible)
- * - Accurately categorizes food categories instead of defaulting to 'other'
- * - Estimates realistic quantities for small items (e.g. 10g for a leaf instead of 1kg)
+ * - Supports BOTH organic food waste and inorganic industrial, mechanical, electronic, and engineering waste
+ * - Accurately sets waste_type ('organic' vs 'inorganic')
+ * - Preserves empty detections on truly blank images (no hallucinated fake items)
+ * - Enforces condition evaluation, reusability score, and condition details
+ * - Enforces inedibility rule (peels, bones, aloe vera cannot be edible)
+ * - Accurately categorizes food/material categories instead of defaulting to 'other'
+ * - Estimates realistic quantities for components, scraps, and residues
  * - Normalizes 2D bounding boxes for live green box visualization
  */
 export function normalizeGeminiOutput(raw) {
   if (!raw || typeof raw !== 'object') {
     return {
       items: [],
-      notes: 'No food waste or organic residue detected in image.'
+      notes: 'No waste or material detected in image.'
     };
   }
 
@@ -206,11 +296,11 @@ export function normalizeGeminiOutput(raw) {
   if (Array.isArray(raw.items) && raw.items.length === 0) {
     return {
       items: [],
-      notes: raw.notes || 'No food waste or organic residue detected in image.'
+      notes: raw.notes || 'No waste or material detected in image.'
     };
   }
 
-  // If raw is an empty object without food identification
+  // If raw is an empty object without identification
   if (
     !Array.isArray(raw.items) &&
     !raw.food_name &&
@@ -224,7 +314,7 @@ export function normalizeGeminiOutput(raw) {
   ) {
     return {
       items: [],
-      notes: raw.notes || 'No food waste or organic residue detected in image.'
+      notes: raw.notes || 'No waste or material detected in image.'
     };
   }
 
@@ -243,20 +333,20 @@ export function normalizeGeminiOutput(raw) {
   } else if (Array.isArray(raw.results)) {
     itemsList = raw.results;
   } else if (raw.food_name || raw.name || raw.item_name) {
-    // Single object returned directly by Gemini
     itemsList = [raw];
   } else if (raw.item && typeof raw.item === 'object') {
     itemsList = [raw.item];
   }
 
   // Filter out any invalid items
-  itemsList = itemsList.filter((it) => it && typeof it === 'object' && (it.food_name || it.name || it.item_name || it.title));
+  itemsList = itemsList.filter(
+    (it) => it && typeof it === 'object' && (it.food_name || it.name || it.item_name || it.title)
+  );
 
-  // If no identifiable food items remain, return empty items array
   if (itemsList.length === 0) {
     return {
       items: [],
-      notes: raw.notes || 'No food waste or organic residue detected in image.'
+      notes: raw.notes || 'No waste or material detected in image.'
     };
   }
 
@@ -267,6 +357,16 @@ export function normalizeGeminiOutput(raw) {
     'other_separate'
   ]);
 
+  const VALID_CONDITIONS = new Set([
+    'new_surplus',
+    'reusable_intact',
+    'minor_wear_refurbishable',
+    'damaged_repairable',
+    'scrap_recyclable',
+    'hazardous_damaged',
+    'degraded_end_of_life'
+  ]);
+
   const VALID_RECOVERY_METHODS = new Set([
     'reuse',
     'redistribution',
@@ -274,92 +374,304 @@ export function normalizeGeminiOutput(raw) {
     'biogas',
     'pectin_recovery',
     'material_recovery',
-    'separate_disposal'
+    'separate_disposal',
+    'refurbishment',
+    'remanufacturing',
+    'component_harvesting',
+    'precious_metal_recovery',
+    'scrap_recycling',
+    'chemical_recycling',
+    'hazardous_neutralization'
   ]);
 
   const normalizedItems = itemsList.map((item, idx) => {
-    const foodName =
-      (typeof item === 'object' &&
-        (item.food_name || item.name || item.item_name || item.title)) ||
+    const itemName =
+      (typeof item === 'object' && (item.food_name || item.name || item.item_name || item.title)) ||
       `Item ${idx + 1}`;
 
-    // Precise Food Category inference
-    let rawCategory =
-      (typeof item === 'object' && (item.food_category || item.category || item.type)) || '';
-    let foodCategory = String(rawCategory).toLowerCase().trim().replace(/[\s-]+/g, '_');
+    const nameLower = itemName.toLowerCase();
 
-    // Intelligent keyword-based category resolution to eliminate 'other' default
-    const nameLower = foodName.toLowerCase();
+    // 1. Determine Waste Type (Organic vs Inorganic)
+    let wasteType = 'inorganic';
+    if (typeof item?.waste_type === 'string') {
+      const wt = item.waste_type.toLowerCase().trim();
+      if (wt === 'organic' || wt === 'inorganic') {
+        wasteType = wt;
+      }
+    } else {
+      // Automatic detection: if item matches inorganic pattern, inorganic; else check organic
+      if (INORGANIC_PATTERN.test(nameLower)) {
+        wasteType = 'inorganic';
+      } else if (
+        /fruit|vegetable|food|peel|rind|bread|rice|meal|meat|fish|bone|coffee|tea|aloe|leaf|plant|dairy|cheese|egg/i.test(
+          nameLower
+        )
+      ) {
+        wasteType = 'organic';
+      }
+    }
+
+    // 2. Precise Category inference
+    let rawCategory =
+      (typeof item === 'object' &&
+        (item.food_category || item.material_category || item.category || item.type)) ||
+      '';
+    let foodCategory = String(rawCategory)
+      .toLowerCase()
+      .trim()
+      .replace(/[\s-]+/g, '_');
+
     if (
       foodCategory === 'other' ||
       foodCategory === '' ||
       foodCategory === 'organic' ||
       foodCategory === 'produce' ||
-      foodCategory === 'plant'
+      foodCategory === 'plant' ||
+      foodCategory === 'hardware' ||
+      foodCategory === 'metal' ||
+      foodCategory === 'scrap'
     ) {
-      if (/aloe|leaf|leaves|succulent|cactus|foliage|flower|garden|grass|stem/i.test(nameLower)) {
+      if (
+        /pcb|circuit|motherboard|chip|ic\b|transistor|capacitor|resistor|connector|wiring|gadget|telecom|server|display|monitor|led\b|inverter/i.test(
+          nameLower
+        )
+      ) {
+        foodCategory = 'electronic_ewaste';
+        wasteType = 'inorganic';
+      } else if (
+        /bearing|gear|sprocket|pulley|bushing|shaft|valve|cylinder|fastener|bolt|screw|nut\b|washer|fitting|pneumatic|linear guide/i.test(
+          nameLower
+        )
+      ) {
+        foodCategory = 'mechanical_hardware';
+        wasteType = 'inorganic';
+      } else if (
+        /aluminum|aluminium|copper|brass|bronze|steel|iron|sheet metal|tubing|pipe|titanium|carbide|turnings|lathe scrap/i.test(
+          nameLower
+        )
+      ) {
+        foodCategory = 'industrial_scrap_metal';
+        wasteType = 'inorganic';
+      } else if (
+        /plastic|polymer|hdpe|ldpe|polypropylene|pp\b|abs\b|polycarbonate|nylon|pa6|teflon|ptfe|acrylic|pvc|pet\b|composite|carbon fiber/i.test(
+          nameLower
+        )
+      ) {
+        foodCategory = 'engineering_polymer';
+        wasteType = 'inorganic';
+      } else if (
+        /battery|cell\b|18650|lithium|lead acid|lifepo4|nimh|power bank/i.test(nameLower)
+      ) {
+        foodCategory = 'battery_storage';
+        wasteType = 'inorganic';
+      } else if (
+        /alternator|engine|starter|caliper|brake rotor|radiator|catalytic|suspension|transmission|exhaust/i.test(
+          nameLower
+        )
+      ) {
+        foodCategory = 'automotive_parts';
+        wasteType = 'inorganic';
+      } else if (
+        /concrete|brick|masonry|tile|drywall|plaster|mineral wool|insulation|aggregate/i.test(
+          nameLower
+        )
+      ) {
+        foodCategory = 'construction_demolition';
+        wasteType = 'inorganic';
+      } else if (
+        /solvent|coolant|sludge|chemical|cutting fluid|lubricant|grease|paint/i.test(nameLower)
+      ) {
+        foodCategory = 'chemical_hazardous';
+        wasteType = 'inorganic';
+      } else if (/glass|ceramic|porcelain|refractory/i.test(nameLower)) {
+        foodCategory = 'glass_ceramic';
+        wasteType = 'inorganic';
+      } else if (
+        /aloe|leaf|leaves|succulent|cactus|foliage|flower|garden|grass|stem/i.test(nameLower)
+      ) {
         foodCategory = 'plant_material';
+        wasteType = 'organic';
       } else if (
         /banana|apple|orange|citrus|lemon|lime|melon|grape|berry|mango|pear|peach|fruit|peel|rind|zest/i.test(
           nameLower
         )
       ) {
         foodCategory = 'fruit';
+        wasteType = 'organic';
       } else if (
         /potato|carrot|onion|tomato|broccoli|cabbage|lettuce|cucumber|pepper|squash|spinach|herb|vegetable|greens|trimmings/i.test(
           nameLower
         )
       ) {
         foodCategory = 'vegetable';
+        wasteType = 'organic';
       } else if (/bread|crust|bagel|pastry|croissant|toast|bun|cake|bakery/i.test(nameLower)) {
         foodCategory = 'bakery';
-      } else if (/rice|pasta|noodle|cereal|oat|grain|flour/i.test(nameLower)) {
+        wasteType = 'organic';
+      } else if (/rice|pasta|noodle|cereal|oat|grain|flour|spent grain/i.test(nameLower)) {
         foodCategory = 'grain';
+        wasteType = 'organic';
       } else if (/coffee|tea|grounds|brew|juice|drink|beverage/i.test(nameLower)) {
         foodCategory = 'beverage';
-      } else if (/cheese|milk|yogurt|butter|dairy/i.test(nameLower)) {
+        wasteType = 'organic';
+      } else if (/cheese|milk|yogurt|butter|dairy|whey/i.test(nameLower)) {
         foodCategory = 'dairy';
+        wasteType = 'organic';
       } else if (/bone|chicken|meat|beef|pork|fish|seafood|egg|eggshell/i.test(nameLower)) {
         foodCategory = 'meat_fish';
-      } else if (/curry|soup|stew|meal|leftover|cooked|rice/i.test(nameLower)) {
+        wasteType = 'organic';
+      } else if (/curry|soup|stew|meal|leftover|cooked/i.test(nameLower)) {
         foodCategory = 'prepared_food';
+        wasteType = 'organic';
+      } else if (wasteType === 'inorganic') {
+        foodCategory = 'mechanical_hardware';
       } else {
         foodCategory = 'vegetable';
       }
     }
 
-    // Map waste_category
+    // 3. Condition Assessment
+    let condition = 'reusable_intact';
+    if (typeof item?.condition === 'string') {
+      const condLower = item.condition
+        .toLowerCase()
+        .trim()
+        .replace(/[\s-]+/g, '_');
+      if (VALID_CONDITIONS.has(condLower)) {
+        condition = condLower;
+      } else if (condLower.includes('new') || condLower.includes('surplus')) {
+        condition = 'new_surplus';
+      } else if (condLower.includes('refurb') || condLower.includes('minor')) {
+        condition = 'minor_wear_refurbishable';
+      } else if (condLower.includes('repair') || condLower.includes('defect')) {
+        condition = 'damaged_repairable';
+      } else if (condLower.includes('hazard') || condLower.includes('leaking')) {
+        condition = 'hazardous_damaged';
+      } else if (condLower.includes('scrap') || condLower.includes('recycle')) {
+        condition = 'scrap_recyclable';
+      } else if (condLower.includes('degrad') || condLower.includes('end_of_life')) {
+        condition = 'degraded_end_of_life';
+      }
+    } else {
+      // Infer condition from keywords
+      if (/burnt|broken|cracked|severely|leaking|swollen|ruined/i.test(nameLower)) {
+        condition = 'damaged_repairable';
+      } else if (/scrap|shredded|turnings|debris|swarf/i.test(nameLower)) {
+        condition = 'scrap_recyclable';
+      } else {
+        condition = 'reusable_intact';
+      }
+    }
+
+    // Condition details
+    let conditionDetails =
+      typeof item?.condition_details === 'string' && item.condition_details.trim()
+        ? item.condition_details.trim()
+        : '';
+    if (!conditionDetails) {
+      if (wasteType === 'inorganic') {
+        conditionDetails =
+          condition === 'new_surplus'
+            ? 'Pristine surplus component; zero operational wear or surface corrosion observed.'
+            : condition === 'reusable_intact'
+              ? 'Component structure, contacts, and mounting interfaces intact; suitable for direct redeployment.'
+              : condition === 'minor_wear_refurbishable'
+                ? 'Minor surface oxidation or cosmetic wear detected; clean, lubricate, or re-machine to restore specification.'
+                : condition === 'damaged_repairable'
+                  ? 'Defective sub-assembly detected; component harvesting or targeted repair recommended.'
+                  : condition === 'hazardous_damaged'
+                    ? 'Caution: Damaged hazardous element present. Isolate and adhere to regulated handling protocols.'
+                    : 'End-of-life condition; optimal for secondary raw material smelting or polymer pelletizing.';
+      } else {
+        conditionDetails =
+          'Organic biomass residue assessed for moisture, structure, and circular composting/biogas suitability.';
+      }
+    }
+
+    // Reusability Score (0-100)
+    let reusabilityScore = 80;
+    if (typeof item?.reusability_score === 'number' && !isNaN(item.reusability_score)) {
+      reusabilityScore = Math.max(0, Math.min(100, Math.round(item.reusability_score)));
+    } else {
+      switch (condition) {
+        case 'new_surplus':
+          reusabilityScore = 98;
+          break;
+        case 'reusable_intact':
+          reusabilityScore = 88;
+          break;
+        case 'minor_wear_refurbishable':
+          reusabilityScore = 72;
+          break;
+        case 'damaged_repairable':
+          reusabilityScore = 55;
+          break;
+        case 'scrap_recyclable':
+          reusabilityScore = 30;
+          break;
+        case 'degraded_end_of_life':
+          reusabilityScore = 15;
+          break;
+        case 'hazardous_damaged':
+          reusabilityScore = 10;
+          break;
+        default:
+          reusabilityScore = 75;
+      }
+    }
+
+    // 4. Waste Stream Classification (DB check compatibility: edible_reusable, surplus_redistributable, unavoidable_organic, other_separate)
     let wasteCategory = typeof item === 'object' ? item.waste_category : null;
     if (typeof wasteCategory === 'string') {
-      const lower = wasteCategory.toLowerCase().trim().replace(/[\s-]+/g, '_');
+      const lower = wasteCategory
+        .toLowerCase()
+        .trim()
+        .replace(/[\s-]+/g, '_');
       if (VALID_WASTE_CATEGORIES.has(lower)) {
         wasteCategory = lower;
-      } else if (lower.includes('edible') || lower.includes('reusable')) {
+      } else if (
+        lower.includes('edible') ||
+        lower.includes('reusable') ||
+        lower.includes('intact')
+      ) {
         wasteCategory = 'edible_reusable';
       } else if (
         lower.includes('surplus') ||
         lower.includes('redistribut') ||
-        lower.includes('donat')
+        lower.includes('refurb')
       ) {
         wasteCategory = 'surplus_redistributable';
       } else if (
         lower.includes('separate') ||
         lower.includes('hazard') ||
-        lower.includes('oil') ||
-        lower.includes('packaging')
+        lower.includes('toxic') ||
+        lower.includes('battery')
       ) {
         wasteCategory = 'other_separate';
       } else {
         wasteCategory = 'unavoidable_organic';
       }
     } else {
-      wasteCategory = 'unavoidable_organic';
+      if (condition === 'new_surplus' || condition === 'minor_wear_refurbishable') {
+        wasteCategory = 'surplus_redistributable';
+      } else if (condition === 'reusable_intact') {
+        wasteCategory = 'edible_reusable';
+      } else if (
+        condition === 'hazardous_damaged' ||
+        foodCategory === 'chemical_hazardous' ||
+        foodCategory === 'battery_storage'
+      ) {
+        wasteCategory = 'other_separate';
+      } else {
+        wasteCategory = 'unavoidable_organic';
+      }
     }
 
-    // MANDATORY RULE: Inedible fruit/vegetable peels, aloe vera, bones, eggshells, etc. CANNOT be edible
+    // MANDATORY RULE: Inedible fruit/vegetable peels, aloe vera, bones, eggshells CANNOT be edible
     if (
+      wasteType === 'organic' &&
       (wasteCategory === 'edible_reusable' || wasteCategory === 'surplus_redistributable') &&
-      (INEDIBLE_RESIDUE_PATTERN.test(foodName) ||
+      (INEDIBLE_RESIDUE_PATTERN.test(itemName) ||
         nameLower.includes('aloe') ||
         nameLower.includes('peel') ||
         nameLower.includes('rind') ||
@@ -369,13 +681,13 @@ export function normalizeGeminiOutput(raw) {
       wasteCategory = 'unavoidable_organic';
     }
 
-    // Confidence
+    // 5. Confidence
     let confidence = 0.92;
     if (typeof item?.confidence === 'number' && !isNaN(item.confidence)) {
       confidence = Math.max(0, Math.min(1, item.confidence));
     }
 
-    // Realistic Quantity & Unit estimation (prevent single leaf defaulting to 1kg)
+    // 6. Realistic Quantity & Unit estimation
     let estimatedQuantity = 1;
     let estimatedUnit = 'piece';
 
@@ -389,49 +701,78 @@ export function normalizeGeminiOutput(raw) {
 
     if (
       typeof item?.estimated_unit === 'string' &&
-      ['g', 'kg', 'piece', 'ml', 'l'].includes(item.estimated_unit.toLowerCase())
+      ['g', 'kg', 'piece', 'unit', 'ml', 'l', 'ton', 'm'].includes(
+        item.estimated_unit.toLowerCase()
+      )
     ) {
       estimatedUnit = item.estimated_unit.toLowerCase();
     } else {
-      // Intelligently infer realistic metric unit based on item type
-      if (/leaf|leaves|aloe|herb|sprig|peel|rind|skin|core|eggshell/i.test(nameLower)) {
-        if (!item?.estimated_quantity || item.estimated_quantity >= 1) {
-          estimatedQuantity =
-            /leaf|leaves|aloe|herb/i.test(nameLower) ? 10 : 30;
-          estimatedUnit = 'g';
+      if (wasteType === 'inorganic') {
+        if (/cable|wire|pipe|hose|extrusion/i.test(nameLower)) {
+          estimatedQuantity = 1;
+          estimatedUnit = 'm';
+        } else if (/oil|fluid|solvent|lubricant|coolant|chemical/i.test(nameLower)) {
+          estimatedQuantity = 500;
+          estimatedUnit = 'ml';
+        } else if (/motor|engine|alternator|pump|transformer|cylinder/i.test(nameLower)) {
+          estimatedQuantity = 1;
+          estimatedUnit = 'unit';
+        } else if (/chip|ic\b|resistor|capacitor|bolt|screw|nut\b|bearing/i.test(nameLower)) {
+          estimatedQuantity = 1;
+          estimatedUnit = 'piece';
+        } else if (/turnings|swarf|shredded|crushed|rubble/i.test(nameLower)) {
+          estimatedQuantity = 2.5;
+          estimatedUnit = 'kg';
+        } else {
+          estimatedQuantity = 1;
+          estimatedUnit = 'piece';
         }
-      } else if (/grounds|powder|crumbs/i.test(nameLower)) {
-        estimatedQuantity = 20;
-        estimatedUnit = 'g';
-      } else if (/oil|liquid|broth|juice/i.test(nameLower)) {
-        estimatedQuantity = 150;
-        estimatedUnit = 'ml';
-      } else if (/meal|curry|rice|pasta|dish|salad|leftovers/i.test(nameLower)) {
-        estimatedQuantity = 250;
-        estimatedUnit = 'g';
       } else {
-        estimatedQuantity = 1;
-        estimatedUnit = 'piece';
+        // Organic metric inference
+        if (/leaf|leaves|aloe|herb|sprig|peel|rind|skin|core|eggshell/i.test(nameLower)) {
+          if (!item?.estimated_quantity || item.estimated_quantity >= 1) {
+            estimatedQuantity = /leaf|leaves|aloe|herb/i.test(nameLower) ? 10 : 30;
+            estimatedUnit = 'g';
+          }
+        } else if (/grounds|powder|crumbs/i.test(nameLower)) {
+          estimatedQuantity = 20;
+          estimatedUnit = 'g';
+        } else if (/oil|liquid|broth|juice/i.test(nameLower)) {
+          estimatedQuantity = 150;
+          estimatedUnit = 'ml';
+        } else if (/meal|curry|rice|pasta|dish|salad|leftovers/i.test(nameLower)) {
+          estimatedQuantity = 250;
+          estimatedUnit = 'g';
+        } else {
+          estimatedQuantity = 1;
+          estimatedUnit = 'piece';
+        }
       }
     }
 
-    // Ensure small scraps are never 1 kg
+    // Ensure small scraps and discrete components are never 1 kg
     if (
       estimatedUnit === 'kg' &&
       estimatedQuantity >= 1 &&
-      /leaf|leaves|peel|rind|skin|aloe|scrap|core|eggshell|grounds/i.test(nameLower)
+      /leaf|leaves|peel|rind|skin|aloe|scrap|core|eggshell|grounds|microchip|resistor|washer|bearing|bolt|screw|fastener/i.test(
+        nameLower
+      )
     ) {
-      estimatedQuantity = /leaf|aloe/i.test(nameLower) ? 10 : 35;
-      estimatedUnit = 'g';
+      if (/bearing|bolt|screw|fastener|washer/i.test(nameLower)) {
+        estimatedQuantity = Math.round(estimatedQuantity);
+        estimatedUnit = 'piece';
+      } else {
+        estimatedQuantity = /leaf|aloe|chip|resistor/i.test(nameLower) ? 10 : 35;
+        estimatedUnit = 'g';
+      }
     }
 
-    // 2D Bounding Box Normalization [ymin, xmin, ymax, xmax] (0 to 1000 scale)
+    // 7. 2D Bounding Box Normalization [ymin, xmin, ymax, xmax] (0 to 1000 scale)
     let boundingBox = null;
     const rawBox = item?.bounding_box || item?.box_2d || item?.box;
     if (Array.isArray(rawBox) && rawBox.length === 4) {
       let [ymin, xmin, ymax, xmax] = rawBox.map((v) => Number(v) || 0);
 
-      // If coordinates were scaled to 0.0 - 1.0 floats, upscale to 0 - 1000
       if (ymin <= 1 && xmin <= 1 && ymax <= 1 && xmax <= 1 && (ymax > 0 || xmax > 0)) {
         ymin *= 1000;
         xmin *= 1000;
@@ -446,11 +787,10 @@ export function normalizeGeminiOutput(raw) {
 
       boundingBox = [ymin, xmin, ymax, xmax];
     } else {
-      // Sensible default detection bounding box centered on object
       boundingBox = [150, 150, 850, 850];
     }
 
-    // Recovery options
+    // 8. Recovery Options
     let rawOptions = [];
     if (Array.isArray(item?.recovery_options)) {
       rawOptions = item.recovery_options;
@@ -466,46 +806,44 @@ export function normalizeGeminiOutput(raw) {
         let method = (opt.method || opt.pathway || opt.type || '').toLowerCase().trim();
         if (VALID_RECOVERY_METHODS.has(method)) {
           // valid
+        } else if (method.includes('harvest') || method.includes('desolder')) {
+          method = 'component_harvesting';
+        } else if (method.includes('refurb') || method.includes('repair')) {
+          method = 'refurbishment';
+        } else if (method.includes('remanuf')) {
+          method = 'remanufacturing';
+        } else if (
+          method.includes('precious') ||
+          method.includes('gold') ||
+          method.includes('smelt')
+        ) {
+          method = 'precious_metal_recovery';
+        } else if (method.includes('scrap') || method.includes('melt')) {
+          method = 'scrap_recycling';
+        } else if (method.includes('chemical') || method.includes('pellet')) {
+          method = 'chemical_recycling';
+        } else if (method.includes('hazard') || method.includes('neutraliz')) {
+          method = 'hazardous_neutralization';
         } else if (method.includes('compost')) {
           method = 'composting';
-        } else if (
-          method.includes('redistribut') ||
-          method.includes('donat') ||
-          method.includes('bank')
-        ) {
+        } else if (method.includes('redistribut') || method.includes('donat')) {
           method = 'redistribution';
         } else if (method.includes('pectin')) {
           method = 'pectin_recovery';
         } else if (
           method.includes('biogas') ||
-          method.includes('energy') ||
           method.includes('methane') ||
-          method.includes('fuel')
+          method.includes('energy')
         ) {
           method = 'biogas';
-        } else if (
-          method.includes('material') ||
-          method.includes('extract') ||
-          method.includes('fiber') ||
-          method.includes('textile')
-        ) {
+        } else if (method.includes('material') || method.includes('extract')) {
           method = 'material_recovery';
-        } else if (
-          method.includes('separate') ||
-          method.includes('dispos') ||
-          method.includes('trash') ||
-          method.includes('landfill')
-        ) {
+        } else if (method.includes('dispos') || method.includes('trash')) {
           method = 'separate_disposal';
-        } else if (
-          method.includes('reuse') ||
-          method.includes('craft') ||
-          method.includes('skin') ||
-          method.includes('home')
-        ) {
+        } else if (method.includes('reuse')) {
           method = 'reuse';
         } else {
-          method = 'composting';
+          method = wasteType === 'inorganic' ? 'material_recovery' : 'composting';
         }
 
         return {
@@ -514,83 +852,216 @@ export function normalizeGeminiOutput(raw) {
             opt.reason ||
             opt.explanation ||
             opt.description ||
-            'Suitable circular recovery pathway.',
+            'Suitable circular resource pathway.',
           requirements:
             opt.requirements ||
             opt.conditions ||
-            'Ensure materials are segregated and uncontaminated.'
+            'Ensure materials are segregated and uncontaminated.',
+          estimated_value:
+            opt.estimated_value || opt.estimatedValue || 'Circular value preservation'
         };
       })
       .filter(Boolean);
 
-    // If no recovery options provided, supply intelligent defaults based on item
+    // If no recovery options supplied, synthesize intelligent defaults based on item
     if (recoveryOptions.length === 0) {
-      if (wasteCategory === 'edible_reusable') {
-        recoveryOptions = [
-          {
-            method: 'reuse',
-            reason: 'Item can be repurposed for culinary, household, or functional preparations.',
-            requirements: 'Ensure clean and uncontaminated handling.'
-          },
-          {
-            method: 'composting',
-            reason: 'Clean plant material will compost rapidly.',
-            requirements: 'Keep free from packaging or chemicals.'
-          }
-        ];
-      } else if (wasteCategory === 'surplus_redistributable') {
-        recoveryOptions = [
-          {
-            method: 'redistribution',
-            reason: 'Wholesome surplus suitable for donation before quality declines.',
-            requirements: 'Maintain temperature and transport in clean containers.'
-          }
-        ];
+      if (wasteType === 'inorganic') {
+        if (condition === 'new_surplus' || condition === 'reusable_intact') {
+          recoveryOptions = [
+            {
+              method: 'reuse',
+              reason: 'Component is intact and within functional tolerances; redeploy directly.',
+              requirements: 'Inspect interfaces and verify electrical/mechanical specs.',
+              estimated_value: 'High (Immediate hardware replacement savings)'
+            },
+            {
+              method: 'redistribution',
+              reason: 'Divert surplus hardware into secondary industrial surplus marketplaces.',
+              requirements: 'Clean and package in protective ESD/anti-corrosion wrapping.',
+              estimated_value: 'Medium-High (50–70% of original equipment cost)'
+            }
+          ];
+        } else if (condition === 'minor_wear_refurbishable') {
+          recoveryOptions = [
+            {
+              method: 'refurbishment',
+              reason:
+                'Ultrasonic cleaning, repacking, and calibration will restore operational readiness.',
+              requirements: 'Clean thoroughly and check dimensional clearances.',
+              estimated_value: 'Medium (Extends asset operational lifecycle)'
+            },
+            {
+              method: 'component_harvesting',
+              reason: 'Extract undamaged sub-components (copper coils, bearings, discrete ICs).',
+              requirements: 'Use desoldering station or mechanical disassembly jigs.',
+              estimated_value: 'Medium (Component salvage inventory value)'
+            }
+          ];
+        } else if (foodCategory === 'electronic_ewaste') {
+          recoveryOptions = [
+            {
+              method: 'component_harvesting',
+              reason: 'Salvage high-value microcontrollers, power transistors, and heatsinks.',
+              requirements: 'Use ESD grounding and low-temperature hot air desoldering.',
+              estimated_value: 'High ($10–$50 salvaged electronic component value)'
+            },
+            {
+              method: 'precious_metal_recovery',
+              reason: 'Smelt and hydrometallurgically refine gold, silver, copper, and palladium.',
+              requirements: 'Send depopulated boards to certified WEEE R4 smelting refiners.',
+              estimated_value: 'High ($3,000–$15,000/ton refined e-scrap yield)'
+            }
+          ];
+        } else if (foodCategory === 'industrial_scrap_metal') {
+          recoveryOptions = [
+            {
+              method: 'scrap_recycling',
+              reason:
+                'Melt segregated alloy into secondary billet/ingot with up to 95% energy savings.',
+              requirements: 'Keep ferrous and non-ferrous alloys strictly segregated.',
+              estimated_value: 'High (Market scrap commodity value: $2.50–$8.00/kg)'
+            }
+          ];
+        } else if (foodCategory === 'engineering_polymer') {
+          recoveryOptions = [
+            {
+              method: 'chemical_recycling',
+              reason: 'Shred, wash, and re-pelletize thermoplastic resin for injection molding.',
+              requirements:
+                'Avoid mixing dissimilar polymer resin codes (e.g. keep HDPE and PP separate).',
+              estimated_value: 'Medium ($1.20–$2.40/kg clean recycled regrind value)'
+            }
+          ];
+        } else if (foodCategory === 'battery_storage' || foodCategory === 'chemical_hazardous') {
+          recoveryOptions = [
+            {
+              method: 'hazardous_neutralization',
+              reason:
+                'Isolate specialized hazardous material and route to closed-loop hydrometallurgical recycling.',
+              requirements:
+                'Tape battery terminals; store in fire-retardant vermiculite container.',
+              estimated_value: 'Safety & Regulatory Compliance'
+            }
+          ];
+        } else {
+          recoveryOptions = [
+            {
+              method: 'material_recovery',
+              reason: 'Segregate material core for secondary industrial recycling and remelting.',
+              requirements: 'Remove contaminants, fasteners, and foreign residues.',
+              estimated_value: 'Material recovery and landfill diversion'
+            }
+          ];
+        }
       } else {
-        recoveryOptions = [
-          {
-            method: 'reuse',
-            reason:
-              'Extract functional plant compounds (e.g. soothing gel, natural extracts) or home preparations.',
-            requirements: 'Rinse outer rind thoroughly before preparation.'
-          },
-          {
-            method: 'composting',
-            reason: 'Biodegradable plant residue provides organic matter and moisture for soil.',
-            requirements: 'Chop thick rinds/leaves to accelerate microbial breakdown.'
-          }
-        ];
+        // Organic defaults
+        if (wasteCategory === 'edible_reusable') {
+          recoveryOptions = [
+            {
+              method: 'reuse',
+              reason: 'Repurpose for culinary, household, or functional preparations.',
+              requirements: 'Ensure clean and uncontaminated handling.',
+              estimated_value: 'Direct culinary savings'
+            },
+            {
+              method: 'composting',
+              reason:
+                'Clean plant residue will compost rapidly into organic humic soil conditioner.',
+              requirements: 'Keep free from packaging or chemicals.',
+              estimated_value: 'Soil organic carbon enhancement'
+            }
+          ];
+        } else if (wasteCategory === 'surplus_redistributable') {
+          recoveryOptions = [
+            {
+              method: 'redistribution',
+              reason: 'Wholesome surplus food suitable for donation before quality declines.',
+              requirements: 'Maintain temperature and transport in clean food-grade containers.',
+              estimated_value: 'High social and community nutrition impact'
+            }
+          ];
+        } else {
+          recoveryOptions = [
+            {
+              method: 'reuse',
+              reason: 'Extract functional plant compounds or prepare concentrated broths/extracts.',
+              requirements: 'Rinse thoroughly before preparation.',
+              estimated_value: 'Repurposing value'
+            },
+            {
+              method: 'composting',
+              reason: 'Biodegradable organic residue provides humic matter and moisture for soil.',
+              requirements: 'Chop coarsely to accelerate microbial digestion.',
+              estimated_value: 'Soil regeneration and landfill methane diversion'
+            }
+          ];
+        }
       }
     }
 
-    // Reuse suggestions
+    // 9. Reuse / Harvesting suggestions
     let reuseSuggestions = [];
     if (Array.isArray(item?.reuse_suggestions)) {
       reuseSuggestions = item.reuse_suggestions.filter((s) => typeof s === 'string' && s.trim());
     }
     if (reuseSuggestions.length === 0) {
-      reuseSuggestions = [
-        'Compost organic residue to enrich garden soil',
-        'Extract natural plant moisture or functional essences for household or craft use'
-      ];
+      if (wasteType === 'inorganic') {
+        reuseSuggestions = [
+          'Harvest reusable discrete components, fasteners, or wiring for workshop prototypes',
+          'Repurpose structural alloy brackets or frames into workshop fixtures and jigs',
+          'Route decontaminated material to local maker spaces, repair cafes, or certified scrap recyclers'
+        ];
+      } else {
+        reuseSuggestions = [
+          'Compost organic residue to enrich garden soil',
+          'Extract natural plant moisture or essences for household preparation'
+        ];
+      }
+    }
+
+    // 10. Hazard alerts
+    let hazardAlerts = [];
+    if (Array.isArray(item?.hazard_alerts)) {
+      hazardAlerts = item.hazard_alerts.filter((s) => typeof s === 'string' && s.trim());
+    }
+    if (hazardAlerts.length === 0 && wasteType === 'inorganic') {
+      if (foodCategory === 'electronic_ewaste' || foodCategory === 'battery_storage') {
+        hazardAlerts = [
+          'Electrical charge hazard: Discharge high-voltage electrolytic capacitors before handling',
+          'Chemical hazard: Avoid puncturing cells or inhaling lead/cadmium solder fumes'
+        ];
+      } else if (
+        foodCategory === 'industrial_scrap_metal' ||
+        foodCategory === 'mechanical_hardware'
+      ) {
+        hazardAlerts = [
+          'Mechanical hazard: Wear cut-resistant gloves to protect against sharp burrs and shear edges',
+          'Chemical hazard: Degrease cutting oil residues in a well-ventilated area'
+        ];
+      }
     }
 
     return {
-      food_name: foodName,
+      food_name: itemName,
+      waste_type: wasteType,
       food_category: foodCategory,
       waste_category: wasteCategory,
+      condition,
+      condition_details: conditionDetails,
+      reusability_score: reusabilityScore,
       confidence,
       estimated_quantity: estimatedQuantity,
       estimated_unit: estimatedUnit,
       bounding_box: boundingBox,
       recovery_options: recoveryOptions,
-      reuse_suggestions: reuseSuggestions
+      reuse_suggestions: reuseSuggestions,
+      hazard_alerts: hazardAlerts
     };
   });
 
   const notes =
     (typeof raw.notes === 'string' && raw.notes.trim()) ||
-    'Contamination and edibility cannot be reliably assessed from a photo alone.';
+    'Material condition and circular recovery pathways evaluated via AI vision inspection.';
 
   return {
     items: normalizedItems,
@@ -600,7 +1071,8 @@ export function normalizeGeminiOutput(raw) {
 
 /**
  * Calls Google Gemini API using the user's decrypted API key.
- * Uses gemini-3.1-flash-lite by default as the primary model.
+ * Analyzes both organic food residues and inorganic industrial, mechanical,
+ * electronic, and engineering waste with equal precision.
  *
  * @param {string} apiKey - Decrypted Gemini API key (passed via x-goog-api-key header)
  * @param {string} imageBase64 - Clean base64 string of the image (without data URL prefix)
@@ -620,7 +1092,6 @@ export async function analyzeFoodImageWithGemini(
     .replace(/^["'`]+|["'`]+$/g, '')
     .replace(/[\u200B-\u200D\uFEFF\u00A0\s]/g, '');
 
-  // High-accuracy model priority under Gemini API: gemini-3.1-flash-lite by default
   const defaultModel = process.env.DEFAULT_GEMINI_MODEL || 'gemini-3.1-flash-lite';
   const modelsToTry = modelOverride
     ? [modelOverride]
@@ -632,7 +1103,6 @@ export async function analyzeFoodImageWithGemini(
         'gemini-1.5-flash'
       ].filter((v, i, a) => a.indexOf(v) === i);
 
-  // Strip data: prefix if accidentally passed
   const cleanBase64 = imageBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').trim();
 
   const payload = {
@@ -643,7 +1113,7 @@ export async function analyzeFoodImageWithGemini(
             text: SYSTEM_INSTRUCTION
           },
           {
-            text: 'Analyze the food waste, kitchen scraps, or organic materials visible in this photo. If no food waste is present, return items: []. Return only JSON conforming strictly to the response schema.'
+            text: 'Inspect this image carefully. Identify all waste items, surplus materials, scrap, components, electronics, hardware, or organic residues. Detect condition, reusability, material type, 2D bounding boxes, and circular recovery pathways. Return ONLY JSON conforming strictly to the response schema.'
           },
           {
             inline_data: {
@@ -683,7 +1153,6 @@ export async function analyzeFoodImageWithGemini(
       throw error;
     }
 
-    // If 404 (model not found) or 400 (e.g. responseSchema not supported on older preview), fallback to next model
     if ((response.status === 404 || response.status === 400) && i < modelsToTry.length - 1) {
       console.warn(
         `Model ${currentModel} returned status ${response.status}, attempting fallback to ${modelsToTry[i + 1]}`
@@ -706,7 +1175,6 @@ export async function analyzeFoodImageWithGemini(
 
     const message = errData.error?.message || `Gemini API returned status ${status}`;
 
-    // Map 400 / 401 / 403 API key errors
     if (
       status === 401 ||
       status === 403 ||
@@ -718,7 +1186,6 @@ export async function analyzeFoodImageWithGemini(
       throw err;
     }
 
-    // Map 429 quota or rate limit errors
     if (
       status === 429 ||
       message.toLowerCase().includes('quota') ||
@@ -732,7 +1199,6 @@ export async function analyzeFoodImageWithGemini(
       throw err;
     }
 
-    // Generic Gemini error
     const err = new Error('Google Gemini was unable to process the image: ' + message);
     err.code = 'GEMINI_ERROR';
     err.status = 502;
@@ -749,7 +1215,6 @@ export async function analyzeFoodImageWithGemini(
     throw err;
   }
 
-  // Clean potential markdown fences (e.g. ```json ... ```)
   const cleanedText = rawText
     .trim()
     .replace(/^```json\s*/i, '')
@@ -767,10 +1232,8 @@ export async function analyzeFoodImageWithGemini(
     throw err;
   }
 
-  // Normalize structure into strict compliance before Zod safeParse
   const normalizedData = normalizeGeminiOutput(parsedJson);
 
-  // Validate with Zod schema
   const validationResult = geminiAnalysisSchema.safeParse(normalizedData);
   if (!validationResult.success) {
     console.warn('Gemini schema validation issue:', validationResult.error.format());
