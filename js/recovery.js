@@ -71,6 +71,31 @@ export const DEFAULT_RECOVERY_RULES = [
     category_group: 'beverage',
     tier: 'community'
   },
+  // 5b. Aloe Vera & Botanical Succulents
+  {
+    material_pattern: 'aloe|aloe vera|succulent|cactus|medicinal leaf|herbal leaf',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'reuse',
+    requirements:
+      'Wash outer leaf thoroughly; fillet to extract clear inner gel for topical skin hydration or soothing preparations.',
+    explanation:
+      'Aloe vera leaves contain polysaccharide-rich gel and acemannan, providing natural topical cooling, moisturizing, and home cosmetic reuse value.',
+    estimated_resource_value: 'High (Natural botanical cosmetic & skincare savings)',
+    category_group: 'vegetable',
+    tier: 'household'
+  },
+  {
+    material_pattern: 'aloe|aloe vera|succulent|cactus|medicinal leaf|herbal leaf',
+    waste_category: 'unavoidable_organic',
+    recovery_method: 'composting',
+    requirements:
+      'Chop thick outer leaf rinds coarsely to accelerate decomposition; mix with dry carbon browns to balance high moisture content.',
+    explanation:
+      'Aloe vera rinds and botanical plant residues provide valuable moisture, minerals, and organic matter to soil compost heaps.',
+    estimated_resource_value: 'Medium (Restores garden soil fertility and hydration)',
+    category_group: 'vegetable',
+    tier: 'household'
+  },
   // 6. Spent Coffee Grounds (Compost Activator)
   {
     material_pattern: 'coffee ground|spent coffee|tea leaf|tea leaves',
@@ -401,41 +426,91 @@ export async function getRecoveryRecommendations(
   foodCategory = '',
   rulesList = null
 ) {
-  const rules = rulesList || (await getActiveRecoveryRules());
-  const searchString = `${foodName} ${foodCategory}`.toLowerCase();
   const rawMatches = [];
 
-  // 1. Direct Pattern Match
-  for (const rule of rules) {
-    const pattern = new RegExp(rule.material_pattern, 'i');
-    const isMaterialMatch = pattern.test(searchString);
-    const isCategoryMatch = rule.waste_category === wasteCategory;
-
-    if (isMaterialMatch && isCategoryMatch) {
-      rawMatches.push({
-        method: rule.recovery_method,
-        reason:
-          rule.explanation || 'Matches optimal circular pathway based on material composition.',
-        requirements: rule.requirements || 'Ensure item is kept free of foreign contaminants.',
-        estimatedValue: rule.estimated_resource_value || 'Circular environmental diversion',
-        tier: rule.tier || 'household',
-        score: 10
-      });
-    } else if (isMaterialMatch) {
-      rawMatches.push({
-        method: rule.recovery_method,
-        reason: rule.explanation || 'Targeted circular application for this material.',
-        requirements: rule.requirements || 'Ensure proper collection conditions.',
-        estimatedValue: rule.estimated_resource_value || 'Circular environmental diversion',
-        tier: rule.tier || 'community',
-        score: 7
-      });
+  // 1. If rulesList contains AI recovery options (with .method or .recovery_method), ingest them directly
+  if (Array.isArray(rulesList) && rulesList.length > 0) {
+    for (const item of rulesList) {
+      if (!item || typeof item !== 'object') continue;
+      const method = (item.method || item.recovery_method || '').toLowerCase().trim();
+      if (method) {
+        rawMatches.push({
+          method,
+          reason: item.reason || item.explanation || 'Matches recommended circular pathway.',
+          requirements: item.requirements || 'Ensure proper collection and segregation.',
+          estimatedValue:
+            item.estimatedValue ||
+            item.estimated_resource_value ||
+            'Circular environmental diversion',
+          tier: item.tier || 'household',
+          score: 10
+        });
+      }
     }
   }
 
-  // 2. Intelligent Keyword Inference (Covers arbitrary / exotic unlisted inputs)
+  // 2. Fetch and evaluate database recovery rules
+  const dbRules = await getActiveRecoveryRules();
+  const safeFoodName = typeof foodName === 'string' ? foodName : '';
+  const safeFoodCategory = typeof foodCategory === 'string' ? foodCategory : '';
+  const searchString = `${safeFoodName} ${safeFoodCategory}`.trim().toLowerCase();
+
+  for (const rule of dbRules) {
+    if (!rule || !rule.material_pattern) continue;
+    try {
+      const pattern = new RegExp(rule.material_pattern, 'i');
+      const isMaterialMatch = pattern.test(searchString);
+      const isCategoryMatch = rule.waste_category === wasteCategory;
+      const method = (rule.recovery_method || rule.method || '').toLowerCase().trim();
+      if (!method) continue;
+
+      if (isMaterialMatch && isCategoryMatch) {
+        rawMatches.push({
+          method,
+          reason:
+            rule.explanation || 'Matches optimal circular pathway based on material composition.',
+          requirements: rule.requirements || 'Ensure item is kept free of foreign contaminants.',
+          estimatedValue: rule.estimated_resource_value || 'Circular environmental diversion',
+          tier: rule.tier || 'household',
+          score: 10
+        });
+      } else if (isMaterialMatch) {
+        rawMatches.push({
+          method,
+          reason: rule.explanation || 'Targeted circular application for this material.',
+          requirements: rule.requirements || 'Ensure proper collection conditions.',
+          estimatedValue: rule.estimated_resource_value || 'Circular environmental diversion',
+          tier: rule.tier || 'community',
+          score: 7
+        });
+      }
+    } catch {
+      // Ignore invalid regex safely
+    }
+  }
+
+  // 3. Intelligent Keyword Inference (Covers arbitrary / exotic unlisted inputs)
   if (rawMatches.length === 0) {
-    if (/(peel|rind|skin|zest|pomace|pulp)/i.test(searchString)) {
+    if (/(aloe|succulent|cactus|herbal|medicinal|gel)/i.test(searchString)) {
+      rawMatches.push({
+        method: 'reuse',
+        reason:
+          'Botanical succulent residues contain functional gel suitable for natural skincare or topical hydration.',
+        requirements: 'Wash outer leaf thoroughly; fillet to extract clear inner gel.',
+        estimatedValue: 'Natural botanical cosmetic & skincare savings',
+        tier: 'household',
+        score: 8
+      });
+      rawMatches.push({
+        method: 'composting',
+        reason:
+          'High-moisture plant matter breaks down readily in aerobic composting, adding hydration to dry compost.',
+        requirements: 'Chop thick leaves coarsely to speed decomposition.',
+        estimatedValue: 'Soil organic carbon and moisture amendment',
+        tier: 'household',
+        score: 7
+      });
+    } else if (/(peel|rind|skin|zest|pomace|pulp|leaf|leaves)/i.test(searchString)) {
       rawMatches.push({
         method: 'composting',
         reason:
@@ -567,18 +642,31 @@ export async function getRecoveryRecommendations(
   // Deduplicate matches by recovery method, picking the highest-scoring explanation
   const dedupedMap = new Map();
   for (const match of rawMatches) {
+    if (!match || !match.method) continue;
     if (!dedupedMap.has(match.method) || dedupedMap.get(match.method).score < match.score) {
       dedupedMap.set(match.method, match);
     }
   }
 
-  return Array.from(dedupedMap.values()).map((m) => ({
+  const result = Array.from(dedupedMap.values()).map((m) => ({
     method: m.method,
-    reason: m.reason,
-    requirements: m.requirements,
-    estimatedValue: m.estimatedValue,
-    tier: m.tier
+    reason: m.reason || 'Circular resource recovery.',
+    requirements: m.requirements || 'Ensure proper collection conditions.',
+    estimatedValue: m.estimatedValue || 'Circular environmental diversion',
+    tier: m.tier || 'household'
   }));
+
+  if (result.length === 0) {
+    result.push({
+      method: 'composting',
+      reason: 'Organic plant material decomposes into beneficial soil compost.',
+      requirements: 'Keep free from plastics, stickers, chemicals, and contaminants.',
+      estimatedValue: 'Rich organic soil amendment',
+      tier: 'household'
+    });
+  }
+
+  return result;
 }
 
 /**
@@ -601,13 +689,48 @@ export async function createRecoveryRecord({
   estimatedValue = null,
   status = 'suggested'
 }) {
+  const VALID_METHODS = new Set([
+    'reuse',
+    'redistribution',
+    'composting',
+    'biogas',
+    'pectin_recovery',
+    'material_recovery',
+    'separate_disposal'
+  ]);
+
+  let finalMethod = (recoveryMethod || '').toLowerCase().trim();
+  if (!VALID_METHODS.has(finalMethod)) {
+    if (finalMethod.includes('compost')) finalMethod = 'composting';
+    else if (
+      finalMethod.includes('reuse') ||
+      finalMethod.includes('craft') ||
+      finalMethod.includes('skin')
+    )
+      finalMethod = 'reuse';
+    else if (finalMethod.includes('redistribut') || finalMethod.includes('donat'))
+      finalMethod = 'redistribution';
+    else if (
+      finalMethod.includes('biogas') ||
+      finalMethod.includes('energy') ||
+      finalMethod.includes('fuel')
+    )
+      finalMethod = 'biogas';
+    else if (finalMethod.includes('pectin')) finalMethod = 'pectin_recovery';
+    else if (finalMethod.includes('material') || finalMethod.includes('extract'))
+      finalMethod = 'material_recovery';
+    else if (finalMethod.includes('dispos') || finalMethod.includes('separate'))
+      finalMethod = 'separate_disposal';
+    else finalMethod = 'composting'; // Fail-safe guaranteed valid enum
+  }
+
   const { data, error } = await supabase
     .from('recovery_records')
     .insert({
       user_id: userId,
       scan_id: scanId,
-      recovery_method: recoveryMethod,
-      recommendation_reason: reason,
+      recovery_method: finalMethod,
+      recommendation_reason: reason || 'Recommended circular resource recovery pathway.',
       estimated_resource_value: estimatedValue,
       status: status
     })

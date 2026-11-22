@@ -447,15 +447,25 @@ async function handleConfirmScan() {
 
     if (recoveryOptions && recoveryOptions.length > 0) {
       for (const opt of recoveryOptions) {
+        const method = opt.method || opt.recovery_method || opt.recoveryMethod || 'composting';
         await createRecoveryRecord({
           scanId: scanRow.id,
           userId: user.id,
-          recoveryMethod: opt.method,
-          reason: opt.reason,
+          recoveryMethod: method,
+          reason: opt.reason || opt.recommendation_reason || 'Circular resource recovery.',
           estimatedValue: opt.estimatedValue || opt.requirements || null,
           status: 'suggested'
         });
       }
+    } else {
+      await createRecoveryRecord({
+        scanId: scanRow.id,
+        userId: user.id,
+        recoveryMethod: 'composting',
+        reason: 'Organic plant material decomposes into beneficial soil compost.',
+        estimatedValue: 'Restores organic garden soil fertility',
+        status: 'suggested'
+      });
     }
 
     // 3. Show Success Screen
