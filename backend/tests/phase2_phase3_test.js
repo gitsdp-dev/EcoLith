@@ -276,3 +276,87 @@ test('Metadata definitions cover all database check enum values', () => {
     assert.ok(WASTE_CATEGORY_METADATA[cat].label, `${cat} must have label`);
   }
 });
+
+test('normalizeGeminiOutput accurately returns empty items on blank or non-food scans', () => {
+  // Empty items array from Gemini
+  const emptyOutput = { items: [], notes: 'No food waste detected.' };
+  const normalizedEmpty = normalizeGeminiOutput(emptyOutput);
+  assert.equal(normalizedEmpty.items.length, 0, 'Must not fabricate items for empty scans');
+
+  // Blank object
+  const blankOutput = {};
+  const normalizedBlank = normalizeGeminiOutput(blankOutput);
+  assert.equal(normalizedBlank.items.length, 0, 'Must not fabricate items for blank objects');
+});
+
+test('Inedible peels and Aloe Vera cannot be classified as edible', () => {
+  // Attempting to pass banana peel as edible_reusable
+  const peelInput = {
+    food_name: 'Banana peel',
+    waste_category: 'edible_reusable',
+    confidence: 0.95
+  };
+  const normalizedPeel = normalizeGeminiOutput(peelInput);
+  assert.equal(
+    normalizedPeel.items[0].waste_category,
+    'unavoidable_organic',
+    'Inedible banana peel must be converted to unavoidable_organic'
+  );
+
+  // Attempting to pass aloe vera as surplus_redistributable
+  const aloeInput = {
+    food_name: 'Aloe vera leaf',
+    waste_category: 'surplus_redistributable',
+    confidence: 0.92
+  };
+  const normalizedAloe = normalizeGeminiOutput(aloeInput);
+  assert.equal(
+    normalizedAloe.items[0].waste_category,
+    'unavoidable_organic',
+    'Aloe vera leaf must be converted to unavoidable_organic'
+  );
+});
+
+test('Leaf and peel quantities are realistically estimated in grams, not kilograms', () => {
+  const leafInput = {
+    food_name: 'Aloe vera leaf cutting',
+    estimated_quantity: 1.0,
+    estimated_unit: 'kg' // Unrealistic 1kg default
+  };
+  const normalizedLeaf = normalizeGeminiOutput(leafInput);
+  assert.equal(normalizedLeaf.items[0].estimated_unit, 'g', 'Single leaf must not be measured in kg');
+  assert.ok(normalizedLeaf.items[0].estimated_quantity < 50, 'Leaf quantity must be under 50 grams');
+});
+
+test('Bounding box coordinates are properly normalized and clamped to 0-1000', () => {
+  const itemWithFloatBox = {
+    food_name: 'Orange peel',
+    bounding_box: [0.15, 0.2, 0.85, 0.9] // float format (0-1)
+  };
+  const normalized = normalizeGeminiOutput(itemWithFloatBox);
+  assert.deepEqual(
+    normalized.items[0].bounding_box,
+    [150, 200, 850, 900],
+    'Float coordinates must be scaled to 0-1000 integers'
+  );
+});
+
+test('Food category is intelligently classified from food name and never left as other', () => {
+  const citrusInput = {
+    food_name: 'Orange peel',
+    food_category: 'other' // Accidental 'other'
+  };
+  const normalized = normalizeGeminiOutput(citrusInput);
+  assert.equal(normalized.items[0].food_category, 'fruit', 'Orange peel category must be fruit');
+
+  const aloeInput = {
+    food_name: 'Aloe vera plant residue',
+    food_category: 'other'
+  };
+  const normalizedAloe = normalizeGeminiOutput(aloeInput);
+  assert.equal(
+    normalizedAloe.items[0].food_category,
+    'plant_material',
+    'Aloe vera category must be plant_material'
+  );
+});

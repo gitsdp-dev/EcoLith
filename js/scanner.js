@@ -18,6 +18,7 @@ const viewfinderStandby = document.getElementById('viewfinder-standby');
 const cameraVideo = document.getElementById('camera-video');
 const capturedImagePreview = document.getElementById('captured-image-preview');
 const viewfinderOverlay = document.getElementById('viewfinder-overlay');
+const viewfinderDetectionOverlay = document.getElementById('viewfinder-detection-overlay');
 const analyzingOverlay = document.getElementById('analyzing-overlay');
 
 // Action Buttons
@@ -30,6 +31,11 @@ const fileInput = document.getElementById('file-input');
 
 // Confirmation Form Elements
 const scanThumbnail = document.getElementById('scan-thumbnail');
+const detectionBoxesLayer = document.getElementById('detection-boxes-layer');
+const aiInspectorCard = document.getElementById('ai-inspector-card');
+const detectionCoordsBadge = document.getElementById('detection-coords-badge');
+const emptyScanNotice = document.getElementById('empty-scan-notice');
+const btnEmptyRetake = document.getElementById('btn-empty-retake');
 const confidencePill = document.getElementById('confidence-pill');
 const editFoodName = document.getElementById('edit-food-name');
 const editFoodCategory = document.getElementById('edit-food-category');
@@ -54,6 +60,15 @@ let currentImageDataUrl = null;
 let currentAiAnalysis = null;
 let originalAiItem = null;
 let userCorrected = false;
+
+/**
+ * Escapes HTML characters to prevent XSS.
+ */
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
 
 /**
  * Downscales an HTML Image or Canvas to max dimensions and returns JPEG base64.
@@ -121,6 +136,10 @@ function stopCamera() {
     cameraVideo.classList.add('is-hidden');
   }
   if (viewfinderOverlay) viewfinderOverlay.classList.add('is-hidden');
+  if (viewfinderDetectionOverlay) {
+    viewfinderDetectionOverlay.innerHTML = '';
+    viewfinderDetectionOverlay.classList.add('is-hidden');
+  }
   if (btnCapture) btnCapture.classList.add('is-hidden');
   if (btnCancelCamera) btnCancelCamera.classList.add('is-hidden');
   if (btnStartCamera) btnStartCamera.classList.remove('is-hidden');
@@ -137,6 +156,10 @@ async function startCamera() {
     capturedImagePreview.classList.add('is-hidden');
     viewfinderStandby.classList.add('is-hidden');
     btnRetake.classList.add('is-hidden');
+    if (viewfinderDetectionOverlay) {
+      viewfinderDetectionOverlay.innerHTML = '';
+      viewfinderDetectionOverlay.classList.add('is-hidden');
+    }
 
     mediaStream = await navigator.mediaDevices.getUserMedia({
       video: {
@@ -182,6 +205,54 @@ function captureFrame() {
 }
 
 /**
+ * Renders an emerald green bounding box overlay with pinned tag and corner brackets.
+ * @param {HTMLElement} container - DOM container for overlay
+ * @param {number[]} box - [ymin, xmin, ymax, xmax] normalized (0 to 1000)
+ * @param {string} label - Name of detected food item
+ * @param {number} confidence - AI detection confidence (0.0 to 1.0)
+ */
+function drawDetectionBoundingBoxes(container, box, label, confidence) {
+  if (!container) return;
+  container.innerHTML = '';
+  if (!box || !Array.isArray(box) || box.length !== 4) return;
+
+  const [ymin, xmin, ymax, xmax] = box;
+  const top = (ymin / 10).toFixed(2);
+  const left = (xmin / 10).toFixed(2);
+  const width = Math.max(5, (xmax - xmin) / 10).toFixed(2);
+  const height = Math.max(5, (ymax - ymin) / 10).toFixed(2);
+
+  const boxEl = document.createElement('div');
+  boxEl.className = 'ai-detected-green-box';
+  boxEl.style.top = `${top}%`;
+  boxEl.style.left = `${left}%`;
+  boxEl.style.width = `${width}%`;
+  boxEl.style.height = `${height}%`;
+
+  const tagEl = document.createElement('div');
+  tagEl.className = 'ai-box-tag';
+  const confText = Math.round((confidence || 0.85) * 100);
+  tagEl.innerHTML = `<span>🟩</span> <span>${escapeHtml(label || 'Organic Waste')}</span> <span class="ai-box-confidence">${confText}%</span>`;
+  boxEl.appendChild(tagEl);
+
+  // Corner brackets
+  const tl = document.createElement('span');
+  tl.className = 'box-bracket bracket-tl';
+  const tr = document.createElement('span');
+  tr.className = 'box-bracket bracket-tr';
+  const bl = document.createElement('span');
+  bl.className = 'box-bracket bracket-bl';
+  const br = document.createElement('span');
+  br.className = 'box-bracket bracket-br';
+  boxEl.appendChild(tl);
+  boxEl.appendChild(tr);
+  boxEl.appendChild(bl);
+  boxEl.appendChild(br);
+
+  container.appendChild(boxEl);
+}
+
+/**
  * Handles image processing and sends to backend for AI classification.
  * @param {string} dataUrl - Downscaled JPEG base64 data URL
  */
@@ -204,6 +275,18 @@ async function processCapturedImage(dataUrl) {
     const result = await analyzeFoodImage(dataUrl, 'image/jpeg');
     currentAiAnalysis = result;
     analyzingOverlay.classList.add('is-hidden');
+
+    // Draw live green box in viewfinder preview if object detected
+    const firstItem = result.items?.[0];
+    if (firstItem && firstItem.bounding_box && viewfinderDetectionOverlay) {
+      drawDetectionBoundingBoxes(
+        viewfinderDetectionOverlay,
+        firstItem.bounding_box,
+        firstItem.food_name,
+        firstItem.confidence
+      );
+      viewfinderDetectionOverlay.classList.remove('is-hidden');
+    }
 
     showConfirmationScreen(result);
   } catch (err) {
@@ -235,16 +318,57 @@ async function processCapturedImage(dataUrl) {
 
 /**
  * Populates and displays the Confirmation & Correction Screen.
+ * Handles both detected waste and empty scans with high fidelity.
  * @param {object} analysis - Validated AI output
  */
 async function showConfirmationScreen(analysis) {
   const item = analysis.items?.[0];
-  if (!item) {
-    alert(
-      'No identifiable food waste was detected in the photo. Please retake with better lighting.'
-    );
+
+  // Set thumbnail in inspector
+  scanThumbnail.src = currentImageDataUrl;
+
+  // Case 1: Empty Scan / No food waste detected
+  if (!item || !item.food_name) {
+    if (emptyScanNotice) emptyScanNotice.classList.remove('is-hidden');
+    if (aiInspectorCard) aiInspectorCard.classList.add('is-hidden');
+    if (detectionBoxesLayer) detectionBoxesLayer.innerHTML = '';
+
+    confidencePill.textContent = '0% Detected';
+    confidencePill.style.backgroundColor = '#4b5563';
+    confidencePill.style.color = '#ffffff';
+
+    // Clear all fields per user instructions
+    editFoodName.value = '';
+    editFoodCategory.value = '';
+    editWasteCategory.value = '';
+    editQuantity.value = '';
+    editQuantityUnit.value = '';
+
+    correctionIndicator.classList.remove('visible');
+    formErrorNotice.classList.add('is-hidden');
+
+    // Clear recycling and reuse suggestions
+    recoveryPreviewList.innerHTML =
+      '<p class="text-xs text-muted" style="padding: var(--spacing-2) 0;">No circular recovery pathways (no organic waste identified in image).</p>';
+    reusePillsList.innerHTML =
+      '<span class="text-xs text-muted">No reuse ideas (no food waste detected).</span>';
+
+    // Disable Save button
+    btnConfirmScan.disabled = true;
+    btnConfirmScan.textContent = 'No Waste Detected to Save';
+
+    // Transition UI
+    activeScannerSection.classList.add('is-hidden');
+    confirmationSection.classList.remove('is-hidden');
+    confirmationSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return;
   }
+
+  // Case 2: Organic waste identified
+  if (emptyScanNotice) emptyScanNotice.classList.add('is-hidden');
+  if (aiInspectorCard) aiInspectorCard.classList.remove('is-hidden');
+  btnConfirmScan.disabled = false;
+  btnConfirmScan.textContent = 'Confirm & Save Scan';
 
   originalAiItem = {
     food_name: item.food_name,
@@ -253,19 +377,85 @@ async function showConfirmationScreen(analysis) {
   };
   userCorrected = false;
 
-  // Set thumbnail
-  scanThumbnail.src = currentImageDataUrl;
-
   // Confidence pill
   const pct = Math.round((item.confidence || 0.85) * 100);
   confidencePill.textContent = `${pct}% AI Confidence`;
+  confidencePill.style.backgroundColor = '';
+  confidencePill.style.color = '';
 
-  // Populate inputs
+  // Draw Live Green Bounding Box on Preview
+  if (item.bounding_box) {
+    drawDetectionBoundingBoxes(
+      detectionBoxesLayer,
+      item.bounding_box,
+      item.food_name,
+      item.confidence
+    );
+    if (detectionCoordsBadge) {
+      const [ymin, xmin, ymax, xmax] = item.bounding_box;
+      detectionCoordsBadge.textContent = `Target Box: [${ymin}, ${xmin}, ${ymax}, ${xmax}]`;
+    }
+  } else {
+    if (detectionBoxesLayer) detectionBoxesLayer.innerHTML = '';
+    if (detectionCoordsBadge) {
+      detectionCoordsBadge.textContent = `Visual scan confirmed`;
+    }
+  }
+
+  // Populate inputs with precise AI detection values
   editFoodName.value = item.food_name || '';
-  editFoodCategory.value = item.food_category || 'organic';
+
+  // Food Category select matching (intelligent fallback mapping)
+  const detectedCategory = (item.food_category || 'vegetable').toLowerCase().trim();
+  let matchedCategory = 'other';
+  const categoryOptions = Array.from(editFoodCategory.options).map((opt) => opt.value);
+  if (categoryOptions.includes(detectedCategory)) {
+    matchedCategory = detectedCategory;
+  } else if (detectedCategory.includes('fruit')) {
+    matchedCategory = 'fruit';
+  } else if (detectedCategory.includes('veg')) {
+    matchedCategory = 'vegetable';
+  } else if (
+    detectedCategory.includes('plant') ||
+    detectedCategory.includes('aloe') ||
+    detectedCategory.includes('leaf')
+  ) {
+    matchedCategory = 'plant_material';
+  } else if (detectedCategory.includes('bread') || detectedCategory.includes('bake')) {
+    matchedCategory = 'bakery';
+  } else if (detectedCategory.includes('grain') || detectedCategory.includes('rice')) {
+    matchedCategory = 'grain';
+  } else if (detectedCategory.includes('dairy')) {
+    matchedCategory = 'dairy';
+  } else if (
+    detectedCategory.includes('meat') ||
+    detectedCategory.includes('fish') ||
+    detectedCategory.includes('egg')
+  ) {
+    matchedCategory = 'meat_fish';
+  } else if (
+    detectedCategory.includes('meal') ||
+    detectedCategory.includes('cook') ||
+    detectedCategory.includes('prepar')
+  ) {
+    matchedCategory = 'prepared_food';
+  } else if (
+    detectedCategory.includes('coffee') ||
+    detectedCategory.includes('tea') ||
+    detectedCategory.includes('beverag')
+  ) {
+    matchedCategory = 'beverage';
+  }
+  editFoodCategory.value = matchedCategory;
+
+  // Waste category
   editWasteCategory.value = item.waste_category || 'unavoidable_organic';
-  editQuantity.value = '1.0';
-  editQuantityUnit.value = 'kg';
+
+  // Realistic quantity & unit estimation (e.g. 10 g for a leaf instead of 1.0 kg)
+  editQuantity.value = String(
+    item.estimated_quantity != null ? item.estimated_quantity : '1'
+  );
+  editQuantityUnit.value = item.estimated_unit || 'g';
 
   correctionIndicator.classList.remove('visible');
   formErrorNotice.classList.add('is-hidden');
@@ -503,6 +693,14 @@ function resetScanner() {
   btnStartCamera.classList.remove('is-hidden');
   btnUpload.classList.remove('is-hidden');
 
+  if (viewfinderDetectionOverlay) {
+    viewfinderDetectionOverlay.innerHTML = '';
+    viewfinderDetectionOverlay.classList.add('is-hidden');
+  }
+  if (detectionBoxesLayer) {
+    detectionBoxesLayer.innerHTML = '';
+  }
+
   confirmationSection.classList.add('is-hidden');
   successSection.classList.add('is-hidden');
   activeScannerSection.classList.remove('is-hidden');
@@ -537,6 +735,13 @@ export async function initScanner() {
     startCamera();
   });
 
+  if (btnEmptyRetake) {
+    btnEmptyRetake.addEventListener('click', () => {
+      resetScanner();
+      startCamera();
+    });
+  }
+
   btnUpload.addEventListener('click', () => {
     fileInput.click();
   });
@@ -566,7 +771,7 @@ export async function initScanner() {
 
   // Track user edits
   editFoodName.addEventListener('input', checkUserModifications);
-  editFoodCategory.addEventListener('input', checkUserModifications);
+  editFoodCategory.addEventListener('change', checkUserModifications);
   editWasteCategory.addEventListener('change', async () => {
     checkUserModifications();
     await renderRecoveryOptions(

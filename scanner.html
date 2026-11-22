@@ -144,12 +144,19 @@
               <!-- Viewfinder Target Frame -->
               <div id="viewfinder-overlay" class="viewfinder-overlay is-hidden">
                 <div class="viewfinder-guide-box">
+                  <div class="scanner-laser-line"></div>
                   <span class="guide-corner corner-tl"></span>
                   <span class="guide-corner corner-tr"></span>
                   <span class="guide-corner corner-bl"></span>
                   <span class="guide-corner corner-br"></span>
+                  <div class="viewfinder-hud-status">
+                    <span class="hud-pulse-dot"></span> AI TARGET RADAR • GEMINI 3.1 FLASH-LITE
+                  </div>
                 </div>
               </div>
+
+              <!-- Live Green Box Detection Overlay (Viewfinder Frame) -->
+              <div id="viewfinder-detection-overlay" class="detection-boxes-layer is-hidden"></div>
 
               <!-- Analyzing Loading State Overlay -->
               <div id="analyzing-overlay" class="analyzing-overlay is-hidden" aria-live="polite">
@@ -286,26 +293,40 @@
             </div>
           </div>
 
-          <div
-            style="display: flex; gap: var(--spacing-4); align-items: flex-start; flex-wrap: wrap"
-          >
-            <img
-              id="scan-thumbnail"
-              src=""
-              alt="Thumbnail of scanned food"
-              style="
-                width: 100px;
-                height: 100px;
-                object-fit: cover;
-                border-radius: var(--radius-lg);
-                border: 1px solid var(--color-border);
-              "
-            />
-            <div style="flex: 1; min-width: 220px">
-              <p class="text-xs text-muted">Scanned item preview</p>
-              <p class="text-xs text-muted" style="margin-top: var(--spacing-1)">
-                All suggested fields are fully editable. You can adjust the quantity,
-                classification, or recommended pathway below.
+          <!-- Empty Scan Notice (Shown when no food waste detected) -->
+          <div id="empty-scan-notice" class="empty-scan-banner is-hidden" role="alert">
+            <span class="empty-scan-icon">🔍</span>
+            <div style="flex: 1">
+              <strong style="display: block; font-size: var(--font-size-sm); margin-bottom: 2px">No Food Waste Detected</strong>
+              <span class="text-xs">
+                The image appears empty, dark, or contains non-food items. EcoLith AI found no organic residues or kitchen waste.
+              </span>
+            </div>
+            <button type="button" id="btn-empty-retake" class="btn btn-sm btn-outline" style="border-color: #eab308; color: #fef08a">
+              Retake Photo
+            </button>
+          </div>
+
+          <!-- AI Detection & Green Bounding Box Inspector -->
+          <div class="ai-detection-inspector-card" id="ai-inspector-card">
+            <div class="ai-inspector-preview-wrapper" id="ai-inspector-wrapper">
+              <img
+                id="scan-thumbnail"
+                src=""
+                alt="Thumbnail of scanned food"
+                class="scan-thumbnail-image"
+              />
+              <div id="detection-boxes-layer" class="detection-boxes-layer"></div>
+            </div>
+            <div class="ai-inspector-meta">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <span class="badge badge-success" id="detection-status-badge">
+                  <span class="hud-pulse-dot" style="display: inline-block; margin-right: 4px;"></span> Organic Waste Detected
+                </span>
+                <span id="detection-coords-badge" class="detection-coords-pill">Live Spatial Bounding Box</span>
+              </div>
+              <p class="text-xs text-muted" id="detection-summary-text" style="margin: 0">
+                Green bounding box shows the organic residue region localized by Gemini 3.1 Flash-Lite vision.
               </p>
             </div>
           </div>
@@ -329,13 +350,19 @@
 
               <div class="form-group">
                 <label for="edit-food-category" class="form-label">Food Category *</label>
-                <input
-                  type="text"
-                  id="edit-food-category"
-                  class="form-input"
-                  required
-                  placeholder="e.g. fruit, bakery, vegetable, dairy"
-                />
+                <select id="edit-food-category" class="form-select" required>
+                  <option value="" disabled selected>Select category...</option>
+                  <option value="fruit">Fruit (peels, cores, rinds, seeds)</option>
+                  <option value="vegetable">Vegetable (skins, trimmings, tops)</option>
+                  <option value="plant_material">Plant Material (leaves, aloe vera, botanical)</option>
+                  <option value="bakery">Bakery & Bread (crusts, stale)</option>
+                  <option value="grain">Grains & Cereals (cooked rice, pasta, oats)</option>
+                  <option value="dairy">Dairy (cheese rinds, milk solids)</option>
+                  <option value="meat_fish">Meat & Fish (bones, trimmings, eggshells)</option>
+                  <option value="prepared_food">Prepared Food / Leftovers (curries, meals)</option>
+                  <option value="beverage">Beverage (coffee grounds, tea leaves)</option>
+                  <option value="other">Other / Specialized Stream</option>
+                </select>
               </div>
             </div>
 
