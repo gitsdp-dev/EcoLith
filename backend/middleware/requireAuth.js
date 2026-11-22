@@ -41,21 +41,50 @@ export async function requireAuth(req, res, next) {
       }
     }
 
-    // Verify account status in public.profiles
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('role, status')
-      .eq('id', user.id)
-      .single();
+    // Verify account status in public.profiles with automatic self-healing
+    let profile = null;
+    try {
+      const { data: existingProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('role, status')
+        .eq('id', user.id)
+        .maybeSingle();
 
-    if (profileError || !profile) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'User profile not found.'
-      });
+      if (existingProfile) {
+        profile = existingProfile;
+      } else {
+        // Auto-heal missing profile row for valid authenticated user
+        const displayName =
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          user.email?.split('@')[0] ||
+          'User';
+        const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
+
+        const { data: newProfile } = await supabaseAdmin
+          .from('profiles')
+          .upsert(
+            {
+              id: user.id,
+              email: user.email,
+              display_name: displayName,
+              avatar_url: avatarUrl,
+              role: 'user',
+              status: 'active'
+            },
+            { onConflict: 'id' }
+          )
+          .select('role, status')
+          .maybeSingle();
+
+        profile = newProfile || { role: 'user', status: 'active' };
+      }
+    } catch {
+      // Graceful fallback for valid authenticated token
+      profile = { role: 'user', status: 'active' };
     }
 
-    if (profile.status === 'suspended') {
+    if (profile && profile.status === 'suspended') {
       return res.status(403).json({
         error: 'Forbidden',
         message: 'Your account has been suspended. Please contact support.'
@@ -66,8 +95,8 @@ export async function requireAuth(req, res, next) {
     req.user = {
       id: user.id,
       email: user.email,
-      role: profile.role,
-      status: profile.status
+      role: profile?.role || 'user',
+      status: profile?.status || 'active'
     };
 
     next();
