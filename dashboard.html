@@ -557,6 +557,12 @@
         </svg>
         <span>Profile</span>
       </a>
+      <a href="admin.html" id="mobileAdminNavLink" class="mobile-nav-item" style="display: none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+        <span>Admin</span>
+      </a>
     </nav>
 
     <script type="module">
@@ -577,6 +583,8 @@
       if (profile?.role === 'admin') {
         const adminLink = document.getElementById('adminNavLink');
         if (adminLink) adminLink.style.display = 'inline-block';
+        const mobileAdminLink = document.getElementById('mobileAdminNavLink');
+        if (mobileAdminLink) mobileAdminLink.style.display = 'flex';
       }
 
       const btnSignOutTop = document.getElementById('btnSignOutTop');

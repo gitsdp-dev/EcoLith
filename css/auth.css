@@ -21,6 +21,43 @@
   padding: var(--spacing-6);
 }
 
+.auth-role-tabs {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-6);
+  background: var(--color-bg);
+  padding: 4px;
+  border: 2px solid var(--color-border);
+  box-shadow: 2px 2px 0 var(--color-border);
+}
+
+.auth-role-tab {
+  flex: 1;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: transparent;
+  border: 2px solid transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.auth-role-tab:hover {
+  color: var(--color-text);
+}
+
+.auth-role-tab.active {
+  background: var(--color-primary);
+  color: #000000;
+  border-color: var(--color-border);
+  box-shadow: 2px 2px 0 var(--color-border);
+}
+
 @media (min-width: 640px) {
   .auth-card {
     padding: var(--spacing-8);

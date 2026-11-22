@@ -13,11 +13,12 @@
     <link rel="stylesheet" href="css/admin.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script type="module">
-      import { requireAuth, getUserProfile } from './js/auth.js';
+      import { requireAuth, getUserProfile, isUserAdmin } from './js/auth.js';
       try {
         const session = await requireAuth();
         const profile = await getUserProfile(session.user.id);
-        if (profile?.role !== 'admin') {
+        const isAdmin = profile?.role === 'admin' || isUserAdmin(session.user.email);
+        if (!isAdmin) {
           window.location.replace('dashboard.html');
         } else {
           document.documentElement.classList.add('auth-verified');
@@ -101,15 +102,51 @@
 
         <!-- Admin App Content -->
         <div id="adminAppContent">
-          <!-- Page Header -->
-          <div style="margin-bottom: var(--spacing-6)">
-            <h1 style="font-size: var(--font-size-2xl); margin: 0">
-              System Administration & Monitoring
-            </h1>
-            <p class="text-sm text-muted" style="margin-top: var(--spacing-1)">
-              Manage user accounts, observe circular waste metrics, and inspect append-only audit
-              records.
-            </p>
+          <!-- Page Header with Live Status & Refresh -->
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              flex-wrap: wrap;
+              gap: var(--spacing-4);
+              margin-bottom: var(--spacing-6);
+            "
+          >
+            <div>
+              <h1 style="font-size: var(--font-size-2xl); margin: 0">
+                System Administration & Monitoring
+              </h1>
+              <p class="text-sm text-muted" style="margin-top: var(--spacing-1)">
+                Live circular waste intelligence, user accounts, and real-time database reports.
+              </p>
+            </div>
+            <div style="display: flex; gap: var(--spacing-3); align-items: center; flex-wrap: wrap">
+              <span
+                class="badge badge-success"
+                id="adminLiveDbBadge"
+                style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px"
+              >
+                <span
+                  style="
+                    display: inline-block;
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: #10b981;
+                  "
+                ></span>
+                Live Database Active
+              </span>
+              <button
+                type="button"
+                id="btnAdminRefreshLive"
+                class="btn btn-outline btn-sm"
+                style="padding: 6px 12px"
+              >
+                🔄 Refresh Live Reports
+              </button>
+            </div>
           </div>
 
           <!-- Navigation Tabs -->
@@ -380,19 +417,25 @@
     </nav>
 
     <script type="module">
-      import { requireAuth, getUserProfile, signOut } from './js/auth.js';
+      import { requireAuth, getUserProfile, isUserAdmin, signOut } from './js/auth.js';
       import { initAdmin } from './js/admin.js';
 
-      const session = await requireAuth();
-      const profile = await getUserProfile(session.user.id);
+      try {
+        const session = await requireAuth();
+        const profile = await getUserProfile(session.user.id);
+        const isAdmin = profile?.role === 'admin' || isUserAdmin(session.user.email);
 
-      // Client-side guard: verify role
-      if (profile?.role !== 'admin') {
-        // Not admin: redirect to dashboard
-        window.location.replace('dashboard.html');
-      } else {
-        document.getElementById('btnAdminSignOut')?.addEventListener('click', () => signOut());
-        await initAdmin(session);
+        // Client-side guard: verify role
+        if (!isAdmin) {
+          // Not admin: redirect to dashboard
+          window.location.replace('dashboard.html');
+        } else {
+          document.documentElement.classList.add('auth-verified');
+          document.getElementById('btnAdminSignOut')?.addEventListener('click', () => signOut());
+          await initAdmin(session);
+        }
+      } catch (err) {
+        console.error('[ADMIN LOAD ERROR]', err);
       }
     </script>
   </body>

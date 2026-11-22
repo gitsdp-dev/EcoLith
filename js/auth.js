@@ -1,9 +1,26 @@
 import { supabase } from './supabase.js';
+import { CONFIG } from './config.js';
 
 // 14 days session duration in milliseconds (14 * 24 * 60 * 60 * 1000)
 export const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
 const SESSION_START_KEY = 'ecolith_session_login_at';
 const SESSION_USER_KEY = 'ecolith_session_user_id';
+
+/**
+ * Checks whether an email belongs to the platform administrator.
+ * Strictly enforces single-admin security ("Only me (1 admin) should be there").
+ * @param {string | null | undefined} email
+ * @returns {boolean}
+ */
+export function isUserAdmin(email) {
+  if (!email || typeof email !== 'string') return false;
+  const cleanEmail = email.trim().toLowerCase();
+  const adminEmails = (CONFIG.ADMIN_EMAILS || [
+    'githubsdp2011@gmail.com',
+    'EducationPatra2011@outlook.com'
+  ]).map((e) => e.trim().toLowerCase());
+  return adminEmails.includes(cleanEmail);
+}
 
 /**
  * Records or refreshes the session start timestamp.
@@ -293,17 +310,62 @@ if (typeof window !== 'undefined') {
 
 /**
  * Fetch current user's profile from public.profiles table.
+ * Accurately detects and enforces sole admin role for the platform owner.
  * @param {string} userId
  */
 export async function getUserProfile(userId) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, display_name, email, avatar_url, role, status, created_at')
-    .eq('id', userId)
-    .single();
+  let profile = null;
 
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, display_name, email, avatar_url, role, status, created_at')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (!error && data) {
+      profile = data;
+    }
+  } catch (err) {
+    console.warn('[AUTH] Direct profiles fetch notice:', err);
+  }
+
+  // Fallback: If profile row is missing or unreadable, hydrate from current session user
+  if (!profile) {
+    try {
+      const {
+        data: { user }
+      } = await supabase.auth.getUser();
+      if (user && user.id === userId) {
+        profile = {
+          id: user.id,
+          display_name:
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            user.email?.split('@')[0] ||
+            'User',
+          email: user.email,
+          avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+          role: 'user',
+          status: 'active',
+          created_at: user.created_at || new Date().toISOString()
+        };
+      }
+    } catch {}
+  }
+
+  if (profile) {
+    // Strictly enforce "Only me (1 admin) should be there":
+    // The designated administrator email is guaranteed role: 'admin'
+    // Any other user is guaranteed role: 'user'
+    if (isUserAdmin(profile.email)) {
+      profile.role = 'admin';
+    } else if (profile.role === 'admin') {
+      profile.role = 'user';
+    }
+  }
+
+  return profile;
 }
 
 /**

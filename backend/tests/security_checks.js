@@ -413,3 +413,25 @@ test('BYOK: Key sanitization cleanly processes quoted, prefixed, and modern AQ./
   const messyKey = 'key: "AQ.MessyKeyWithSpaces\r\n\u200B" ';
   assert.equal(cleanApiKey(messyKey), 'AQ.MessyKeyWithSpaces');
 });
+
+// Test 12: Single Administrator Policy Enforcement
+test('SECURITY & ROLE: Single administrator policy strictly enforces exactly 1 designated owner admin', async () => {
+  const { isUserAdmin } = await import('../middleware/requireAdmin.js');
+  const { isUserAdmin: clientIsAdmin } = await import('../../js/auth.js');
+
+  // 1. Owner email is recognized as administrator
+  assert.equal(isUserAdmin('githubsdp2011@gmail.com'), true);
+  assert.equal(isUserAdmin('GITHUBsdp2011@GMAIL.COM'), true);
+  assert.equal(clientIsAdmin('githubsdp2011@gmail.com'), true);
+
+  // 2. Arbitrary emails are strictly NOT administrator
+  assert.equal(isUserAdmin('hacker@example.com'), false);
+  assert.equal(isUserAdmin('user@ecolith.app'), false);
+  assert.equal(isUserAdmin('admin@fake.com'), false);
+  assert.equal(clientIsAdmin('user@example.com'), false);
+
+  // 3. Null or undefined is rejected
+  assert.equal(isUserAdmin(null), false);
+  assert.equal(isUserAdmin(''), false);
+  assert.equal(clientIsAdmin(undefined), false);
+});

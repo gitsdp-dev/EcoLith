@@ -16,5 +16,10 @@ export const CONFIG = {
     window.location.hostname !== 'localhost' &&
     window.location.hostname !== '127.0.0.1'
       ? ''
-      : 'http://localhost:3000')
+      : 'http://localhost:3000'),
+  ADMIN_EMAILS:
+    (typeof window !== 'undefined' && window.ECOLITH_ADMIN_EMAILS) || [
+      'githubsdp2011@gmail.com',
+      'EducationPatra2011@outlook.com'
+    ]
 };

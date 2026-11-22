@@ -73,6 +73,11 @@ function renderProfile() {
   badgeRole.className =
     currentProfile.role === 'admin' ? 'badge badge-warning' : 'badge badge-primary';
 
+  const adminQuickLink = document.getElementById('adminPortalQuickLink');
+  if (adminQuickLink) {
+    adminQuickLink.style.display = currentProfile.role === 'admin' ? 'block' : 'none';
+  }
+
   badgeStatus.textContent = currentProfile.status === 'suspended' ? 'Suspended' : 'Active';
   badgeStatus.className =
     currentProfile.status === 'suspended' ? 'badge badge-danger' : 'badge badge-success';

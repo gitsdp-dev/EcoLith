@@ -72,9 +72,31 @@
 
     <main class="auth-wrapper">
       <div class="auth-card">
+        <!-- Sign-In Role Mode Tabs -->
+        <div class="auth-role-tabs" role="tablist" aria-label="Sign-in role selection">
+          <button
+            type="button"
+            id="tabUserLogin"
+            class="auth-role-tab active"
+            role="tab"
+            aria-selected="true"
+          >
+            User Sign In
+          </button>
+          <button
+            type="button"
+            id="tabAdminLogin"
+            class="auth-role-tab"
+            role="tab"
+            aria-selected="false"
+          >
+            🛡️ Admin Portal
+          </button>
+        </div>
+
         <div class="auth-header">
-          <h1 class="auth-title">Welcome Back</h1>
-          <p class="auth-subtitle">Sign in to your EcoLith account</p>
+          <h1 class="auth-title" id="authTitle">Welcome Back</h1>
+          <p class="auth-subtitle" id="authSubtitle">Sign in to your EcoLith account</p>
         </div>
 
         <!-- Alert Message Box -->
@@ -250,7 +272,10 @@
         signInWithOAuth,
         resetPassword,
         updatePassword,
-        getSession
+        getSession,
+        getUserProfile,
+        isUserAdmin,
+        signOut
       } from './js/auth.js';
 
       const loginForm = document.getElementById('loginForm');
@@ -258,6 +283,10 @@
       const btnLoginSubmit = document.getElementById('btnLoginSubmit');
       const loginSpinner = document.getElementById('loginSpinner');
       const btnGoogleSignIn = document.getElementById('btnGoogleSignIn');
+      const authTitle = document.getElementById('authTitle');
+      const authSubtitle = document.getElementById('authSubtitle');
+      const tabUserLogin = document.getElementById('tabUserLogin');
+      const tabAdminLogin = document.getElementById('tabAdminLogin');
 
       // Forgot password modal elements
       const btnForgotPwd = document.getElementById('btnForgotPwd');
@@ -286,8 +315,48 @@
       }
 
       const urlParams = new URLSearchParams(window.location.search);
-      const rawReturnTo = urlParams.get('returnTo') || 'dashboard.html';
+      const rawReturnTo = urlParams.get('returnTo') || '';
       const returnTo = rawReturnTo.replace(/^\//, '');
+
+      // Sign-In Role Mode State ('user' | 'admin')
+      let currentMode = 'user';
+
+      function setRoleMode(mode) {
+        currentMode = mode;
+        hideAlert(authAlert);
+
+        if (mode === 'admin') {
+          tabAdminLogin.classList.add('active');
+          tabAdminLogin.setAttribute('aria-selected', 'true');
+          tabUserLogin.classList.remove('active');
+          tabUserLogin.setAttribute('aria-selected', 'false');
+
+          authTitle.textContent = 'Admin Portal Sign In';
+          authSubtitle.textContent = 'EcoLith Operations & Intelligence Dashboard';
+          btnLoginSubmit.querySelector('.btn-text').textContent = 'Sign In to Admin Dashboard';
+        } else {
+          tabUserLogin.classList.add('active');
+          tabUserLogin.setAttribute('aria-selected', 'true');
+          tabAdminLogin.classList.remove('active');
+          tabAdminLogin.setAttribute('aria-selected', 'false');
+
+          authTitle.textContent = 'Welcome Back';
+          authSubtitle.textContent = 'Sign in to your EcoLith account';
+          btnLoginSubmit.querySelector('.btn-text').textContent = 'Sign In';
+        }
+      }
+
+      tabUserLogin.addEventListener('click', () => setRoleMode('user'));
+      tabAdminLogin.addEventListener('click', () => setRoleMode('admin'));
+
+      // Auto-activate Admin Portal mode if requested via URL
+      if (
+        urlParams.get('mode') === 'admin' ||
+        returnTo.includes('admin.html') ||
+        rawReturnTo.includes('admin')
+      ) {
+        setRoleMode('admin');
+      }
 
       // Check if logged out due to 14-day inactivity
       if (urlParams.get('reason') === 'session_expired') {
@@ -302,7 +371,21 @@
       const existingSession = await getSession();
 
       if (existingSession && !window.location.hash.includes('type=recovery')) {
-        window.location.replace(returnTo);
+        const existingProfile = await getUserProfile(existingSession.user.id).catch(() => null);
+        if (currentMode === 'admin' || returnTo.includes('admin.html')) {
+          if (existingProfile?.role === 'admin' || isUserAdmin(existingSession.user.email)) {
+            window.location.replace('admin.html');
+          } else {
+            // Already logged in as regular user but tried to access admin portal
+            showAlert(
+              authAlert,
+              'Active session does not have administrator privileges. Please sign in with the platform administrator account.',
+              'error'
+            );
+          }
+        } else {
+          window.location.replace(returnTo || 'dashboard.html');
+        }
       }
 
       // Check for recovery flow in URL
@@ -343,8 +426,46 @@
           const authData = await signInWithPassword(email, password);
           const session = authData?.session;
 
-          // Check if user has registered their Gemini API key
-          if (session) {
+          if (!session) {
+            throw new Error('Authentication failed. Please verify your credentials.');
+          }
+
+          // Fetch verified profile
+          const profile = await getUserProfile(session.user.id).catch(() => null);
+          const isAdmin = profile?.role === 'admin' || isUserAdmin(session.user.email);
+
+          // 1. Admin Portal Sign In or Admin Return Target
+          if (currentMode === 'admin' || returnTo.includes('admin.html')) {
+            if (!isAdmin) {
+              // Strictly enforce single-admin security: Kick out unauthorized user
+              await signOut().catch(() => {});
+              showAlert(
+                authAlert,
+                `Access Denied: Account "${email}" does not possess administrator privileges. Only the designated platform administrator may log into the Admin Dashboard.`,
+                'error'
+              );
+              return;
+            }
+
+            showAlert(
+              authAlert,
+              'Administrator access verified. Redirecting to Admin Dashboard...',
+              'success'
+            );
+            setTimeout(() => {
+              window.location.replace('admin.html');
+            }, 500);
+            return;
+          }
+
+          // 2. Regular User Sign In (if admin logged in through user form with admin returnTo)
+          if (isAdmin && returnTo.includes('admin.html')) {
+            window.location.replace('admin.html');
+            return;
+          }
+
+          // Check if user has registered their Gemini API key (skip for admins)
+          if (!isAdmin) {
             try {
               const statusRes = await fetch(`${CONFIG.API_BASE_URL}/api/keys/status`, {
                 headers: { Authorization: `Bearer ${session.access_token}` }
@@ -362,7 +483,7 @@
             }
           }
 
-          window.location.replace(returnTo);
+          window.location.replace(returnTo || 'dashboard.html');
         } catch (err) {
           showAlert(authAlert, err.message || 'Invalid email or password.');
         } finally {

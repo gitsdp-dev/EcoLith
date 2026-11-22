@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '../lib/supabaseAdmin.js';
+import { isUserAdmin } from './requireAdmin.js';
 
 /**
  * Authentication Middleware.
@@ -91,11 +92,19 @@ export async function requireAuth(req, res, next) {
       });
     }
 
+    // Strictly enforce single-admin role mapping:
+    let effectiveRole = profile?.role || 'user';
+    if (isUserAdmin(user.email)) {
+      effectiveRole = 'admin';
+    } else if (effectiveRole === 'admin') {
+      effectiveRole = 'user';
+    }
+
     // Attach authenticated identity to request
     req.user = {
       id: user.id,
       email: user.email,
-      role: profile?.role || 'user',
+      role: effectiveRole,
       status: profile?.status || 'active'
     };
 
