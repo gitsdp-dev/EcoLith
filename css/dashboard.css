@@ -286,11 +286,35 @@
 
 /* Mobile & Thin Phone Dashboard Optimizations (Galaxy S21 Ultra, 360px - 384px) */
 @media (max-width: 480px) {
+  .welcome-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-4);
+  }
+  .welcome-banner > div:last-child {
+    flex-direction: column;
+    width: 100%;
+    gap: var(--spacing-2);
+  }
+  .welcome-banner .btn {
+    width: 100%;
+  }
+  .key-alert-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-3);
+  }
+  .key-alert-card .btn {
+    width: 100%;
+    text-align: center;
+  }
   .stat-card {
     padding: var(--spacing-4);
   }
   .stat-value {
     font-size: 1.65rem;
+    word-break: break-all;
+    overflow-wrap: anywhere;
   }
   .chart-card {
     padding: var(--spacing-4);
@@ -306,5 +330,27 @@
   }
   .suggestion-card {
     padding: var(--spacing-3);
+  }
+}
+
+@media (max-width: 360px) {
+  .stat-card {
+    padding: var(--spacing-3);
+  }
+  .stat-value {
+    font-size: 1.35rem;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+  }
+  .impact-number {
+    font-size: 1.25rem;
+  }
+  .impact-title {
+    font-size: 0.65rem;
+  }
+  .suggestion-card {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

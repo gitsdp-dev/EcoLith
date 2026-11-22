@@ -166,7 +166,18 @@
               </p>
             </div>
           </div>
-          <a href="keyvault.html" class="btn btn-primary btn-sm">Configure Key</a>
+          <div style="display: flex; gap: var(--spacing-2); flex-wrap: wrap; align-items: center">
+            <a href="keyvault.html" class="btn btn-primary btn-sm">Configure Key</a>
+            <a
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-outline btn-sm"
+              title="Get a free key from Google AI Studio"
+            >
+              Get Key (aistudio.google.com/api) ↗
+            </a>
+          </div>
         </div>
 
         <div
@@ -461,6 +472,32 @@
                   👁️
                 </button>
               </div>
+
+              <!-- Direct Hyperlink Box to get API Key -->
+              <div class="api-key-helper-box">
+                <div class="api-key-helper-header">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="api-key-helper-icon" aria-hidden="true">
+                    <path d="M15 3h6v6"></path>
+                    <path d="M10 14 21 3"></path>
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  </svg>
+                  <span>Get your free Google Gemini API key:</span>
+                </div>
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="api-key-helper-link"
+                >
+                  <span>aistudio.google.com/api</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="external-link-arrow" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
+              </div>
+
               <span class="text-xs text-muted" style="margin-top: 4px; display: block">
                 🔒 Stored strictly in Supabase private vault (AES-256-GCM). Inaccessible even to
                 admins.

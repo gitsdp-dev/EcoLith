@@ -181,7 +181,7 @@
                 <div>
                   Open
                   <a
-                    href="https://aistudio.google.com/app/apikey"
+                    href="https://aistudio.google.com/app/api-keys"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="step-link"
@@ -239,6 +239,32 @@
                     </svg>
                   </button>
                 </div>
+
+                <!-- Direct Hyperlink Box to get API Key -->
+                <div class="api-key-helper-box">
+                  <div class="api-key-helper-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="api-key-helper-icon" aria-hidden="true">
+                      <path d="M15 3h6v6"></path>
+                      <path d="M10 14 21 3"></path>
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    </svg>
+                    <span>Get your free Google Gemini API key:</span>
+                  </div>
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="api-key-helper-link"
+                  >
+                    <span>aistudio.google.com/api</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="external-link-arrow" aria-hidden="true">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                  </a>
+                </div>
+
                 <span class="form-help"
                   >Keys are write-only. They are encrypted immediately and never shown back.</span
                 >
@@ -415,7 +441,18 @@
         </svg>
         <span>Recovery</span>
       </a>
-      <a href="keyvault.html" class="mobile-nav-item active">
+      <a href="history.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <span>History</span>
+      </a>
+      <a href="keyvault.html" class="mobile-nav-item active" aria-current="page">
         <svg
           viewBox="0 0 24 24"
           fill="none"

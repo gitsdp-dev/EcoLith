@@ -181,6 +181,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
   margin-bottom: var(--spacing-4);
   font-size: var(--font-size-xs);
   font-weight: 600;
@@ -214,5 +216,17 @@
   }
   .auth-title {
     font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .auth-card {
+    padding: var(--spacing-4) var(--spacing-3);
+  }
+  .auth-title {
+    font-size: 1.3rem;
+  }
+  .btn-oauth {
+    font-size: 0.68rem;
   }
 }

@@ -22,6 +22,12 @@
   margin-bottom: var(--spacing-6);
   overflow-x: auto;
   padding-bottom: var(--spacing-2);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.admin-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .admin-tab {
@@ -162,4 +168,14 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   display: inline-block;
+}
+
+@media (max-width: 480px) {
+  .admin-tab {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+  .admin-kpi-grid {
+    gap: var(--spacing-3);
+  }
 }

@@ -65,6 +65,11 @@
   padding-bottom: var(--spacing-3);
   margin-bottom: var(--spacing-6);
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.recovery-filter-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .filter-tab-btn {
@@ -283,11 +288,21 @@
 
 /* Mobile & Thin Phone Recovery Optimizations (Galaxy S21 Ultra, 360px - 384px) */
 @media (max-width: 480px) {
+  .recovery-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-3);
+  }
+  .recovery-page-header .btn {
+    width: 100%;
+  }
   .recovery-stat-card {
     padding: var(--spacing-3);
   }
   .recovery-stat-number {
     font-size: 1.5rem;
+    word-break: break-all;
+    overflow-wrap: anywhere;
   }
   .filter-tab-btn {
     padding: 6px 12px;
@@ -295,5 +310,28 @@
   }
   .recovery-card {
     padding: var(--spacing-4);
+  }
+  .recovery-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-2);
+  }
+  .recovery-card-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .recovery-stat-card {
+    padding: var(--spacing-2);
+  }
+  .recovery-stat-number {
+    font-size: 1.25rem;
+  }
+  .recovery-stat-label {
+    font-size: 0.62rem;
+  }
+  .recovery-card-title {
+    font-size: 1rem;
   }
 }

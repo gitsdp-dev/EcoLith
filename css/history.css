@@ -221,4 +221,45 @@
   .record-card {
     padding: var(--spacing-4);
   }
+  .record-header {
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+  }
+  .record-title-group {
+    min-width: 0;
+    flex: 1;
+  }
+  .record-food-name {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    font-size: 1.1rem;
+  }
+  .record-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-2);
+  }
+  .record-actions .btn {
+    width: 100%;
+  }
+  .pagination-container {
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    justify-content: center;
+    text-align: center;
+  }
+  .pagination-container .btn {
+    flex: 1;
+    min-width: 90px;
+  }
+}
+
+@media (max-width: 360px) {
+  .record-food-name {
+    font-size: 0.95rem;
+  }
+  .record-qty-badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
 }

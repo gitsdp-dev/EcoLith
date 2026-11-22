@@ -67,17 +67,28 @@
         font-weight: 800;
         text-transform: uppercase;
         margin-bottom: var(--spacing-1);
+        word-break: break-word;
+        overflow-wrap: break-word;
       }
       .profile-email {
         color: var(--color-text-muted);
         font-size: var(--font-size-xs);
         font-weight: 600;
         margin-bottom: var(--spacing-3);
+        word-break: break-all;
+        overflow-wrap: anywhere;
       }
       .keyvault-banner-card {
         border: 2px solid var(--color-border);
         background-color: var(--color-surface);
         box-shadow: 4px 4px 0px var(--color-border);
+      }
+      @media (max-width: 480px) {
+        #btnSaveProfile,
+        #btnSavePassword,
+        #btnSignOutBottom {
+          width: 100%;
+        }
       }
     </style>
   </head>
@@ -185,7 +196,18 @@
                 EcoLith requires your own Google Gemini API key to run scans. Manage or replace your
                 encrypted key in the Key Vault.
               </p>
-              <a href="keyvault.html" class="btn btn-primary btn-block btn-sm">Open Key Vault</a>
+              <div style="display: flex; flex-direction: column; gap: var(--spacing-2); margin-top: var(--spacing-3)">
+                <a href="keyvault.html" class="btn btn-primary btn-block btn-sm">Open Key Vault</a>
+                <a
+                  href="https://aistudio.google.com/app/api-keys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-outline btn-block btn-sm"
+                  style="font-size: 0.68rem"
+                >
+                  Get Key (aistudio.google.com/api-keys) ↗
+                </a>
+              </div>
             </div>
           </div>
 
@@ -330,6 +352,17 @@
           <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
         </svg>
         <span>Recovery</span>
+      </a>
+      <a href="history.html" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <span>History</span>
       </a>
       <a href="keyvault.html" class="mobile-nav-item">
         <svg

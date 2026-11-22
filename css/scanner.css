@@ -113,6 +113,19 @@
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+
+@media (max-width: 380px) {
+  .viewfinder-hud-status {
+    font-size: 8px;
+    padding: 2px 5px;
+    gap: 4px;
+    letter-spacing: 0;
+  }
 }
 
 .hud-pulse-dot {
@@ -458,14 +471,54 @@
   border: 1.5px solid var(--color-border);
 }
 
+/* Scanner Confirm & Success Action Groups */
+.scanner-confirm-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-4);
+  width: 100%;
+}
+
+.scanner-confirm-actions #btn-confirm-scan {
+  flex: 1;
+  min-width: 200px;
+}
+
+.success-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
 /* Mobile & Thin Phone Scanner Optimizations (Galaxy S21 Ultra, 360px - 384px) */
 @media (max-width: 480px) {
   .scanner-actions {
     flex-direction: column;
     padding: var(--spacing-3);
     gap: var(--spacing-2);
+    width: 100%;
   }
   .scanner-actions .btn {
+    width: 100%;
+  }
+  .scanner-confirm-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: var(--spacing-2);
+  }
+  .scanner-confirm-actions .btn {
+    width: 100%;
+  }
+  .success-actions {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+    gap: var(--spacing-2);
+  }
+  .success-actions .btn {
     width: 100%;
   }
   .confirmation-card {
@@ -473,6 +526,13 @@
   }
   .scanner-locked-box {
     padding: var(--spacing-6) var(--spacing-4);
+  }
+  .industrial-safety-banner,
+  .hazard-alerts-banner,
+  .food-safety-banner,
+  .empty-scan-banner,
+  .condition-details-card {
+    padding: var(--spacing-3);
   }
 }
 
@@ -561,6 +621,9 @@
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
   border-radius: 2px;
   z-index: 10;
+  max-width: calc(100vw - 32px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ai-box-confidence {
