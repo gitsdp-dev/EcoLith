@@ -1,0 +1,73 @@
+# EcoLith Full Technical Knowledge Base & Circular Taxonomy
+
+EcoLith (https://ecolith.app) is an enterprise and consumer food waste intelligence platform.
+
+## 1. System Taxonomy & Material Rules
+
+### Material Stream: Citrus Peels & Rinds (Orange, Lemon, Lime, Grapefruit)
+- **Waste Category**: unavoidable_organic
+- **Primary Recovery Method**: pectin_recovery (Industrial/Biochemical Tier)
+  - *Mechanism*: Acid-assisted hot water extraction of high-methoxyl pectin polysaccharides ($C_6H_{10}O_7$).
+  - *Economic Value*: Commercial food stabilizer, gelling agent, pharmaceutical capsule excipient ($2.50–$4.50/kg).
+  - *Contamination Constraints*: Must be free of synthetic diphenyl fungicide fruit waxes and retail stickers.
+- **Secondary Recovery Method**: composting (Household Tier)
+  - *Mechanism*: Aerobic microbial digestion with high brown-carbon ratio to temper citric acidity ($pH \approx 3.5$).
+  - *Constraint*: Avoid heavy concentrations in vermiculture (harmful to Eisenia fetida worms).
+
+### Material Stream: Spent Coffee Grounds & Tea Residue
+- **Waste Category**: unavoidable_organic
+- **Primary Recovery Method**: material_recovery (Community/Small Business Tier)
+  - *Mechanism*: Lignocellulosic substrate inoculation for Pleurotus ostreatus (oyster) and Hericium erinaceus (lion's mane) mushrooms.
+  - *Yield Ratio*: 2.5 kg spent grounds yields approximately 1.0 kg gourmet edible mushrooms.
+  - *Requirements*: Steam pasteurization or immediate blending with hardwood sawdust to prevent Trichoderma green mold.
+- **Secondary Recovery Method**: soil amendment / direct composting
+  - *Nutrient Profile*: Contains ~2.0% nitrogen, 0.3% phosphorus, 0.3% potassium with mild natural acidity.
+
+### Material Stream: Banana & Tropical Fruit Peels
+- **Waste Category**: unavoidable_organic
+- **Primary Recovery Method**: material_recovery / bio-fertilizer
+  - *Mechanism*: Potassium leaching and phosphorus mineralization via dehydration or liquid maceration.
+  - *Nutrient Content*: Potassium ($K_2O$) concentration reaching up to 40% of ash content.
+
+### Material Stream: Vegetable Tops, Trimmings & Root Peels
+- **Waste Category**: unavoidable_organic / edible_reusable
+- **Primary Recovery Method**: reuse (Culinary Broth & Stock)
+  - *Procedure*: Simmer clean scraps (allium skins, carrot tops, celery ends) for 45 minutes with aromatics.
+  - *Safety Warning*: Discard any trimmings showing powdery mildew, black rot, or bacterial slime.
+- **Secondary Recovery Method**: composting
+  - *C:N Ratio*: Ideal green nitrogen source ($C:N \approx 15:1$ to $20:1$).
+
+### Material Stream: Stale Bread & Surplus Baked Goods
+- **Waste Category**: edible_reusable / surplus_redistributable
+- **Primary Recovery Method**: reuse (Croutons, Panko Breadcrumbs, Kvass / Fermented Malt)
+  - *Procedure*: Low-temperature oven dehydration ($100^\circ\text{C}$) to eliminate moisture below $aw < 0.6$.
+- **Secondary Recovery Method**: anaerobic digestion (Biogas)
+  - *Biomethane Potential*: High starch and carbohydrate content yields excellent biogas ($CH_4 > 65\%$).
+
+### Material Stream: Eggshells
+- **Waste Category**: unavoidable_organic
+- **Primary Recovery Method**: material_recovery (Calcium Carbonate Micronutrient)
+  - *Composition*: Over 95% bioavailable calcium carbonate ($CaCO_3$).
+  - *Procedure*: Bake at $120^\circ\text{C}$ to sterilize against Salmonella enterica, grind to fine powder for soil conditioning.
+
+### Material Stream: Whey & Sour Milk Residuals
+- **Waste Category**: other_separate / anaerobic digestion
+- **Handling**: High biological oxygen demand ($BOD > 40,000\text{ mg/L}$); prohibited from open water runoff.
+- **Recovery Pathway**: Co-digestion in industrial anaerobic digesters or lactic acid fermentation.
+
+## 2. Environmental Metrics & Carbon Equations
+
+1. **Diverted Mass ($M$)**:
+   $$\text{Mass}_{\text{total}} = \sum_{i=1}^n M_i$$
+2. **Landfill Methane Avoidance**:
+   $$\text{CO}_2\text{e Averted} = M_{\text{diverted}} \times 2.5\text{ kg CO}_2\text{e/kg}$$
+   Based on EPA WARM (Waste Reduction Model) factors accounting for avoided anaerobic decay in unmanaged landfills.
+3. **Methane Global Warming Potential**:
+   Methane ($CH_4$) possesses a 28-36x higher warming potential over a 100-year time horizon compared to carbon dioxide ($CO_2$).
+
+## 3. Security, Privacy & BYOK Principles
+
+- **No Platform-Owned AI Secret**: EcoLith operates under pure client-provided Bring Your Own Key (BYOK) architecture for Google Gemini.
+- **Encryption at Rest**: AES-256-GCM cipher with random 12-byte initialization vector (IV) and cryptographic authentication tag stored in a private database schema inaccessible to public/authenticated clients.
+- **Zero In-Flight Photo Retention**: Images sent to `/api/analyze` are processed entirely in server RAM and immediately garbage collected unless the user explicitly opts in to save a snapshot.
+- **Disclaimers**: AI recommendations do not replace certified food safety inspections (HACCP/FDA).

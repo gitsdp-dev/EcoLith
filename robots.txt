@@ -1,0 +1,89 @@
+# ==============================================================================
+# EcoLith Robots.txt — SEO, GEO & AEO Configuration
+# ==============================================================================
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /login.html
+Allow: /register.html
+Allow: /sitemap.xml
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /manifest.webmanifest
+Allow: /assets/
+Allow: /css/
+Allow: /favicon.ico
+Disallow: /dashboard.html
+Disallow: /scanner.html
+Disallow: /history.html
+Disallow: /recovery.html
+Disallow: /keyvault.html
+Disallow: /profile.html
+Disallow: /admin.html
+Disallow: /api/
+
+# Generative Engine Optimization (GEO) & Answer Engine Optimization (AEO)
+# Welcoming AI search crawlers to index public educational guides, schemas & taxonomy
+
+User-agent: GPTBot
+Allow: /
+Allow: /index.html
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /sitemap.xml
+Disallow: /dashboard.html
+Disallow: /scanner.html
+Disallow: /history.html
+Disallow: /recovery.html
+Disallow: /keyvault.html
+Disallow: /profile.html
+Disallow: /admin.html
+Disallow: /api/
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /index.html
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /sitemap.xml
+Disallow: /dashboard.html
+Disallow: /scanner.html
+Disallow: /keyvault.html
+Disallow: /admin.html
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+Allow: /index.html
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /sitemap.xml
+Disallow: /admin.html
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /index.html
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /sitemap.xml
+Disallow: /admin.html
+Disallow: /api/
+
+User-agent: Applebot-Extended
+Allow: /
+Allow: /index.html
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /sitemap.xml
+Disallow: /admin.html
+Disallow: /api/
+
+# XML Sitemap Location
+Sitemap: https://ecolith.app/sitemap.xml

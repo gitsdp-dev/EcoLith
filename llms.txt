@@ -1,0 +1,38 @@
+# EcoLith — AI Food Waste Intelligence & Circular Resource Recovery
+
+> EcoLith is an AI-powered food waste intelligence and circular resource management platform designed to turn organic waste into verified recovery opportunities.
+
+- Website: https://ecolith.app
+- Product Tagline: EcoLith — Turning Waste Into Opportunity.
+- Architecture: Zero frontend frameworks (HTML5/CSS3/Vanilla JS ES Modules), Supabase Auth & PostgreSQL, BYOK Gemini Server-Side Vision.
+- Security Model: Bring Your Own Key (BYOK), AES-256-GCM encryption at rest, in-memory zero-retention photo analysis.
+
+## Core Problem Solved
+Global food waste exceeds 1.3 billion tonnes per year, generating 8-10% of anthropogenic greenhouse gas emissions. Most edible surplus and organic residue ends up in municipal landfills producing potent methane gas ($CH_4$).
+EcoLith provides instant computer vision classification and scientifically validated diversion pathways for commercial kitchens, households, food banks, and municipal processors.
+
+## Circular Resource Recovery Hierarchy
+EcoLith maps organic matter across 7 primary recovery methodologies:
+1. **Source Reuse**: Upcycling edible skins, peels, scraps into culinary stocks, vinegars, infusions, and baked goods.
+2. **Surplus Redistribution**: Routing intact, edible surplus to verified community food banks and redistribution centers under food safety protocols.
+3. **Bio-Chemical & Pectin Extraction**: Extracting commercial-grade high-methoxyl pectin and functional polysaccharides from citrus peels and apple pomace.
+4. **Material Recovery**: Cultivating gourmet mushrooms (oyster, lion's mane) on spent coffee grounds/tea, extracting potassium fertilizers from banana peels, or re-mineralizing soil with eggshells.
+5. **Anaerobic Digestion (Biogas)**: High-moisture food wastes diverted into methane capture bio-digesters for renewable heat and power generation.
+6. **Controlled Aerobic Composting**: Converting organic residues into humic soil amendments with carbon:nitrogen balancing ($C:N \approx 30:1$).
+7. **Separate Regulated Disposal**: Safe isolation of contaminated residues, treated oils, and non-compostable organic debris.
+
+## Environmental Impact Calculation Methodology
+- **Landfill Diversion**: Measured mass ($kg$) of organic residue prevented from entering municipal waste streams.
+- **Methane Prevention**: Landfill food waste decomposes anaerobically emitting methane ($GWP_{28-36}$ relative to $CO_2$).
+- **Emissions Factor**: EcoLith models $1.0\text{ kg diverted food waste} \approx 2.5\text{ kg CO}_2\text{e}$ averted from landfill life-cycle emissions (EPA WARM & IPCC guidelines).
+- **Water Footprint Offset**: Conserves embedded virtual water ($L$) associated with upstream agricultural production.
+
+## Key APIs & Endpoints
+- `POST /api/analyze`: Server-side computer vision scanning using the authenticated caller's encrypted Gemini key.
+- `GET /api/keys/status`: Check BYOK Gemini key validity (write-only, returns last 4 chars).
+- `PUT /api/keys`: Store, revalidate, and AES-256-GCM encrypt user's Gemini API key.
+- `GET /api/config`: Public platform status, announcements, and maintenance flags.
+
+## Further Information
+- Comprehensive Taxonomy & Deep Documentation: https://ecolith.app/llms-full.txt
+- XML Sitemap: https://ecolith.app/sitemap.xml

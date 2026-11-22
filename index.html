@@ -3,14 +3,223 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Primary SEO Metadata -->
+    <title>EcoLith AI — Turning Food Waste Into Opportunity</title>
     <meta
       name="description"
-      content="AI-powered food waste intelligence and circular resource recovery platform."
+      content="AI-powered food waste intelligence and circular resource recovery. Identify organic scraps, calculate carbon offsets, and discover verified composting, biogas, and biochemical recovery pathways."
     />
-    <title>EcoLith — Turning Wastes Into Opportunity</title>
+    <meta
+      name="keywords"
+      content="food waste intelligence, circular economy, organic waste recovery, food waste AI, composting guide, pectin extraction, anaerobic digestion, carbon footprint calculator, food waste hierarchy, BYOK AI, zero waste kitchen, sustainability, biogas"
+    />
+    <meta name="author" content="EcoLith Platform" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="canonical" href="https://ecolith-cc.vercel.app/" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Favicon & PWA App Manifest -->
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="assets/icons/icon.svg" />
+    <link rel="manifest" href="manifest.webmanifest" />
+
+    <!-- Open Graph / Facebook / LinkedIn Metadata -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://ecolith-cc.vercel.app/" />
+    <meta property="og:site_name" content="EcoLith" />
+    <meta property="og:title" content="EcoLith AI — Turning Food Waste Into Opportunity" />
+    <meta
+      property="og:description"
+      content="AI-powered food waste intelligence and circular resource recovery. Transform organic residue into verified opportunities with computer vision and zero-data-retention BYOK privacy."
+    />
+    <meta property="og:image" content="https://ecolith-cc.vercel.app/assets/icons/og-image.svg" />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="EcoLith — AI Food Waste Intelligence and Circular Resource Recovery" />
+
+    <!-- Twitter / X Card Metadata -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://ecolith-cc.vercel.app/" />
+    <meta name="twitter:title" content="EcoLith AI — Turning Food Waste Into Opportunity" />
+    <meta
+      name="twitter:description"
+      content="AI-powered food waste intelligence and circular resource recovery. Identify organic residue and calculate carbon emissions averted."
+    />
+    <meta name="twitter:image" content="https://ecolith-cc.vercel.app/assets/icons/og-image.svg" />
+    <meta name="twitter:image:alt" content="EcoLith Platform Interface and Circular Recovery Hierarchy" />
+
+    <!-- Machine-Readable LLM Discovery Links (GEO Standards) -->
+    <link rel="help" type="text/plain" href="llms.txt" title="AI Machine-Readable Context" />
+    <link rel="alternate" type="application/xml" href="sitemap.xml" title="Sitemap" />
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="css/global.css" />
     <link rel="stylesheet" href="css/components.css" />
+
+    <!-- JSON-LD Structured Data: Organization, WebSite, WebApplication, HowTo, FAQPage (GEO & AEO Core) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://ecolith-cc.vercel.app/#website",
+          "url": "https://ecolith-cc.vercel.app/",
+          "name": "EcoLith",
+          "description": "AI-powered food waste intelligence and circular resource recovery platform.",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://ecolith-cc.vercel.app/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://ecolith-cc.vercel.app/#organization",
+          "name": "EcoLith",
+          "url": "https://ecolith-cc.vercel.app/",
+          "logo": "https://ecolith-cc.vercel.app/assets/icons/icon.svg",
+          "slogan": "Turning Waste Into Opportunity",
+          "description": "EcoLith develops circular resource recovery intelligence to divert food waste from landfills into upcycled materials, biochemicals, and renewable energy."
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://ecolith-cc.vercel.app/#software",
+          "name": "EcoLith Food Waste Intelligence",
+          "url": "https://ecolith-cc.vercel.app/",
+          "applicationCategory": "BusinessApplication, UtilitiesApplication, Sustainability",
+          "operatingSystem": "All modern web browsers (Chrome, Safari, Firefox, Edge)",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "featureList": [
+            "AI-powered computer vision food waste classification",
+            "Deterministic circular recovery pathway recommendations",
+            "Bring-Your-Own-Key (BYOK) AES-256-GCM zero-knowledge architecture",
+            "Real-time carbon footprint and methane prevention calculations",
+            "Zero in-flight photo retention"
+          ]
+        },
+        {
+          "@type": "HowTo",
+          "@id": "https://ecolith-cc.vercel.app/#howto",
+          "name": "How to Convert Organic Food Waste into Circular Resources with EcoLith",
+          "description": "Step-by-step process to identify organic scraps, calculate carbon offsets, and implement circular recovery pathways.",
+          "totalTime": "PT2M",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "position": 1,
+              "name": "Identify Residue Stream",
+              "text": "Inspect surplus food, meal prep trimmings, citrus rinds, or spent coffee grounds in your kitchen, restaurant, or facility."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 2,
+              "name": "Scan with AI Computer Vision",
+              "text": "Capture a live photo using the EcoLith scanner. The server-side vision engine classifies the food name and waste category."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 3,
+              "name": "Select Circular Pathway",
+              "text": "Review verified diversion options including culinary reuse, pectin recovery, mushroom cultivation, anaerobic biogas, or aerobic composting."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 4,
+              "name": "Confirm Weight and Segregate",
+              "text": "Log the approximate weight (g or kg) and route the organic stream to the designated container or processing partner."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 5,
+              "name": "Track Environmental Impact",
+              "text": "Monitor your diversion statistics, cumulative kilograms rescued, and CO2e greenhouse gas emissions prevented from municipal landfills."
+            }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://ecolith-cc.vercel.app/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is EcoLith and how does it solve food waste problems?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "EcoLith is an AI-powered circular resource management platform that converts food waste information into actionable recovery opportunities. Rather than throwing organic scraps into municipal landfills—where they decompose anaerobically into potent methane gas—EcoLith identifies the exact food material and pairs it with scientifically verified diversion pathways including biochemical pectin extraction, gourmet mushroom cultivation, anaerobic digestion, and aerobic composting."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can citrus peels and acidic fruits be composted or recovered?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. While citrus peels (orange, lemon, grapefruit) should be limited in worm vermicomposting due to natural citric acidity and limonene oils, they are exceptionally valuable for aerobic thermal composting when balanced with dry brown carbon (leaves, cardboard). In commercial quantities, citrus rinds are the premier industrial source of high-methoxyl pectin, an upcycled polysaccharide used worldwide in food stabilization, confectionery, and pharmaceuticals."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How can spent coffee grounds and tea leaves be used circularly?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Spent coffee grounds and tea leaves contain valuable nitrogen, lignin, and trace minerals. They serve as an ideal pasteurized substrate for cultivating gourmet oyster and lion's mane mushrooms, yielding up to 1 kg of fresh mushrooms per 2.5 kg of grounds. Alternatively, coffee grounds can be mixed directly into garden soils or compost piles to provide nitrogen without acidifying the soil."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does Bring Your Own Key (BYOK) protect user privacy and API security?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "EcoLith uses a strict Bring Your Own Key (BYOK) model for Google Gemini. Your key is encrypted at rest using server-side AES-256-GCM authenticated encryption with a unique 12-byte initialization vector. The key is decrypted solely in server memory for the duration of a single scan and is never logged, exposed to the browser, or accessible to administrators. Photos are processed in RAM and discarded immediately without persistent retention."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How is environmental impact and carbon savings calculated?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "EcoLith calculates environmental savings based on EPA WARM (Waste Reduction Model) and IPCC landfill emissions factors. Every 1.0 kg of food waste diverted from unmanaged landfills prevents approximately 2.5 kg of CO2-equivalent greenhouse gas emissions, primarily by halting the anaerobic generation of methane (CH4), a gas with 28 to 36 times the global warming potential of CO2 over a 100-year horizon."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the difference between food waste recycling and circular resource recovery?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Traditional food waste recycling typically focuses on generic collection for mass composting or landfill dumping. Circular resource recovery cascades materials through their highest-value applications first: starting with source reduction and human consumption, proceeding to secondary culinary reuse, biochemical ingredient extraction (such as pectin and enzymes), high-value agricultural cultivation (mushrooms and bio-fertilizers), renewable bio-methane energy generation, and finally soil-restoring compost."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can spoiled dairy, whey, or cooked oils be recycled?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Spoiled dairy and liquid whey possess an extremely high Biological Oxygen Demand (BOD > 40,000 mg/L) and must never be dumped down storm drains or waterways. In a circular system, dairy residuals are ideal feedstocks for anaerobic bio-digesters, where methanogenic microbes convert lactose and fats into renewable biogas. Used cooking oils can be separated for industrial biodiesel production."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is AI visual analysis guaranteed to prove that food is safe to eat?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. AI computer vision analysis can never replace certified food safety inspections (such as HACCP or local public health standards). Visual inspection cannot detect microscopic foodborne pathogens (like Salmonella or Listeria) or chemical contamination. EcoLith always reminds users to verify aroma, texture, refrigeration history, and hygiene before consumption or redistribution."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
     <style>
       .hero-section {
         text-align: center;
@@ -22,7 +231,7 @@
       }
       .hero-title {
         font-family: var(--font-family-heading);
-        font-size: clamp(1.85rem, 6.5vw, 2.5rem);
+        font-size: clamp(1.85rem, 6.5vw, 2.75rem);
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: -0.03em;
@@ -35,9 +244,10 @@
         font-size: var(--font-size-sm);
         font-weight: 500;
         color: var(--color-text-muted);
-        max-width: 680px;
+        max-width: 720px;
         margin-inline: auto;
         margin-bottom: var(--spacing-6);
+        line-height: var(--line-height-relaxed);
       }
       @media (min-width: 640px) {
         .hero-tagline {
@@ -137,13 +347,31 @@
       .disclaimer-banner span {
         color: #000000 !important;
       }
+      .section-heading-wrapper {
+        text-align: center;
+        max-width: 760px;
+        margin-inline: auto;
+        margin-bottom: var(--spacing-6);
+      }
+      .section-title {
+        font-family: var(--font-family-heading);
+        font-size: clamp(1.5rem, 4vw, 2.25rem);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        margin-bottom: var(--spacing-2);
+      }
+      .section-desc {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-muted);
+      }
     </style>
   </head>
   <body>
     <!-- App Header -->
     <header class="app-header">
       <div class="app-container header-container">
-        <a href="index.html" class="brand-link">
+        <a href="index.html" class="brand-link" aria-label="EcoLith Home">
           <svg
             class="brand-logo-icon"
             viewBox="0 0 24 24"
@@ -152,6 +380,7 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
+            aria-hidden="true"
           >
             <path d="M12 2v8"></path>
             <path d="m4.93 10.93 1.41 1.41"></path>
@@ -165,6 +394,14 @@
           <span>EcoLith</span>
           <span class="brand-tagline-subtle">— Turning Waste Into Opportunity</span>
         </a>
+
+        <nav class="desktop-nav" aria-label="Primary site navigation">
+          <a href="#solver" class="nav-link">Problem Solver</a>
+          <a href="#calculator" class="nav-link">Impact Calc</a>
+          <a href="#hierarchy" class="nav-link">Hierarchy</a>
+          <a href="#faq" class="nav-link">FAQ</a>
+        </nav>
+
         <div class="header-actions" id="headerAuthActions">
           <a href="login.html" class="btn btn-outline btn-sm">Sign In</a>
           <a href="register.html" class="btn btn-primary btn-sm">Get Started</a>
@@ -175,31 +412,33 @@
     <!-- Main Content -->
     <main class="main-content">
       <div class="app-container">
-        <section class="hero-section">
+        <!-- Hero Section -->
+        <section class="hero-section" aria-labelledby="hero-title">
           <div class="hero-badge">
-            <span class="badge badge-primary">Circular Resource Management</span>
+            <span class="badge badge-primary">Circular Resource Intelligence</span>
           </div>
-          <h1 class="hero-title">Turning Food Waste Into Valuable Opportunity</h1>
+          <h1 id="hero-title" class="hero-title">Turning Food Waste Into Valuable Opportunity</h1>
           <p class="hero-tagline">
-            EcoLith brings AI-powered waste intelligence to your fingertips. Identify organic
-            residue, discover recovery pathways from composting to bio-recovery, and track your
-            environmental impact.
+            EcoLith brings AI-powered waste intelligence to everyone. Identify organic residue,
+            discover verified circular pathways from composting to pectin recovery, and measure
+            quantified landfill greenhouse gas reductions in real time.
           </p>
           <div class="hero-actions">
             <a href="register.html" class="btn btn-primary btn-lg">Create Free Account</a>
-            <a href="login.html" class="btn btn-secondary btn-lg">Sign In to Dashboard</a>
+            <a href="#solver" class="btn btn-secondary btn-lg">Explore Waste Solutions</a>
           </div>
 
-          <!-- Brutalist Promo Highlights (Matches Reference Style) -->
+          <!-- Brutalist Promo Highlights -->
           <div class="hero-promo-grid">
             <div class="promo-card promo-card-lime">
               <div>
-                <span class="badge badge-dark" style="margin-bottom: var(--spacing-2)"
-                  >EFFICIENCY</span
-                >
-                <h3 style="font-size: var(--font-size-xl); margin-top: 4px">
+                <span class="badge badge-dark" style="margin-bottom: var(--spacing-2)">EFFICIENCY</span>
+                <h2 style="font-size: var(--font-size-xl); margin-top: 4px; text-transform: uppercase;">
                   CIRCULAR DIVERSION<br />UP TO 85% RECOVERY
-                </h3>
+                </h2>
+                <p style="font-size: var(--font-size-xs); color: #222222; margin-top: 6px;">
+                  Turn citrus rinds into pectin, coffee grounds into mushrooms, and scraps into biogas.
+                </p>
               </div>
               <div style="display: flex; justify-content: flex-end; margin-top: var(--spacing-3)">
                 <a
@@ -211,14 +450,16 @@
                 >
               </div>
             </div>
+
             <div class="promo-card promo-card-white">
               <div>
-                <span class="badge badge-primary" style="margin-bottom: var(--spacing-2)"
-                  >PRIVACY</span
-                >
-                <h3 style="font-size: var(--font-size-xl); margin-top: 4px">
-                  BYOK INTELLIGENCE<br />NO KEY STORAGE
-                </h3>
+                <span class="badge badge-primary" style="margin-bottom: var(--spacing-2)">PRIVACY FIRST</span>
+                <h2 style="font-size: var(--font-size-xl); margin-top: 4px; text-transform: uppercase;">
+                  BYOK INTELLIGENCE<br />NO PHOTO RETENTION
+                </h2>
+                <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: 6px;">
+                  AES-256-GCM encrypted Gemini keys. Images processed in RAM and discarded immediately.
+                </p>
               </div>
               <div style="display: flex; justify-content: flex-end; margin-top: var(--spacing-3)">
                 <a
@@ -234,8 +475,8 @@
         </section>
 
         <!-- Features Grid -->
-        <section class="features-grid">
-          <div class="card feature-card">
+        <section class="features-grid" aria-label="Platform capabilities">
+          <article class="card feature-card">
             <div class="card-body">
               <div class="feature-icon-wrapper">
                 <svg
@@ -246,22 +487,21 @@
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
+                  aria-hidden="true"
                 >
-                  <path
-                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-                  ></path>
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                   <circle cx="12" cy="13" r="4"></circle>
                 </svg>
               </div>
               <h2>Smart Waste Scan</h2>
               <p class="text-muted text-sm">
-                Snap a photo of surplus food or prep scraps. Our server-side vision engine
-                classifies food items and organic categories in seconds.
+                Snap a photo of prep scraps or surplus food. Our server-side vision engine
+                classifies items, estimated weights, and organic categories with zero image retention.
               </p>
             </div>
-          </div>
+          </article>
 
-          <div class="card feature-card">
+          <article class="card feature-card">
             <div class="card-body">
               <div class="feature-icon-wrapper">
                 <svg
@@ -272,19 +512,20 @@
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
+                  aria-hidden="true"
                 >
                   <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
                 </svg>
               </div>
               <h2>Circular Recovery</h2>
               <p class="text-muted text-sm">
-                Discover actionable diversion pathways: reuse recipes, neighborhood redistribution,
-                anaerobic biogas digestion, pectin extraction, and composting.
+                Discover actionable diversion pathways: culinary reuse, community redistribution,
+                anaerobic bio-methane digesters, pectin extraction, and balanced aerobic composting.
               </p>
             </div>
-          </div>
+          </article>
 
-          <div class="card feature-card">
+          <article class="card feature-card">
             <div class="card-body">
               <div class="feature-icon-wrapper">
                 <svg
@@ -295,6 +536,7 @@
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
+                  aria-hidden="true"
                 >
                   <rect width="18" height="18" x="3" y="3" rx="2"></rect>
                   <path d="M3 9h18"></path>
@@ -304,53 +546,753 @@
               <h2>BYOK Privacy First</h2>
               <p class="text-muted text-sm">
                 Bring Your Own Key architecture. Your Gemini API key is encrypted with AES-256-GCM
-                and never shared or exposed. Images are processed in memory and never stored by
-                default.
+                in an isolated private schema. No platform key, zero tracking, and complete user ownership.
               </p>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===================================================================
+             INTERACTIVE CIRCULAR WASTE PROBLEM SOLVER (SEO, GEO & AEO CORE)
+             Free, Instant, No Login Required — Real Problem Solver for the Web
+             =================================================================== -->
+        <section class="solver-section" id="solver" aria-labelledby="solver-title">
+          <div class="solver-container">
+            <header class="solver-header">
+              <div class="badge badge-primary" style="margin-bottom: var(--spacing-2)">
+                Instant Problem Solver
+              </div>
+              <h2 id="solver-title" class="solver-title">
+                What Food Waste Do You Need to Recover?
+              </h2>
+              <p class="solver-subtitle">
+                Search any kitchen scrap, peel, or surplus residue below for immediate, scientifically
+                validated circular recovery procedures, contamination rules, and upcycled resource value.
+              </p>
+            </header>
+
+            <!-- Search Bar -->
+            <div class="solver-search-wrapper">
+              <input
+                type="search"
+                id="solverInput"
+                class="solver-search-input"
+                placeholder="Search food scrap (e.g. orange peel, coffee grounds, stale bread, milk)..."
+                aria-label="Search food waste material"
+                autocomplete="off"
+              />
+              <button
+                type="button"
+                id="solverClearBtn"
+                class="solver-search-clear"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            </div>
+
+            <!-- Quick Filter Chips -->
+            <div class="solver-chips-container" id="solverChips" role="toolbar" aria-label="Waste category filters">
+              <button type="button" class="solver-chip active" data-category="all">All Items</button>
+              <button type="button" class="solver-chip" data-category="fruit">Citrus &amp; Fruits</button>
+              <button type="button" class="solver-chip" data-category="beverage">Coffee &amp; Tea</button>
+              <button type="button" class="solver-chip" data-category="bakery">Bakery &amp; Grains</button>
+              <button type="button" class="solver-chip" data-category="vegetable">Vegetables &amp; Roots</button>
+              <button type="button" class="solver-chip" data-category="dairy">Dairy &amp; Oils</button>
+              <button type="button" class="solver-chip" data-category="mineral">Eggshells &amp; Minerals</button>
+            </div>
+
+            <!-- Solver Results Grid -->
+            <div class="solver-results-grid" id="solverGrid" aria-live="polite">
+              <!-- Rendered via JavaScript -->
             </div>
           </div>
         </section>
 
+        <!-- ===================================================================
+             INTERACTIVE ENVIRONMENTAL IMPACT & CARBON CALCULATOR
+             =================================================================== -->
+        <section class="solver-section" id="calculator" aria-labelledby="calc-title">
+          <div class="impact-calculator-box">
+            <div class="calc-grid">
+              <div>
+                <span class="badge badge-primary" style="margin-bottom: var(--spacing-2); color: #000000;">
+                  EPA WARM Standard
+                </span>
+                <h2 id="calc-title" style="font-size: var(--font-size-2xl); font-weight: 800; text-transform: uppercase; margin-bottom: var(--spacing-2);">
+                  Calculate Your Diversion Impact
+                </h2>
+                <p style="font-size: var(--font-size-xs); color: #9ca3af; margin-bottom: var(--spacing-4); line-height: 1.5;">
+                  Discover the quantified greenhouse gas emissions and landfill methane avoided when diverting
+                  organic waste from municipal dumps into circular streams.
+                </p>
+
+                <div class="calc-input-group">
+                  <label for="calcWeightInput">Enter Organic Waste Mass:</label>
+                  <div class="calc-input-wrapper">
+                    <input
+                      type="number"
+                      id="calcWeightInput"
+                      class="calc-input-field"
+                      value="10"
+                      min="0.1"
+                      max="10000"
+                      step="0.5"
+                    />
+                    <select id="calcUnitSelect" class="calc-unit-select" aria-label="Mass unit">
+                      <option value="kg" selected>Kilograms (kg)</option>
+                      <option value="g">Grams (g)</option>
+                      <option value="lbs">Pounds (lbs)</option>
+                    </select>
+                  </div>
+                  <input
+                    type="range"
+                    id="calcWeightSlider"
+                    class="calc-slider"
+                    min="1"
+                    max="100"
+                    value="10"
+                    aria-label="Adjust weight slider"
+                  />
+                </div>
+              </div>
+
+              <!-- Output Statistics -->
+              <div class="calc-stats-grid">
+                <div class="calc-stat-card">
+                  <div class="calc-stat-label">Landfill Mass Diverted</div>
+                  <div class="calc-stat-value" id="calcDivertedDisplay">10.0 kg</div>
+                  <div class="calc-stat-sub">Zero anaerobic decay</div>
+                </div>
+
+                <div class="calc-stat-card">
+                  <div class="calc-stat-label">CO₂e Emissions Averted</div>
+                  <div class="calc-stat-value" id="calcCo2Display">25.0 kg</div>
+                  <div class="calc-stat-sub">EPA factor ~2.5 kg CO₂e / kg</div>
+                </div>
+
+                <div class="calc-stat-card">
+                  <div class="calc-stat-label">Methane (CH₄) Prevented</div>
+                  <div class="calc-stat-value" id="calcCh4Display">0.9 kg</div>
+                  <div class="calc-stat-sub">28–36× GWP vs CO₂</div>
+                </div>
+
+                <div class="calc-stat-card">
+                  <div class="calc-stat-label">Equiv. Car Distance Saved</div>
+                  <div class="calc-stat-value" id="calcCarDisplay">101 km</div>
+                  <div class="calc-stat-sub">Passenger vehicle offset</div>
+                </div>
+              </div>
+            </div>
+
+            <p style="font-size: 11px; color: #6b7280; margin-top: var(--spacing-4); border-top: 1px solid #222222; padding-top: var(--spacing-2);">
+              *Estimates are derived from EPA Waste Reduction Model (WARM) factors for composted &amp; anaerobically digested organics compared to municipal landfill baseline.
+            </p>
+          </div>
+        </section>
+
+        <!-- ===================================================================
+             THE 5-TIER CIRCULAR FOOD RECOVERY HIERARCHY (GEO EDUCATION)
+             =================================================================== -->
+        <section class="solver-section" id="hierarchy" aria-labelledby="hierarchy-title">
+          <div class="section-heading-wrapper">
+            <span class="badge badge-primary" style="margin-bottom: var(--spacing-2)">
+              Circular Economy Framework
+            </span>
+            <h2 id="hierarchy-title" class="section-title">
+              The Circular Food Recovery Hierarchy
+            </h2>
+            <p class="section-desc">
+              EcoLith prioritizes resource recovery pathways according to the EPA and international circular economy standards, maximizing economic value before organic decomposition.
+            </p>
+          </div>
+
+          <div class="hierarchy-grid">
+            <article class="hierarchy-step">
+              <span class="hierarchy-step-num">Tier 1</span>
+              <h3 class="hierarchy-step-title">Source Reuse</h3>
+              <p class="hierarchy-step-desc">
+                Culinary upcycling of clean trimmings: peel chips, stocks, herbal infusions, and scrap vinegar ferments.
+              </p>
+            </article>
+
+            <article class="hierarchy-step">
+              <span class="hierarchy-step-num">Tier 2</span>
+              <h3 class="hierarchy-step-title">Redistribution</h3>
+              <p class="hierarchy-step-desc">
+                Surplus edible food routed to local food banks, shelters, and community networks prior to spoil dates.
+              </p>
+            </article>
+
+            <article class="hierarchy-step">
+              <span class="hierarchy-step-num">Tier 3</span>
+              <h3 class="hierarchy-step-title">Bio-Recovery</h3>
+              <p class="hierarchy-step-desc">
+                High-value extraction: citrus pectin, coffee-grown gourmet mushrooms, and potassium fertilizers.
+              </p>
+            </article>
+
+            <article class="hierarchy-step">
+              <span class="hierarchy-step-num">Tier 4</span>
+              <h3 class="hierarchy-step-title">Anaerobic Biogas</h3>
+              <p class="hierarchy-step-desc">
+                High-moisture organics and starches digested into renewable methane gas and nutrient-rich digestate.
+              </p>
+            </article>
+
+            <article class="hierarchy-step">
+              <span class="hierarchy-step-num">Tier 5</span>
+              <h3 class="hierarchy-step-title">Aerobic Compost</h3>
+              <p class="hierarchy-step-desc">
+                Controlled humification with brown carbon, generating regenerative organic soil amendments.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <!-- ===================================================================
+             FREQUENTLY ASKED QUESTIONS (FAQ & AEO SNIPPET SECTION)
+             Native <details> & <summary> Accessible Accordion
+             =================================================================== -->
+        <section class="solver-section" id="faq" aria-labelledby="faq-title">
+          <div class="section-heading-wrapper">
+            <span class="badge badge-primary" style="margin-bottom: var(--spacing-2)">
+              Knowledge Base &amp; AEO
+            </span>
+            <h2 id="faq-title" class="section-title">
+              Frequently Asked Questions
+            </h2>
+            <p class="section-desc">
+              Authoritative answers to common questions about food waste recovery, circular biotechnology, and AI vision privacy.
+            </p>
+          </div>
+
+          <div class="faq-accordion-group">
+            <details class="brutal-accordion" open>
+              <summary class="brutal-summary">
+                <span>What is EcoLith and how does it solve food waste problems?</span>
+                <span class="summary-icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="accordion-content">
+                <p>
+                  <strong>EcoLith</strong> is an AI-powered food waste intelligence and circular resource management platform.
+                  Each year, more than 1.3 billion tonnes of food is sent to landfills globally, where it decomposes anaerobically
+                  into potent greenhouse gases.
+                </p>
+                <p>
+                  EcoLith solves this by instantly analyzing photos of surplus ingredients or prep scraps, determining their
+                  organic composition, and matching them with verified diversion pathways—including biochemical pectin extraction,
+                  gourmet mushroom farming, anaerobic biogas digestion, and thermal composting.
+                </p>
+              </div>
+            </details>
+
+            <details class="brutal-accordion">
+              <summary class="brutal-summary">
+                <span>Can citrus peels and acidic rinds be composted or recovered?</span>
+                <span class="summary-icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="accordion-content">
+                <p>
+                  <strong>Yes.</strong> While citrus peels (orange, lemon, lime, grapefruit) should be kept away from delicate
+                  vermicompost worm bins because of limonene oils and natural acidity, they compost exceptionally well in
+                  standard aerobic compost piles when mixed with carbon-rich brown matter (dry leaves, straw, shredded cardboard).
+                </p>
+                <p>
+                  At commercial and industrial scale, citrus rinds are the world’s leading source of <strong>pectin</strong>—a
+                  valuable commercial polysaccharide used in jams, confectioneries, and pharmaceutical capsules ($2.50–$4.50/kg market value).
+                </p>
+              </div>
+            </details>
+
+            <details class="brutal-accordion">
+              <summary class="brutal-summary">
+                <span>How can spent coffee grounds and tea leaves be used circularly?</span>
+                <span class="summary-icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="accordion-content">
+                <p>
+                  Spent coffee grounds and tea leaves are nutrient-dense waste streams containing bioavailable nitrogen, lignin,
+                  and essential trace minerals.
+                </p>
+                <ul>
+                  <li><strong>Gourmet Mushroom Cultivation:</strong> Coffee grounds provide a sterile, pasteurized substrate for cultivating oyster and lion's mane mushrooms (2.5 kg grounds yields up to 1 kg fresh mushrooms).</li>
+                  <li><strong>Organic Soil Amendment:</strong> Mixed into garden beds, grounds slowly release nitrogen without significantly lowering soil pH.</li>
+                  <li><strong>Compost Activator:</strong> Provides an ideal green nitrogen source to accelerate decomposition in slow compost piles.</li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="brutal-accordion">
+              <summary class="brutal-summary">
+                <span>How does the Bring Your Own Key (BYOK) privacy model work?</span>
+                <span class="summary-icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="accordion-content">
+                <p>
+                  EcoLith ships with <strong>no platform-owned AI key</strong>. Every user supplies their own Google Gemini API key
+                  via the dedicated, hardened Key Vault page.
+                </p>
+                <p>
+                  Your key is encrypted on the server with <strong>AES-256-GCM authenticated encryption</strong> using a unique
+                  12-byte initialization vector and stored in an isolated database schema that is unreachable from client queries.
+                  The key is decrypted strictly in memory for the duration of a single scan and is never logged, placed in URLs,
+                  or viewable by system administrators.
+                </p>
+              </div>
+            </details>
+
+            <details class="brutal-accordion">
+              <summary class="brutal-summary">
+                <span>How are environmental metrics and carbon savings calculated?</span>
+                <span class="summary-icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="accordion-content">
+                <p>
+                  Environmental metrics in EcoLith are calculated deterministically using scientific emission factors established by
+                  the <strong>EPA Waste Reduction Model (WARM)</strong> and the <strong>IPCC Guidelines for National Greenhouse Gas Inventories</strong>.
+                </p>
+                <p>
+                  When food scraps decompose in municipal landfills without oxygen, anaerobic bacteria generate methane (CH₄),
+                  a greenhouse gas with 28 to 36 times the global warming potential of CO₂. EcoLith models approximately
+                  <strong>2.5 kg of CO₂e emissions prevented for every 1.0 kg of organic waste diverted</strong> into composting,
+                  anaerobic digesters, or reuse.
+                </p>
+              </div>
+            </details>
+
+            <details class="brutal-accordion">
+              <summary class="brutal-summary">
+                <span>What is the difference between food waste recycling and circular resource recovery?</span>
+                <span class="summary-icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="accordion-content">
+                <p>
+                  Traditional food recycling is typically a flat, single-stage process: collecting all organic scraps into one bin
+                  and shipping them to a commercial compost site or biodigester.
+                </p>
+                <p>
+                  In contrast, <strong>circular resource recovery</strong> follows a cascade principle: extracting the highest possible
+                  utility and economic value from a resource before allowing it to break down into soil. For example, citrus peel is first
+                  harvested for food-grade zest or essential oils, its pulp is processed for commercial pectin, and only the exhausted
+                  residue is aerobically composted.
+                </p>
+              </div>
+            </details>
+
+            <details class="brutal-accordion">
+              <summary class="brutal-summary">
+                <span>Can spoiled dairy, liquid whey, or cooked oils be safely diverted?</span>
+                <span class="summary-icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="accordion-content">
+                <p>
+                  Yes, but through specialized industrial pathways. Liquid dairy and whey have an extraordinarily high
+                  Biological Oxygen Demand (BOD > 40,000 mg/L) and must never be dumped down municipal storm drains.
+                </p>
+                <p>
+                  Instead, dairy liquids are prime candidates for <strong>anaerobic co-digestion facilities</strong>, where their high
+                  lactose and butterfat content yields exceptional biogas volumes. Used vegetable cooking oils are collected for
+                  refining into ASTM-certified biodiesel.
+                </p>
+              </div>
+            </details>
+
+            <details class="brutal-accordion">
+              <summary class="brutal-summary">
+                <span>Can AI vision guarantee that surplus food is completely safe to eat?</span>
+                <span class="summary-icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="accordion-content">
+                <p>
+                  <strong>No.</strong> AI visual analysis cannot replace certified culinary food safety inspections (such as HACCP
+                  or ServSafe protocols). Optical cameras cannot detect bacterial pathogens (such as Salmonella, Listeria, or E. coli),
+                  microbial toxins, or invisible spoilage.
+                </p>
+                <p>
+                  EcoLith provides directional categorization and diversion ideas. Users must always verify temperature history,
+                  cleanliness, aroma, and local sanitary regulations before redistributing or consuming any surplus food.
+                </p>
+              </div>
+            </details>
+          </div>
+        </section>
+
         <!-- Disclaimer Banner -->
-        <aside class="disclaimer-banner">
-          <strong>Important Disclaimer:</strong> AI visual analysis is not a guarantee of food
-          safety or edibility. Always verify food condition, hygiene, and local regulatory
+        <aside class="disclaimer-banner" role="note" aria-label="Food safety disclaimer">
+          <strong>Important Safety Disclaimer:</strong> AI visual analysis is an informational tool and is not a guarantee of food
+          safety or edibility. Always verify food condition, refrigeration history, hygiene, and local health regulatory
           requirements before consumption or redistribution.
         </aside>
       </div>
     </main>
 
+    <!-- Semantic Brutalist App Footer -->
+    <footer class="app-footer">
+      <div class="app-container">
+        <div class="footer-top">
+          <div>
+            <div class="footer-brand-title">
+              <svg
+                class="brand-logo-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="width: 24px; height: 24px;"
+                aria-hidden="true"
+              >
+                <path d="M12 2v8"></path>
+                <path d="m4.93 10.93 1.41 1.41"></path>
+                <path d="M2 18h2"></path>
+                <path d="M20 18h2"></path>
+                <path d="m19.07 10.93-1.41 1.41"></path>
+                <path d="M22 22H2"></path>
+                <path d="m8 6 4-4 4 4"></path>
+                <path d="M16 18a4 4 0 0 0-8 0"></path>
+              </svg>
+              <span>EcoLith</span>
+            </div>
+            <p class="footer-brand-desc">
+              Turning waste into opportunity. AI-powered food waste intelligence and circular resource recovery platform.
+            </p>
+            <span class="badge badge-primary">BYOK Architecture</span>
+          </div>
+
+          <div>
+            <h3 class="footer-heading">Problem Solver</h3>
+            <ul class="footer-link-list">
+              <li><a href="#solver" class="footer-link">Waste Explorer</a></li>
+              <li><a href="#calculator" class="footer-link">Carbon Calculator</a></li>
+              <li><a href="#hierarchy" class="footer-link">Recovery Hierarchy</a></li>
+              <li><a href="#faq" class="footer-link">Knowledge Base &amp; FAQ</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="footer-heading">Platform</h3>
+            <ul class="footer-link-list">
+              <li><a href="register.html" class="footer-link">Create Account</a></li>
+              <li><a href="login.html" class="footer-link">User Sign In</a></li>
+              <li><a href="login.html?returnTo=scanner.html" class="footer-link">Smart Scanner</a></li>
+              <li><a href="login.html?returnTo=keyvault.html" class="footer-link">Key Vault (BYOK)</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="footer-heading">AI &amp; Open Standards</h3>
+            <ul class="footer-link-list">
+              <li><a href="llms.txt" class="footer-link" target="_blank" rel="noopener">llms.txt (AI Index)</a></li>
+              <li><a href="llms-full.txt" class="footer-link" target="_blank" rel="noopener">llms-full.txt (Taxonomy)</a></li>
+              <li><a href="sitemap.xml" class="footer-link" target="_blank" rel="noopener">XML Sitemap</a></li>
+              <li><a href="robots.txt" class="footer-link" target="_blank" rel="noopener">Robots Directives</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>© 2026 EcoLith. All rights reserved. Open circular economy intelligence.</p>
+          <p>Zero photo retention · AES-256-GCM encrypted · Built with vanilla web standards</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Interactive Problem Solver & Calculator Logic -->
     <script type="module">
       import { supabase } from './js/supabase.js';
 
-      // Check user session
-      const {
-        data: { session }
-      } = await supabase.auth.getSession();
+      // =======================================================================
+      // 1. Session & CTA routing
+      // =======================================================================
+      try {
+        const {
+          data: { session }
+        } = await supabase.auth.getSession();
 
-      // If logged in, point promo cards directly to destination; otherwise keep safely directed to login
-      const byokPromoBtn = document.getElementById('byokPromoBtn');
-      const recoveryPromoBtn = document.getElementById('recoveryPromoBtn');
-      if (session) {
-        if (byokPromoBtn) byokPromoBtn.href = 'keyvault.html';
-        if (recoveryPromoBtn) recoveryPromoBtn.href = 'recovery.html';
+        const byokPromoBtn = document.getElementById('byokPromoBtn');
+        const recoveryPromoBtn = document.getElementById('recoveryPromoBtn');
+        if (session) {
+          if (byokPromoBtn) byokPromoBtn.href = 'keyvault.html';
+          if (recoveryPromoBtn) recoveryPromoBtn.href = 'recovery.html';
 
-        const heroSecondary = document.querySelector('.hero-actions .btn-secondary');
-        if (heroSecondary) {
-          heroSecondary.href = 'dashboard.html';
-          heroSecondary.textContent = 'Go to Dashboard';
+          const heroSecondary = document.querySelector('.hero-actions .btn-secondary');
+          if (heroSecondary) {
+            heroSecondary.href = 'dashboard.html';
+            heroSecondary.textContent = 'Go to Dashboard';
+          }
+
+          const container = document.getElementById('headerAuthActions');
+          if (container) {
+            container.innerHTML = `
+              <a href="dashboard.html" class="btn btn-primary btn-sm">Dashboard</a>
+            `;
+          }
+        }
+      } catch (err) {
+        console.warn('Session check skipped:', err);
+      }
+
+      // =======================================================================
+      // 2. Verified Circular Waste Knowledge Data (Instant Problem Solver)
+      // =======================================================================
+      const WASTE_SOLVER_DATA = [
+        {
+          name: 'Citrus Peels & Rinds',
+          keywords: 'citrus orange lemon lime grapefruit rind peel pomelo',
+          category: 'fruit',
+          recoveryMethod: 'Pectin Extraction & Composting',
+          badgeClass: 'badge-primary',
+          action: 'Dehydrate or zest for culinary extracts, or submit to commercial pectin recovery. At home, chop finely and blend into aerated compost with brown carbon.',
+          contamination: 'Remove synthetic fruit stickers and wax coatings. Avoid high volumes in worm vermicompost.',
+          value: 'High ($2.50–$4.50/kg industrial pectin yield)'
+        },
+        {
+          name: 'Spent Coffee Grounds & Tea',
+          keywords: 'coffee grounds spent coffee tea leaves espresso cold brew',
+          category: 'beverage',
+          recoveryMethod: 'Gourmet Mushroom Cultivation',
+          badgeClass: 'badge-primary',
+          action: 'Mix with pasteurized straw or sawdust substrate to inoculate oyster or lion’s mane mushrooms. Or scatter directly on soil as slow-release nitrogen.',
+          contamination: 'Keep dry or refrigerate before use to prevent Trichoderma green mold contamination.',
+          value: 'High (2.5 kg grounds yields up to 1 kg fresh mushrooms)'
+        },
+        {
+          name: 'Banana & Tropical Peels',
+          keywords: 'banana plantain mango skin papaya peel tropical',
+          category: 'fruit',
+          recoveryMethod: 'Potassium Bio-Fertilizer',
+          badgeClass: 'badge-secondary',
+          action: 'Steep peels in aerated water for 48 hours to create bioavailable liquid potassium fertilizer, or dry at 80°C and pulverize into plant mineral feed.',
+          contamination: 'Rinse off any surface pesticides. Ensure peels are mold-free.',
+          value: 'Medium (Organic potassium & phosphorus replacement)'
+        },
+        {
+          name: 'Stale Bread & Bakery Surplus',
+          keywords: 'bread crust bagel pastry sourdough baguette pita bakery',
+          category: 'bakery',
+          recoveryMethod: 'Culinary Upcycling & Biogas',
+          badgeClass: 'badge-dark',
+          action: 'Bake at 100°C for panko breadcrumbs, croutons, or brew into traditional fermented kvass. High volumes make premium anaerobic biogas feedstock.',
+          contamination: 'Discard immediately if black or blue mold (Rhizopus) is present.',
+          value: 'High (Caloric upcycling or rapid biomethane production)'
+        },
+        {
+          name: 'Vegetable Trimmings & Tops',
+          keywords: 'carrot tops celery ends onion peel garlic skin leek potato vegetable scrap',
+          category: 'vegetable',
+          recoveryMethod: 'Regenerative Culinary Stock',
+          badgeClass: 'badge-primary',
+          action: 'Freeze clean trimmings in a batch container. Simmer for 45 minutes with aromatics to produce zero-waste vegetable stock, then compost the spent pulp.',
+          contamination: 'Wash thoroughly to remove soil residue. Avoid moldy, rotting pieces.',
+          value: 'Medium (Saves $3–$5 per liter of culinary stock)'
+        },
+        {
+          name: 'Eggshells & Mineral Shells',
+          keywords: 'eggshell egg shell calcium oyster shell mineral',
+          category: 'mineral',
+          recoveryMethod: 'Calcium Carbonate Soil Conditioner',
+          badgeClass: 'badge-secondary',
+          action: 'Rinse and bake at 120°C for 15 minutes to sterilize, then crush into fine powder. Apply to garden soil to prevent tomato blossom end rot.',
+          contamination: 'Always heat sterilize to eradicate Salmonella enterica bacteria.',
+          value: 'Medium (95% pure bioavailable calcium carbonate)'
+        },
+        {
+          name: 'Apple Cores & Fruit Pomace',
+          keywords: 'apple core pear quince cider pomace fruit press cake',
+          category: 'fruit',
+          recoveryMethod: 'Dietary Fiber & Scrap Vinegar',
+          badgeClass: 'badge-primary',
+          action: 'Ferment cores in sugar water to produce live apple scrap vinegar, or process fresh cider pomace into upcycled soluble dietary fiber.',
+          contamination: 'Process within 12 hours of juicing or freeze to prevent wild spoil.',
+          value: 'High ($3–$5/kg upcycled dietary fiber value)'
+        },
+        {
+          name: 'Sour Milk & Dairy Residuals',
+          keywords: 'milk sour milk whey yoghurt dairy cream cheese',
+          category: 'dairy',
+          recoveryMethod: 'Anaerobic Biogas Digestion',
+          badgeClass: 'badge-dark',
+          action: 'Never pour down storm drains (high BOD oxygen hazard). Co-digest with municipal organics in an anaerobic biogas digester to extract biomethane.',
+          contamination: 'Keep isolated from clear municipal runoff and grease traps.',
+          value: 'Medium (High calorific energy yield in bio-digesters)'
+        },
+        {
+          name: 'Aloe Vera & Botanical Leaves',
+          keywords: 'aloe vera leaf succulent cactus medicinal herb',
+          category: 'vegetable',
+          recoveryMethod: 'Topical Gel Extraction',
+          badgeClass: 'badge-primary',
+          action: 'Fillet outer green rind to extract inner gel for natural hydration or skin soothing. Compost remaining fibrous rinds in aerobic pile.',
+          contamination: 'Wash outer leaf well to remove yellow aloin latex before gel use.',
+          value: 'High (Natural cosmetic and soothing preparations)'
+        }
+      ];
+
+      // =======================================================================
+      // 3. Problem Solver Rendering & Search Interactions
+      // =======================================================================
+      const solverGrid = document.getElementById('solverGrid');
+      const solverInput = document.getElementById('solverInput');
+      const solverClearBtn = document.getElementById('solverClearBtn');
+      const solverChips = document.getElementById('solverChips');
+
+      let currentCategory = 'all';
+      let currentQuery = '';
+
+      function renderSolverResults() {
+        if (!solverGrid) return;
+
+        const filtered = WASTE_SOLVER_DATA.filter(item => {
+          const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
+          const queryClean = currentQuery.toLowerCase().trim();
+          const matchesQuery = !queryClean ||
+            item.name.toLowerCase().includes(queryClean) ||
+            item.keywords.toLowerCase().includes(queryClean) ||
+            item.recoveryMethod.toLowerCase().includes(queryClean);
+          return matchesCategory && matchesQuery;
+        });
+
+        if (filtered.length === 0) {
+          solverGrid.innerHTML = `
+            <div class="solver-empty-state" style="grid-column: 1 / -1;">
+              <h3 style="font-size: var(--font-size-base); font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">
+                No matching material found for "${escapeHtml(currentQuery)}"
+              </h3>
+              <p style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
+                Try typing another scrap (e.g. peel, coffee, bread, vegetables) or sign in to scan with our AI vision engine.
+              </p>
+              <div style="margin-top: var(--spacing-4);">
+                <a href="register.html" class="btn btn-primary btn-sm">Use AI Vision Scanner</a>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        solverGrid.innerHTML = filtered.map(item => `
+          <article class="solver-card" tabindex="0">
+            <div>
+              <div class="solver-card-header">
+                <h3 class="solver-card-title">${escapeHtml(item.name)}</h3>
+                <span class="badge ${item.badgeClass} solver-card-badge">${escapeHtml(item.recoveryMethod)}</span>
+              </div>
+              <div class="solver-card-body">
+                <strong>Circular Procedure:</strong>
+                <p>${escapeHtml(item.action)}</p>
+
+                <strong>Contamination &amp; Requirements:</strong>
+                <p>${escapeHtml(item.contamination)}</p>
+              </div>
+            </div>
+            <div class="solver-card-footer">
+              <span style="font-weight: 700; color: var(--color-text-main);">Value Potential:</span>
+              <span style="font-family: var(--font-family-mono); font-weight: 700;">${escapeHtml(item.value)}</span>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, match => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[match]));
+      }
+
+      if (solverInput) {
+        solverInput.addEventListener('input', (e) => {
+          currentQuery = e.target.value;
+          if (solverClearBtn) {
+            solverClearBtn.classList.toggle('visible', currentQuery.length > 0);
+          }
+          renderSolverResults();
+        });
+      }
+
+      if (solverClearBtn) {
+        solverClearBtn.addEventListener('click', () => {
+          solverInput.value = '';
+          currentQuery = '';
+          solverClearBtn.classList.remove('visible');
+          solverInput.focus();
+          renderSolverResults();
+        });
+      }
+
+      if (solverChips) {
+        solverChips.addEventListener('click', (e) => {
+          const target = e.target.closest('.solver-chip');
+          if (!target) return;
+
+          solverChips.querySelectorAll('.solver-chip').forEach(c => c.classList.remove('active'));
+          target.classList.add('active');
+          currentCategory = target.dataset.category || 'all';
+          renderSolverResults();
+        });
+      }
+
+      // Initial Solver Render
+      renderSolverResults();
+
+      // =======================================================================
+      // 4. Interactive Environmental Impact Calculator Logic
+      // =======================================================================
+      const weightInput = document.getElementById('calcWeightInput');
+      const unitSelect = document.getElementById('calcUnitSelect');
+      const weightSlider = document.getElementById('calcWeightSlider');
+
+      const displayDiverted = document.getElementById('calcDivertedDisplay');
+      const displayCo2 = document.getElementById('calcCo2Display');
+      const displayCh4 = document.getElementById('calcCh4Display');
+      const displayCar = document.getElementById('calcCarDisplay');
+
+      function updateCalculator() {
+        if (!weightInput || !unitSelect || !displayDiverted) return;
+
+        let rawVal = parseFloat(weightInput.value);
+        if (isNaN(rawVal) || rawVal <= 0) rawVal = 1;
+
+        const unit = unitSelect.value;
+        let massKg = rawVal;
+        if (unit === 'g') massKg = rawVal / 1000;
+        if (unit === 'lbs') massKg = rawVal * 0.453592;
+
+        // EPA WARM Standard: 1kg diverted organics ~ 2.5kg CO2e emissions avoided
+        const co2eKg = massKg * 2.5;
+        // Landfill anaerobic methane emission fraction ~ 0.09kg CH4 per kg waste
+        const ch4Kg = massKg * 0.09;
+        // 1 passenger vehicle km ~ 0.247 kg CO2e
+        const carKm = Math.round(co2eKg / 0.247);
+
+        displayDiverted.textContent = `${massKg.toFixed(1)} kg`;
+        displayCo2.textContent = `${co2eKg.toFixed(1)} kg`;
+        displayCh4.textContent = `${ch4Kg.toFixed(2)} kg`;
+        displayCar.textContent = `${carKm.toLocaleString()} km`;
+
+        if (weightSlider && unit === 'kg') {
+          weightSlider.value = Math.min(100, Math.max(1, Math.round(rawVal)));
         }
       }
 
-      // If already logged in, update header CTA to point directly to dashboard
-      if (session) {
-        const container = document.getElementById('headerAuthActions');
-        if (container) {
-          container.innerHTML = `
-          <a href="dashboard.html" class="btn btn-primary btn-sm">Dashboard</a>
-        `;
-        }
+      if (weightInput) weightInput.addEventListener('input', updateCalculator);
+      if (unitSelect) unitSelect.addEventListener('change', updateCalculator);
+      if (weightSlider) {
+        weightSlider.addEventListener('input', (e) => {
+          if (weightInput) {
+            weightInput.value = e.target.value;
+            if (unitSelect) unitSelect.value = 'kg';
+            updateCalculator();
+          }
+        });
       }
+
+      // Initial Calculator calculation
+      updateCalculator();
     </script>
   </body>
 </html>

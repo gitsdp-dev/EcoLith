@@ -295,6 +295,25 @@ npm test
 
 ---
 
+## SEO, GEO & AEO Architecture
+
+EcoLith is engineered to be an immediate, authoritative problem solver across classical search engines, voice assistants, and modern Generative AI search engines (Perplexity, SearchGPT, Google Gemini AI Overviews, Claude, Bing Copilot):
+
+1. **Search Engine Optimization (SEO):**
+   - High-contrast Neo-brutalist semantic HTML5 hierarchy (`<header>`, `<main>`, `<article>`, `<section>`, `<footer>`).
+   - Standardized Open Graph (`og:*`), Twitter Cards (`summary_large_image`), canonical URLs, and mobile web app manifest.
+   - Comprehensive `robots.txt` and `sitemap.xml` ensuring crawl budget is directed to high-value public problem-solving pages while protecting authenticated user views with `noindex, nofollow`.
+2. **Generative Engine Optimization (GEO):**
+   - Rich Schema.org JSON-LD `@graph` embedding `WebSite`, `Organization`, `WebApplication`, `HowTo` (step-by-step circular conversion), and `FAQPage`.
+   - Native `llms.txt` and `llms-full.txt` files providing LLM web crawlers (GPTBot, PerplexityBot, Google-Extended, ClaudeBot) with structured, token-efficient, citable scientific context and chemical/biological recovery taxonomies.
+   - Transparent, statistically grounded environmental metrics adhering to EPA WARM and IPCC landfill methane avoidance standards.
+3. **Answer Engine Optimization (AEO) & Instant Problem Solver:**
+   - **Interactive Circular Waste Problem Solver:** Visitors can immediately search or filter any organic scrap (citrus rinds, spent coffee, banana peels, stale bread, sour milk, eggshells) without logging in and receive verified processing procedures, contamination alerts, and resource values.
+   - **Interactive EPA Carbon & Methane Calculator:** Real-time client-side calculation of mass diverted, CO₂e emissions averted, methane prevented, and passenger car distance equivalents.
+   - **Native Accessible FAQ Accordion:** Accessible HTML5 `<details>` and `<summary>` components answering high-intent questions for direct Google featured snippets and voice search responses.
+
+---
+
 ## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
