@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { geminiAnalysisSchema } from '../lib/gemini.js';
+import { geminiAnalysisSchema, normalizeGeminiOutput } from '../lib/gemini.js';
 import {
   DEFAULT_RECOVERY_RULES,
   getRecoveryRecommendations,
@@ -76,6 +76,37 @@ test('Gemini Analysis Schema rejects invalid waste_category or recovery_method e
 
   assert.equal(geminiAnalysisSchema.safeParse(invalidCategory).success, false);
   assert.equal(geminiAnalysisSchema.safeParse(invalidMethod).success, false);
+});
+
+test('normalizeGeminiOutput self-heals aloe vera leaf scan or single-item outputs', () => {
+  // Simulates Gemini returning a single object (e.g. for an aloe vera leaf) without an "items" wrapper or missing waste_category
+  const singleAloeVeraOutput = {
+    food_name: 'Aloe vera leaf',
+    food_category: 'plant',
+    recovery_options: [
+      {
+        method: 'reuse',
+        reason: 'Extract soothing clear inner gel for skincare hydration and cooling.',
+        requirements: 'Rinse outer rind thoroughly.'
+      },
+      {
+        method: 'compost', // fuzzy name: compost -> composting
+        reason: 'Organic green matter rich in moisture and minerals.'
+      }
+    ],
+    reuse_suggestions: ['Scrape gel for face and skin', 'Blend for organic garden fertilizer']
+  };
+
+  const normalized = normalizeGeminiOutput(singleAloeVeraOutput);
+  assert.ok(Array.isArray(normalized.items), 'Must be wrapped into items array');
+  assert.equal(normalized.items.length, 1);
+  assert.equal(normalized.items[0].food_name, 'Aloe vera leaf');
+  assert.equal(normalized.items[0].waste_category, 'unavoidable_organic');
+  assert.equal(normalized.items[0].recovery_options[1].method, 'composting');
+
+  // Verify it strictly passes geminiAnalysisSchema
+  const parseResult = geminiAnalysisSchema.safeParse(normalized);
+  assert.equal(parseResult.success, true, 'Normalized output must pass geminiAnalysisSchema without errors');
 });
 
 test('Circular Recovery Seed contains comprehensive taxonomy of at least 20 valid rules', () => {

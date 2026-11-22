@@ -98,7 +98,7 @@ app.get(['/api/health', '/health'], (_req, res) => {
 // Public application settings
 app.get(['/api/config', '/config'], requireAuth, (_req, res) => {
   res.json({
-    defaultModel: process.env.DEFAULT_GEMINI_MODEL || 'gemini-2.5-flash',
+    defaultModel: process.env.DEFAULT_GEMINI_MODEL || 'gemini-2.5-pro',
     maxImageSizeMb: 4,
     maintenanceMode: false,
     disclaimer: 'AI visual analysis is not a guarantee of food safety or edibility.'

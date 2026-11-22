@@ -55,7 +55,12 @@ export async function testGeminiKey(apiKey) {
     return { valid: false, error: 'API key is too short or invalid format.' };
   }
 
-  const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const candidateModels = [
+    'gemini-2.5-pro',
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash'
+  ];
   let lastError = null;
 
   // Strategy 1: Lightweight models query via x-goog-api-key header (pageSize=1 limits overhead)
